@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneLab Growth Platform</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">OL</div>
+    <div class="logo-text">
+      <span class="logo-main">OneLab</span>
+      <span class="logo-sub">Growth Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">UTAMA</div>
+    <button class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard">
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="navigate('partners')" data-page="partners">
+      <span class="nav-icon">🤝</span><span class="nav-label">Partner Database</span>
+      <span class="nav-badge" id="badge-partners">0</span>
+    </button>
+    <button class="nav-item" onclick="navigate('maps')" data-page="maps">
+      <span class="nav-icon">🗺</span><span class="nav-label">Maps Prospecting</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">MARKETING</div>
+    <button class="nav-item" onclick="navigate('marketing')" data-page="marketing">
+      <span class="nav-icon">📣</span><span class="nav-label">Marketing Kit</span>
+    </button>
+    <button class="nav-item" onclick="navigate('voucher')" data-page="voucher">
+      <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">OPERASIONAL</div>
+    <button class="nav-item" onclick="navigate('surat')" data-page="surat">
+      <span class="nav-icon">📄</span><span class="nav-label">Surat Keluar</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">SISTEM</div>
+    <button class="nav-item" onclick="navigate('settings')" data-page="settings">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Pengaturan</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-user" id="sidebar-user" style="display:none">
+    <div class="user-avatar" id="user-avatar">U</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="user-name-sidebar">User</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5)" id="user-role-sidebar">sales</div>
+    </div>
+    <button onclick="doLogout()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:4px" title="Logout">⏻</button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="conn-status">
+      <span class="conn-dot" id="conn-dot"></span>
+      <span id="conn-label" style="font-size:11px;color:rgba(255,255,255,.5)">Memeriksa...</span>
+    </div>
+  </div>
+</aside>
+
+<div class="topbar" id="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-title" id="topbar-title">Dashboard</div>
+  <div class="topbar-right">
+    <button class="btn btn-teal btn-sm topbar-add-btn" style="display:none">+</button>
+    <div style="font-size:12px;color:var(--gray)" id="topbar-user"></div>
+  </div>
+</div>
+
+<main class="main-content" id="main-content">
+  <div class="loading-row" style="min-height:80vh"><div class="spinner"></div></div>
+</main>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- CORE -->
+<script src="js/core/api.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/router.js"></script>
+<script src="js/auth.js"></script>
+
+<!-- MODULES -->
+<script src="modules/dashboard/index.js"></script>
+<script src="modules/partners/index.js"></script>
+<script src="modules/partners/deals.js"></script>
+<script src="modules/maps/index.js"></script>
+<script src="modules/marketing.js"></script>
+<script src="modules/voucher.js"></script>
+<script src="modules/surat.js"></script>
+<script src="modules/settings.js"></script>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  // Check auth
+  const token = localStorage.getItem('ol_token');
+  if (token) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: { ...SB_HEADERS, 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const user = await res.json();
+        if (user && user.id) {
+          window.currentUser = user;
+          try {
+            const profile = await sbGet('user_profiles',`select=*&id=eq.${user.id}`);
+            if (profile && profile[0]) window.currentUser.profile = profile[0];
+          } catch(e) {}
+          setupAppUI();
+          checkConnection();
+          navigate('dashboard');
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+  // No valid session — show login
+  showLoginScreen();
+});
+
+function setupAppUI() {
+  const name = getUserName();
+  const role = getUserRole();
+  document.getElementById('sidebar-user').style.display = 'flex';
+  document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('user-name-sidebar').textContent = name;
+  document.getElementById('user-role-sidebar').textContent = role;
+  document.getElementById('topbar-user').textContent = name;
+}
+
+async function checkConnection() {
+  const dot = document.getElementById('conn-dot');
+  const lbl = document.getElementById('conn-label');
+  try {
+    await sbGet('partners','select=count&limit=1');
+    dot.className = 'conn-dot ok';
+    lbl.textContent = 'Terhubung';
+  } catch(e) {
+    dot.className = 'conn-dot error';
+    lbl.textContent = 'Offline';
+  }
+}
+
+setInterval(checkConnection, 60000);
+</script>
+</body>
+</html>
