@@ -114,9 +114,6 @@ function timeAgo(d) {
   return formatDateShort(d);
 }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
 
 function getUserName() {
   return window.currentUser?.profile?.full_name || window.currentUser?.email?.split('@')[0] || 'User';
