@@ -1,41 +1,66 @@
-// ═══════════════════════════════════════════════════
-// Module: Surat Keluar — Auto Nomor, PDF, Arsip
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// MODULE: Surat Keluar v2
+// - Upload DOCX template
+// - Replace variabel via docxtemplater
+// - Download DOCX terisi
+// - Arsip & log
+// ═══════════════════════════════════════════
 
 const LETTER_TYPES = [
-  { key:'SP',   label:'Surat Penawaran' },
-  { key:'SPK',  label:'Surat Permohonan Kerjasama' },
-  { key:'SPN',  label:'Surat Pemberitahuan' },
-  { key:'MOU',  label:'MOU / Perjanjian' },
-  { key:'SI',   label:'Surat Izin' },
-  { key:'SK',   label:'Surat Keterangan' },
-  { key:'SL',   label:'Surat Lainnya' },
+  { key:'SP',  label:'Surat Penawaran' },
+  { key:'SPK', label:'Surat Permohonan Kerjasama' },
+  { key:'SPN', label:'Surat Pemberitahuan' },
+  { key:'MOU', label:'MOU / Perjanjian' },
+  { key:'SI',  label:'Surat Izin' },
+  { key:'SK',  label:'Surat Keterangan' },
+  { key:'SL',  label:'Surat Lainnya' },
 ];
 
-const ORG_NAME  = 'OneLab Diagnostics by Plebo';
-const ORG_ADDR  = 'Bintaro Jaya, Jl. Elang Raya No.15, Pd. Pucung, Kec. Pd. Aren, Kota Tangerang Selatan, Banten 15224';
-const ORG_PHONE = '(021) xxxx-xxxx';
-const ORG_EMAIL = 'info@onelab.id';
+const ORG = {
+  name:  'OneLab Diagnostics by Plebo',
+  addr:  'Bintaro Jaya, Jl. Elang Raya No.15, Pd. Pucung, Kec. Pd. Aren, Kota Tangerang Selatan',
+  phone: '(021) xxxx-xxxx',
+  email: 'info@onelab.id',
+};
 
-async function renderSurat(){
+// Variabel yang bisa dipakai di template DOCX
+const TEMPLATE_VARS = [
+  { key:'NO_SURAT',       label:'Nomor Surat',         example:'001/SP/OL/VI/2026' },
+  { key:'TANGGAL',        label:'Tanggal Surat',        example:'13 Juni 2026' },
+  { key:'PERIHAL',        label:'Perihal / Judul',      example:'Penawaran Kerjasama' },
+  { key:'NAMA_TUJUAN',    label:'Nama Perusahaan',      example:'PT. Contoh Maju' },
+  { key:'ALAMAT_TUJUAN',  label:'Alamat Tujuan',        example:'Jl. Contoh No.1' },
+  { key:'PIC_TUJUAN',     label:'Nama PIC / Jabatan',   example:'Bapak/Ibu HRD Manager' },
+  { key:'ORG_NAMA',       label:'Nama Organisasi',      example:ORG.name },
+  { key:'ORG_ALAMAT',     label:'Alamat Organisasi',    example:ORG.addr },
+  { key:'PENANDATANGAN',  label:'Nama Penandatangan',   example:'dr. Ahmad, SpPK' },
+  { key:'JABATAN',        label:'Jabatan Penandatangan',example:'Direktur' },
+  { key:'BULAN_TAHUN',    label:'Bulan & Tahun',        example:'Juni 2026' },
+  { key:'TAHUN',          label:'Tahun',                example:'2026' },
+];
+
+async function renderSurat() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
-      <div><h1>Surat Keluar</h1><p>Buat surat dengan penomoran otomatis, generate PDF, dan arsip terpusat</p></div>
+      <div><h1>Surat Keluar</h1>
+        <p>Generate surat dari template DOCX — penomoran otomatis, arsip terpusat</p></div>
       <div class="btn-row">
         <button class="btn btn-teal" onclick="openSuratForm()">+ Buat Surat</button>
       </div>
     </div>
 
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchSuratTab('list',this)">📋 Daftar Surat</button>
+    <div class="tabs" id="surat-tabs">
+      <button class="tab-btn active" onclick="switchSuratTab('list',this)">📋 Arsip Surat</button>
       <button class="tab-btn" onclick="switchSuratTab('templates',this)">📄 Template Surat</button>
+      <button class="tab-btn" onclick="switchSuratTab('panduan',this)">❓ Panduan</button>
     </div>
 
-    <div id="surat-list-tab">
+    <!-- List -->
+    <div id="tab-list">
       <div class="table-wrap">
         <div class="table-toolbar">
-          <input class="table-search" id="sl-search" placeholder="🔍 Cari nomor, tujuan, judul..."
-            oninput="filterSurat(this.value)">
+          <input class="table-search" id="sl-q" placeholder="🔍 Cari nomor, tujuan, perihal..."
+            oninput="filterSurat()" style="flex:1">
           <select class="table-filter" id="sl-type" onchange="filterSurat()">
             <option value="">Semua Tipe</option>
             ${LETTER_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('')}
@@ -45,82 +70,145 @@ async function renderSurat(){
             <option>Draft</option><option>Sent</option><option>Archived</option>
           </select>
         </div>
-        <div id="surat-table"><div class="loading-row"><div class="spinner"></div></div></div>
+        <div id="surat-tbody">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
       </div>
     </div>
 
-    <div id="surat-templates-tab" style="display:none">
-      <div class="page-header" style="margin-bottom:14px">
+    <!-- Templates -->
+    <div id="tab-templates" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;color:var(--navy)">Template Surat Tersimpan</div>
-        <button class="btn btn-outline btn-sm" onclick="openLetterTemplateForm()">+ Upload Template</button>
+        <button class="btn btn-teal btn-sm" onclick="openUploadTemplateForm()">
+          ⬆ Upload Template DOCX
+        </button>
       </div>
-      <div id="letter-templates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+      <div id="templates-grid"
+        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
         <div class="loading-row"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Panduan -->
+    <div id="tab-panduan" style="display:none">
+      <div class="card" style="max-width:700px">
+        <div class="card-title" style="margin-bottom:16px">📖 Cara Membuat Template Surat DOCX</div>
+        <div style="font-size:13px;line-height:1.8;color:var(--text)">
+          <p style="margin-bottom:12px">
+            Buat template surat di <strong>Microsoft Word</strong> atau <strong>Google Docs</strong>
+            dengan desain bebas — logo, header, footer, tanda tangan, semua bisa diatur.
+          </p>
+          <p style="margin-bottom:8px;font-weight:700;color:var(--navy)">
+            Gunakan placeholder berikut di dalam template:
+          </p>
+          <div style="background:var(--lgray);border-radius:8px;padding:14px;margin-bottom:14px">
+            <table style="width:100%;font-size:12px;border-collapse:collapse">
+              <thead>
+                <tr style="background:var(--navy);color:#fff">
+                  <th style="padding:8px 10px;text-align:left;border-radius:4px 0 0 0">Placeholder</th>
+                  <th style="padding:8px 10px;text-align:left">Keterangan</th>
+                  <th style="padding:8px 10px;text-align:left;border-radius:0 4px 0 0">Contoh</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${TEMPLATE_VARS.map((v,i)=>`
+                  <tr style="background:${i%2===0?'#fff':'#F8FAFC'}">
+                    <td style="padding:7px 10px;font-family:monospace;color:var(--teal);font-weight:700">
+                      {{${v.key}}}
+                    </td>
+                    <td style="padding:7px 10px;color:var(--gray)">${v.label}</td>
+                    <td style="padding:7px 10px;color:var(--text)">${v.example}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="background:#FFF8E1;border-radius:8px;padding:12px 14px;font-size:12px;color:#5D4037">
+            <strong>Contoh penggunaan di Word:</strong><br>
+            "Kepada Yth. <strong>{{PIC_TUJUAN}}</strong><br>
+            <strong>{{NAMA_TUJUAN}}</strong><br>
+            <strong>{{ALAMAT_TUJUAN}}</strong>"<br><br>
+            Setelah generate, teks ini akan otomatis terisi dengan data yang Anda input.
+          </div>
+          <div style="margin-top:14px;padding:12px 14px;background:#E3F2FD;border-radius:8px;font-size:12px;color:#0D47A1">
+            <strong>💡 Tips:</strong> Simpan template dalam format <strong>.docx</strong> (bukan .doc).
+            Setelah upload, template bisa digunakan berkali-kali — tinggal ganti tujuan dan tanggal.
+          </div>
+        </div>
       </div>
     </div>`;
 
   await loadSuratList();
 }
 
+// ── Load List ─────────────────────────────────────
 let suratAll = [];
 
-async function loadSuratList(){
+async function loadSuratList() {
   try {
     const data = await sbGet('outgoing_letters','select=*&order=created_at.desc');
     suratAll = Array.isArray(data) ? data : [];
     renderSuratTable(suratAll);
-  } catch(e){
-    document.getElementById('surat-table').innerHTML =
+  } catch(e) {
+    document.getElementById('surat-tbody').innerHTML =
       `<div class="status-box status-err" style="margin:16px">❌ ${e.message}</div>`;
   }
 }
 
-function filterSurat(q){
-  const search = (document.getElementById('sl-search')?.value||'').toLowerCase();
+function filterSurat() {
+  const q      = (document.getElementById('sl-q')?.value||'').toLowerCase();
   const type   = document.getElementById('sl-type')?.value||'';
   const status = document.getElementById('sl-status')?.value||'';
   const filtered = suratAll.filter(s=>
-    (!search || (s.doc_number||'').toLowerCase().includes(search) ||
-                (s.to_name||'').toLowerCase().includes(search) ||
-                (s.title||'').toLowerCase().includes(search)) &&
+    (!q || (s.doc_number||'').toLowerCase().includes(q) ||
+           (s.to_name||'').toLowerCase().includes(q) ||
+           (s.title||'').toLowerCase().includes(q)) &&
     (!type   || s.letter_type === type) &&
     (!status || s.status === status)
   );
   renderSuratTable(filtered);
 }
 
-function renderSuratTable(data){
-  if(!data.length){
-    document.getElementById('surat-table').innerHTML = `
+function renderSuratTable(data) {
+  const el = document.getElementById('surat-tbody');
+  if (!el) return;
+  if (!data.length) {
+    el.innerHTML = `
       <div class="empty-state">
         <div class="ico">📄</div>
         <h3>${suratAll.length?'Tidak ada hasil':'Belum ada surat'}</h3>
         <p>Klik "+ Buat Surat" untuk membuat surat pertama.</p>
-      </div>`;
-    return;
+      </div>`; return;
   }
-  document.getElementById('surat-table').innerHTML = `
+  el.innerHTML = `
     <table>
       <thead><tr>
-        <th>No. Dokumen</th><th>Judul</th><th>Tujuan</th>
+        <th>No. Dokumen</th><th>Perihal</th><th>Tujuan</th>
         <th>Tipe</th><th>Tanggal</th><th>Dibuat Oleh</th><th>Status</th><th>Aksi</th>
       </tr></thead>
       <tbody>
         ${data.map(s=>{
           const stBadge = s.status==='Sent'?'badge-green':s.status==='Archived'?'badge-gray':'badge-gold';
+          const tLabel  = LETTER_TYPES.find(t=>t.key===s.letter_type)?.label || s.letter_type || '—';
           return `<tr>
-            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--navy)">${s.doc_number||'—'}</td>
+            <td style="font-family:monospace;font-size:12px;font-weight:700;color:var(--navy)">
+              ${s.doc_number||'DRAFT'}
+            </td>
             <td><div class="td-name">${s.title||'—'}</div></td>
-            <td><div style="font-size:13px">${s.to_name||'—'}</div><div class="td-sub">${s.to_pic||''}</div></td>
-            <td><span class="badge badge-navy" style="font-size:10px">${s.letter_type||'—'}</span></td>
-            <td style="font-size:12px;color:var(--gray)">${s.letter_date ? new Date(s.letter_date).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}) : '—'}</td>
-            <td style="font-size:12px;color:var(--gray)">${s.created_by_name||'—'}</td>
+            <td>
+              <div style="font-size:13px">${s.to_name||'—'}</div>
+              <div class="td-sub">${s.to_pic||''}</div>
+            </td>
+            <td><span class="badge badge-navy" style="font-size:10px">${tLabel}</span></td>
+            <td style="font-size:12px;color:var(--gray)">${formatDateShort(s.letter_date)}</td>
+            <td style="font-size:11px;color:var(--gray)">${s.created_by_name||'—'}</td>
             <td><span class="badge ${stBadge}">${s.status||'Draft'}</span></td>
             <td>
               <div class="act-row">
-                <button class="act-btn" onclick="previewSurat(${s.id})" title="Preview & PDF">📄</button>
+                <button class="act-btn" onclick="regenerateSurat(${s.id})" title="Download DOCX">📥</button>
                 <button class="act-btn edit" onclick="openSuratForm(${s.id})" title="Edit">✏️</button>
-                <button class="act-btn" onclick="updateSuratStatus(${s.id},'Sent')" title="Tandai Terkirim" style="color:#22C55E">✓</button>
+                <button class="act-btn" onclick="updateSuratStatus(${s.id},'Sent')"
+                  title="Tandai Terkirim" style="color:#22C55E">✓</button>
                 <button class="act-btn del" onclick="deleteSurat(${s.id})">🗑</button>
               </div>
             </td>
@@ -130,76 +218,87 @@ function renderSuratTable(data){
     </table>`;
 }
 
-function switchSuratTab(tab, btn){
-  document.querySelectorAll('.tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+function switchSuratTab(tab, btn) {
+  document.querySelectorAll('#surat-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('surat-list-tab').style.display      = tab==='list'      ?'block':'none';
-  document.getElementById('surat-templates-tab').style.display = tab==='templates' ?'block':'none';
+  ['list','templates','panduan'].forEach(t=>{
+    const el = document.getElementById(`tab-${t}`);
+    if(el) el.style.display = t===tab?'block':'none';
+  });
   if(tab==='templates') loadLetterTemplates();
 }
 
 // ── Auto Nomor ────────────────────────────────────
-async function generateDocNumber(typeCode){
+async function generateDocNumber(typeCode) {
   const now = new Date();
   const yr  = now.getFullYear();
   const mo  = now.getMonth()+1;
-  const moRoman = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mo];
-
+  const moR = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mo];
   try {
-    // Get or create sequence
-    const existing = await sbGet('letter_sequences',
+    const ex = await sbGet('letter_sequences',
       `select=*&year=eq.${yr}&month=eq.${mo}&type_code=eq.${typeCode}`);
-
     let seq = 1;
-    if(existing && existing.length > 0){
-      seq = (existing[0].last_seq||0) + 1;
-      await sbPatch('letter_sequences', existing[0].id, { last_seq: seq });
+    if(ex && ex.length > 0){
+      seq = (ex[0].last_seq||0) + 1;
+      await sbPatch('letter_sequences', ex[0].id, { last_seq: seq });
     } else {
       await sbPost('letter_sequences', { year:yr, month:mo, type_code:typeCode, last_seq:1 });
     }
-
-    return `${String(seq).padStart(3,'0')}/${typeCode}/OL/${moRoman}/${yr}`;
-  } catch(e){
-    // Fallback if table doesn't exist
-    const ts = Date.now().toString().slice(-4);
-    return `${ts}/${typeCode}/OL/${moRoman}/${yr}`;
+    return `${String(seq).padStart(3,'0')}/${typeCode}/OL/${moR}/${yr}`;
+  } catch(e) {
+    return `${Date.now().toString().slice(-4)}/${typeCode}/OL/${moR}/${yr}`;
   }
 }
 
-// ── Form Buat / Edit Surat ────────────────────────
-async function openSuratForm(id=null){
+// ── Form Buat / Edit ──────────────────────────────
+async function openSuratForm(id=null) {
   let s = {};
   if(id){
-    const data = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
-    s = data[0]||{};
+    const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
+    s = d[0]||{};
   }
 
-  // Load partner list for autocomplete
-  let partnerOpts = '<option value="">-- Pilih Partner (opsional) --</option>';
+  // Load templates
+  let tmplOpts = '<option value="">-- Pilih Template DOCX --</option>';
   try {
-    const pts = await sbGet('partners','select=id,partner_name,address,pic_name&order=partner_name');
-    partnerOpts += (pts||[]).map(p=>`<option value="${p.id}" data-name="${p.partner_name||''}" data-addr="${p.address||''}" data-pic="${p.pic_name||''}">${p.partner_name}</option>`).join('');
+    const tmpls = await sbGet('marketing_templates',
+      'select=id,title,file_url,file_name,content&type=eq.surat&order=title');
+    tmplOpts += (tmpls||[]).map(t=>
+      `<option value="${t.id}"
+        data-url="${t.file_url||''}"
+        data-name="${t.file_name||''}"
+        data-content="${encodeURIComponent(t.content||'')}">
+        ${t.title}
+       </option>`).join('');
   } catch(e){}
 
-  // Load letter templates
-  let templateOpts = '<option value="">-- Pilih Template (opsional) --</option>';
+  // Load partners
+  let partnerOpts = '<option value="">-- Pilih dari database partner --</option>';
   try {
-    const tmpl = await sbGet('marketing_templates','select=id,title,content&type=eq.surat');
-    templateOpts += (tmpl||[]).map(t=>`<option value="${t.id}" data-content="${encodeURIComponent(t.content||'')}">${t.title}</option>`).join('');
+    const pts = await sbGet('partners',
+      'select=id,partner_name,address,pic_name&order=partner_name&limit=200');
+    partnerOpts += (pts||[]).map(p=>
+      `<option value="${p.id}"
+        data-name="${p.partner_name||''}"
+        data-addr="${p.address||''}"
+        data-pic="${p.pic_name||''}">
+        ${p.partner_name}
+       </option>`).join('');
   } catch(e){}
 
   const today = new Date().toISOString().split('T')[0];
-  const defaultContent = s.content || getDefaultLetterContent();
+  const user  = getUserName ? getUserName() : 'User';
 
   openModal(`
     <div class="modal-header">
       <div class="modal-title">${id?'✏️ Edit Surat':'📄 Buat Surat Baru'}</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
+
     <div class="form-row">
       <div class="form-group">
         <label>Tipe Surat *</label>
-        <select id="sf-type" onchange="updateDocPreview()">
+        <select id="sf-type">
           ${LETTER_TYPES.map(t=>`<option value="${t.key}"${s.letter_type===t.key?' selected':''}>${t.label}</option>`).join('')}
         </select>
       </div>
@@ -208,25 +307,20 @@ async function openSuratForm(id=null){
         <input type="date" id="sf-date" value="${s.letter_date||today}">
       </div>
     </div>
+
     <div class="form-group">
-      <label>No. Dokumen (otomatis)</label>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="sf-docnum" value="${s.doc_number||''}"
-          placeholder="Auto-generate saat simpan" style="flex:1;background:var(--lgray)" readonly>
-        <button class="btn btn-ghost btn-sm" onclick="previewDocNum()">Preview No.</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Judul / Perihal *</label>
+      <label>Perihal / Judul *</label>
       <input type="text" id="sf-title" value="${s.title||''}"
         placeholder="Penawaran Kerjasama Layanan Kesehatan Korporat">
     </div>
+
     <div class="form-group">
-      <label>Tujuan (dari partner atau manual)</label>
+      <label>Pilih dari Partner Database</label>
       <select id="sf-partner" onchange="fillSuratPartner(this)">
         ${partnerOpts}
       </select>
     </div>
+
     <div class="form-row">
       <div class="form-group">
         <label>Nama Perusahaan / Instansi *</label>
@@ -239,268 +333,375 @@ async function openSuratForm(id=null){
           placeholder="Bapak/Ibu HRD Manager">
       </div>
     </div>
+
     <div class="form-group">
       <label>Alamat Tujuan</label>
-      <input type="text" id="sf-to-addr" value="${s.to_address||''}"
-        placeholder="Jl. ...">
+      <input type="text" id="sf-to-addr" value="${s.to_address||''}" placeholder="Jl. ...">
     </div>
+
     <div class="form-group">
-      <label>Gunakan Template</label>
-      <select id="sf-template" onchange="applyLetterTemplate(this)">
-        ${templateOpts}
-      </select>
+      <label>Penandatangan</label>
+      <input type="text" id="sf-signer" value="${s.signer||user}"
+        placeholder="Nama yang tanda tangan surat">
     </div>
-    <div class="form-group">
-      <label>Isi Surat *</label>
-      <textarea id="sf-content" rows="12" style="font-family:serif">${defaultContent}</textarea>
+
+    <!-- Template DOCX -->
+    <div style="border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px">
+        📄 Template DOCX
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Pilih Template yang Sudah Diupload</label>
+        <select id="sf-template" onchange="onSelectSuratTemplate(this)">
+          ${tmplOpts}
+        </select>
+      </div>
+      <div id="sf-template-info" style="display:none;padding:10px;background:var(--mint);border-radius:8px;font-size:12px;color:#085041;margin-bottom:10px"></div>
+
+      <div style="font-size:12px;color:var(--gray);margin-bottom:8px">— atau upload template baru —</div>
+      ${renderUploadArea('sf-file','sf-file-preview',
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+         'application/msword'])}
     </div>
+
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-outline" onclick="previewSuratDraft()">👁 Preview PDF</button>
-      <button class="btn btn-teal" onclick="saveSurat(${id||'null'})">
-        ${id?'💾 Simpan':'📄 Buat & Simpan'}
+      <button class="btn btn-outline" onclick="previewSuratHTML()">👁 Preview HTML</button>
+      <button class="btn btn-teal" id="sf-save-btn" onclick="saveSurat(${id||'null'})">
+        ${id?'💾 Simpan':'📄 Buat & Download'}
       </button>
-    </div>`,
-  );
+    </div>`);
 }
 
-function fillSuratPartner(sel){
+function fillSuratPartner(sel) {
   const opt = sel.options[sel.selectedIndex];
   if(!opt.value) return;
-  document.getElementById('sf-to-name').value  = opt.dataset.name||'';
-  document.getElementById('sf-to-addr').value  = opt.dataset.addr||'';
-  document.getElementById('sf-to-pic').value   = opt.dataset.pic  ? `Bapak/Ibu ${opt.dataset.pic}` : '';
+  document.getElementById('sf-to-name').value = opt.dataset.name||'';
+  document.getElementById('sf-to-addr').value = opt.dataset.addr||'';
+  document.getElementById('sf-to-pic').value  = opt.dataset.pic
+    ? `Bapak/Ibu ${opt.dataset.pic}` : '';
 }
 
-function applyLetterTemplate(sel){
-  const opt = sel.options[sel.selectedIndex];
-  if(!opt.value) return;
-  const content = decodeURIComponent(opt.dataset.content||'');
-  if(content) document.getElementById('sf-content').value = content;
+function onSelectSuratTemplate(sel) {
+  const opt  = sel.options[sel.selectedIndex];
+  const info = document.getElementById('sf-template-info');
+  if(!opt.value){ info.style.display='none'; return; }
+  info.style.display = 'block';
+  info.innerHTML = `✅ Template dipilih: <strong>${opt.textContent.trim()}</strong><br>
+    File: <strong>${opt.dataset.name||'—'}</strong>`;
 }
 
-async function previewDocNum(){
-  const type = document.getElementById('sf-type').value;
-  const num  = await generateDocNumber(type);
-  document.getElementById('sf-docnum').value = num;
-}
+// ── Save Surat ────────────────────────────────────
+async function saveSurat(id) {
+  const title  = document.getElementById('sf-title').value.trim();
+  const toName = document.getElementById('sf-to-name').value.trim();
+  if(!title)  { toast('Perihal wajib diisi','err'); return; }
+  if(!toName) { toast('Nama tujuan wajib diisi','err'); return; }
 
-function getDefaultLetterContent(){
-  return `Dengan hormat,
+  const btn  = document.getElementById('sf-save-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Menyimpan...'; }
 
-Sehubungan dengan hal tersebut di atas, kami dari OneLab Diagnostics by Plebo dengan ini mengajukan penawaran kerjasama layanan kesehatan preventif untuk karyawan perusahaan Bapak/Ibu.
+  const user      = getUserName ? getUserName() : 'User';
+  const typeCode  = document.getElementById('sf-type').value;
+  const docNumber = id
+    ? (await sbGet('outgoing_letters',`select=doc_number&id=eq.${id}`))[0]?.doc_number
+    : await generateDocNumber(typeCode);
 
-OneLab Diagnostics merupakan laboratorium klinik preventif yang berfokus pada deteksi dini penyakit metabolik dan kanker, dengan pengalaman melayani lebih dari 20.000 karyawan dari berbagai perusahaan besar di Indonesia.
+  // Upload template baru jika ada
+  let fileUrl  = '';
+  let fileName = '';
+  const tmplSel = document.getElementById('sf-template');
+  const tmplOpt = tmplSel?.options[tmplSel.selectedIndex];
 
-Layanan yang kami tawarkan meliputi:
-1. Medical Check-Up (MCU) Karyawan
-2. Skrining Metabolik (Diabetes, Kolesterol, Hipertensi)
-3. Deteksi Dini Kanker (FOB, Pap Smear, HPV, Gene Solution)
-4. Program Gut Health
-5. Employee Health Day
-6. Digital Health Platform (Plebo App)
+  if(tmplOpt?.value) {
+    fileUrl  = tmplOpt.dataset.url  || '';
+    fileName = tmplOpt.dataset.name || '';
+  }
 
-Kami berharap dapat melakukan presentasi dan diskusi lebih lanjut mengenai penawaran ini. Atas perhatian dan kesempatan yang diberikan, kami ucapkan terima kasih.
-
-Hormat kami,
-OneLab Diagnostics by Plebo`;
-}
-
-async function saveSurat(id){
-  const title   = document.getElementById('sf-title').value.trim();
-  const toName  = document.getElementById('sf-to-name').value.trim();
-  const content = document.getElementById('sf-content').value.trim();
-  if(!title||!toName){ toast('Judul dan nama tujuan wajib diisi','err'); return; }
-
-  const typeCode = document.getElementById('sf-type').value;
-  let docNum = document.getElementById('sf-docnum').value.trim();
-  if(!docNum || !id) docNum = await generateDocNumber(typeCode);
+  const newFile = document.getElementById('sf-file')?.files?.[0];
+  if(newFile) {
+    try {
+      const up = await uploadFile(newFile, 'templates', 'surat');
+      fileUrl  = up.url;
+      fileName = up.name;
+    } catch(e) {
+      toast('❌ Gagal upload template: '+e.message,'err');
+      if(btn){ btn.disabled=false; btn.textContent=id?'💾 Simpan':'📄 Buat & Download'; }
+      return;
+    }
+  }
 
   const payload = {
-    doc_number:    docNum,
+    doc_number:      docNumber,
     title,
-    letter_type:   typeCode,
-    letter_date:   document.getElementById('sf-date').value,
-    to_name:       toName,
-    to_pic:        document.getElementById('sf-to-pic').value.trim(),
-    to_address:    document.getElementById('sf-to-addr').value.trim(),
-    content,
-    status:        'Draft',
-    created_by_name: getUserName ? getUserName() : 'User',
-    updated_at:    new Date().toISOString(),
+    letter_type:     typeCode,
+    letter_date:     document.getElementById('sf-date').value,
+    to_name:         toName,
+    to_pic:          document.getElementById('sf-to-pic').value.trim(),
+    to_address:      document.getElementById('sf-to-addr').value.trim(),
+    file_url:        fileUrl,
+    file_name:       fileName,
+    status:          'Draft',
+    created_by_name: user,
+    updated_at:      new Date().toISOString(),
   };
 
   try {
     let savedId = id;
-    if(id){ await sbPatch('outgoing_letters',id,payload); toast('✅ Surat diupdate','ok'); }
-    else {
-      const res = await sbPost('outgoing_letters',payload);
+    if(id) {
+      await sbPatch('outgoing_letters', id, payload);
+      toast('✅ Surat diupdate','ok');
+    } else {
+      const res = await sbPost('outgoing_letters', payload);
       savedId = res[0]?.id;
-      toast('✅ Surat dibuat: '+docNum,'ok');
+      toast('✅ Surat dibuat: '+docNumber,'ok');
+      await logActivity('create','outgoing_letters', savedId,
+        `Surat baru: ${docNumber} — ${title}`, title);
     }
     closeModalForce();
     await loadSuratList();
-    // Auto preview PDF
-    if(savedId) setTimeout(()=>previewSurat(savedId), 300);
-  } catch(e){ toast('❌ '+e.message,'err'); }
+
+    // Generate DOCX
+    if(fileUrl) {
+      setTimeout(() => generateDocx(savedId, payload, fileUrl), 400);
+    } else {
+      // Fallback HTML print
+      setTimeout(() => previewSuratHTMLDirect(payload), 400);
+    }
+  } catch(e) {
+    toast('❌ '+e.message,'err');
+    if(btn){ btn.disabled=false; btn.textContent=id?'💾 Simpan':'📄 Buat & Download'; }
+  }
 }
 
-// ── Preview & PDF ────────────────────────────────
-async function previewSurat(id){
-  const data = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
-  const s = data[0]; if(!s) return;
-  printLetterPDF(s);
+// ── Generate DOCX dari template ───────────────────
+async function generateDocx(id, data, templateUrl) {
+  // Load library docxtemplater + pizzip
+  await loadDocxLibraries();
+
+  try {
+    toast('⏳ Memproses template DOCX...','info',5000);
+
+    // Fetch template file
+    const res  = await fetch(templateUrl);
+    const blob = await res.arrayBuffer();
+
+    const PizZip = window.PizZip;
+    const Docxtemplater = window.docxtemplater;
+
+    const zip = new PizZip(blob);
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true,
+      nullGetter: () => '',
+    });
+
+    // Build variables
+    const dateStr = data.letter_date
+      ? new Date(data.letter_date).toLocaleDateString('id-ID',
+          {day:'numeric',month:'long',year:'numeric'})
+      : new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+    const now  = new Date();
+    const moR  = ['Januari','Februari','Maret','April','Mei','Juni',
+                  'Juli','Agustus','September','Oktober','November','Desember'][now.getMonth()];
+
+    doc.render({
+      NO_SURAT:      data.doc_number   || '',
+      TANGGAL:       dateStr,
+      PERIHAL:       data.title        || '',
+      NAMA_TUJUAN:   data.to_name      || '',
+      ALAMAT_TUJUAN: data.to_address   || '',
+      PIC_TUJUAN:    data.to_pic       || 'Bapak/Ibu Pimpinan',
+      ORG_NAMA:      ORG.name,
+      ORG_ALAMAT:    ORG.addr,
+      PENANDATANGAN: data.signer || data.created_by_name || 'Pimpinan',
+      JABATAN:       data.jabatan  || 'Direktur',
+      BULAN_TAHUN:   `${moR} ${now.getFullYear()}`,
+      TAHUN:         String(now.getFullYear()),
+    });
+
+    const output = doc.getZip().generate({
+      type: 'blob',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
+
+    // Download
+    const fname = `${data.doc_number||'Surat'}_${data.to_name||''}.docx`
+      .replace(/[\/\\:*?"<>|]/g,'_');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(output);
+    a.download = fname;
+    a.click();
+    toast('✅ DOCX berhasil didownload!','ok');
+
+  } catch(e) {
+    console.error(e);
+    toast('❌ Gagal generate DOCX: '+e.message+' — menggunakan preview HTML','err');
+    previewSuratHTMLDirect(data);
+  }
 }
 
-function previewSuratDraft(){
-  const s = {
-    doc_number:   document.getElementById('sf-docnum')?.value||'DRAFT',
-    title:        document.getElementById('sf-title')?.value||'',
-    letter_type:  document.getElementById('sf-type')?.value||'',
-    letter_date:  document.getElementById('sf-date')?.value||new Date().toISOString().split('T')[0],
-    to_name:      document.getElementById('sf-to-name')?.value||'',
-    to_pic:       document.getElementById('sf-to-pic')?.value||'',
-    to_address:   document.getElementById('sf-to-addr')?.value||'',
-    content:      document.getElementById('sf-content')?.value||'',
-    created_by_name: getUserName ? getUserName() : 'User',
+async function regenerateSurat(id) {
+  const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
+  const s = d[0]; if(!s) return;
+  if(s.file_url) {
+    generateDocx(id, s, s.file_url);
+  } else {
+    previewSuratHTMLDirect(s);
+  }
+}
+
+// ── Load docxtemplater libraries ──────────────────
+function loadDocxLibraries() {
+  return new Promise((resolve) => {
+    if(window.PizZip && window.docxtemplater){ resolve(); return; }
+
+    const s1 = document.createElement('script');
+    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js';
+    s1.onload = () => {
+      const s2 = document.createElement('script');
+      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.12/docxtemplater.js';
+      s2.onload = () => resolve();
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s1);
+  });
+}
+
+// ── Fallback: Preview HTML ────────────────────────
+function previewSuratHTML() {
+  const data = {
+    doc_number:  'PREVIEW',
+    title:       document.getElementById('sf-title')?.value||'',
+    letter_type: document.getElementById('sf-type')?.value||'',
+    letter_date: document.getElementById('sf-date')?.value||'',
+    to_name:     document.getElementById('sf-to-name')?.value||'',
+    to_pic:      document.getElementById('sf-to-pic')?.value||'',
+    to_address:  document.getElementById('sf-to-addr')?.value||'',
+    created_by_name: getUserName?getUserName():'User',
   };
-  printLetterPDF(s);
+  previewSuratHTMLDirect(data);
 }
 
-function printLetterPDF(s){
-  const tLabel = LETTER_TYPES.find(t=>t.key===s.letter_type)?.label || s.letter_type;
-  const dateStr = s.letter_date ? new Date(s.letter_date).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}) : '';
-  const content = (s.content||'').split('\n').map(l=>`<p style="margin:0 0 8px">${l||'&nbsp;'}</p>`).join('');
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>${s.doc_number} — ${s.title}</title>
-    <style>
-      @page{size:A4;margin:2.5cm 2.5cm 2.5cm 3cm}
-      body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;line-height:1.5}
-      .header{border-bottom:3px solid #0A2342;padding-bottom:12px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
-      .org-logo{width:48px;height:48px;background:#0A2342;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:sans-serif}
-      .org-name{font-size:14pt;font-weight:bold;color:#0A2342}
-      .org-addr{font-size:9pt;color:#555;margin-top:2px}
-      .doc-info{margin-bottom:20px}
-      .doc-info table{border-collapse:collapse}
-      .doc-info td{padding:2px 0;vertical-align:top}
-      .doc-info td:first-child{width:140px;color:#444}
-      .salutation{margin:20px 0 8px}
-      .signature{margin-top:48px}
-      .sig-name{font-weight:bold;border-top:1px solid #000;display:inline-block;min-width:180px;padding-top:4px;margin-top:60px}
-      @media print{button{display:none}}
-    </style></head><body>
-    <button onclick="window.print()" style="position:fixed;top:16px;right:16px;padding:10px 20px;background:#0A2342;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;z-index:999">🖨 Print / Save PDF</button>
-    <div class="header">
-      <div class="org-logo">OL</div>
-      <div>
-        <div class="org-name">${ORG_NAME}</div>
-        <div class="org-addr">${ORG_ADDR}</div>
-        <div class="org-addr">Tel: ${ORG_PHONE} | Email: ${ORG_EMAIL}</div>
-      </div>
-    </div>
-    <div class="doc-info">
-      <table>
-        <tr><td>Nomor</td><td>: ${s.doc_number}</td></tr>
-        <tr><td>Perihal</td><td>: ${s.title}</td></tr>
-        <tr><td>Tanggal</td><td>: ${dateStr}</td></tr>
-        <tr><td>Jenis</td><td>: ${tLabel}</td></tr>
-      </table>
-    </div>
-    <div>
-      <p>Kepada Yth.</p>
-      <p>${s.to_pic||'Bapak/Ibu Pimpinan'}</p>
-      <p><strong>${s.to_name}</strong></p>
-      ${s.to_address?`<p>${s.to_address}</p>`:''}
-      <p>di Tempat</p>
-    </div>
-    <div class="salutation"><p>Dengan hormat,</p></div>
-    <div>${content}</div>
-    <div class="signature">
-      <p>Tangerang Selatan, ${dateStr}</p>
-      <p>Hormat kami,</p>
-      <p><strong>${ORG_NAME}</strong></p>
-      <div class="sig-name">${s.created_by_name||'________________'}</div>
-    </div>
-    </body></html>`;
+function previewSuratHTMLDirect(s) {
+  const tLabel  = LETTER_TYPES.find(t=>t.key===s.letter_type)?.label||s.letter_type||'';
+  const dateStr = s.letter_date
+    ? new Date(s.letter_date).toLocaleDateString('id-ID',
+        {day:'numeric',month:'long',year:'numeric'}) : '';
+  const moR     = ['Januari','Februari','Maret','April','Mei','Juni',
+                   'Juli','Agustus','September','Oktober','November','Desember']
+                   [new Date().getMonth()];
 
   const w = window.open('','_blank','width=900,height=700');
-  w.document.write(html);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>${s.doc_number}</title>
+    <style>
+      @page{size:A4;margin:2.5cm 2.5cm 2.5cm 3cm}
+      *{box-sizing:border-box}
+      body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;line-height:1.6;margin:0;padding:20px}
+      .header{border-bottom:3px double #0A2342;padding-bottom:10px;margin-bottom:20px;display:flex;gap:14px;align-items:center}
+      .logo{width:52px;height:52px;background:#0A2342;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;font-family:Arial;flex-shrink:0}
+      .org-name{font-size:14pt;font-weight:bold;color:#0A2342}
+      .org-sub{font-size:9pt;color:#555;margin-top:2px}
+      .info{margin-bottom:20px}
+      .info table td{padding:2px 0;vertical-align:top}
+      .info td:first-child{width:150px;color:#333}
+      .salut{margin:20px 0 8px}
+      .sig{margin-top:50px}
+      .sig-line{border-top:1px solid #000;display:inline-block;min-width:180px;padding-top:4px;margin-top:60px}
+      @media print{.no-print{display:none}}
+    </style></head><body>
+    <button class="no-print" onclick="window.print()"
+      style="position:fixed;top:16px;right:16px;padding:10px 20px;background:#0A2342;
+      color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;z-index:999">
+      🖨 Print / Save PDF
+    </button>
+    <div class="header">
+      <div class="logo">OL</div>
+      <div>
+        <div class="org-name">${ORG.name}</div>
+        <div class="org-sub">${ORG.addr}</div>
+        <div class="org-sub">Tel: ${ORG.phone} | ${ORG.email}</div>
+      </div>
+    </div>
+    <div class="info"><table>
+      <tr><td>Nomor</td><td>: ${s.doc_number||'—'}</td></tr>
+      <tr><td>Perihal</td><td>: ${s.title||'—'}</td></tr>
+      <tr><td>Tanggal</td><td>: ${dateStr}</td></tr>
+      <tr><td>Jenis</td><td>: ${tLabel}</td></tr>
+    </table></div>
+    <p>Kepada Yth.<br>
+    <strong>${s.to_pic||'Bapak/Ibu Pimpinan'}</strong><br>
+    <strong>${s.to_name||'—'}</strong><br>
+    ${s.to_address||''}<br>di Tempat</p>
+    <div class="salut"><p>Dengan hormat,</p></div>
+    <p>Sehubungan dengan hal tersebut di atas, kami dari <strong>${ORG.name}</strong>
+    dengan ini mengajukan penawaran kerjasama layanan kesehatan preventif.</p>
+    <p>Demikian surat ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
+    <div class="sig">
+      <p>Tangerang Selatan, ${dateStr}</p>
+      <p>Hormat kami,<br><strong>${ORG.name}</strong></p>
+      <div class="sig-line">${s.created_by_name||'Pimpinan'}</div>
+    </div>
+    </body></html>`);
   w.document.close();
 }
 
-async function updateSuratStatus(id, status){
+// ── Templates ─────────────────────────────────────
+async function loadLetterTemplates() {
+  const el = document.getElementById('templates-grid');
+  if(!el) return;
   try {
-    await sbPatch('outgoing_letters',id,{status, updated_at:new Date().toISOString()});
-    toast(`✅ Status diubah ke ${status}`,'ok');
+    const data = await sbGet('marketing_templates',
+      'select=*&type=eq.surat&order=created_at.desc');
+    if(!data?.length){
+      el.innerHTML=`
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="ico">📄</div>
+          <h3>Belum ada template surat</h3>
+          <p>Klik "⬆ Upload Template DOCX" untuk mulai.<br>
+          Lihat tab <strong>Panduan</strong> untuk cara membuat template.</p>
+        </div>`; return;
+    }
+    el.innerHTML = data.map(t=>`
+      <div class="card">
+        <div style="font-size:16px;margin-bottom:8px">📝</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px">${t.title}</div>
+        <div style="font-size:11px;color:var(--gray);margin-bottom:10px">
+          ${t.file_name||'—'} · ${timeAgo(t.created_at)}
+        </div>
+        ${t.file_url?`
+          <a href="${t.file_url}" target="_blank" download
+            class="btn btn-teal btn-sm" style="text-decoration:none;display:block;text-align:center;margin-bottom:6px">
+            ⬇️ Download Template
+          </a>`:'' }
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="openMktForm(${t.id})">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMkt(${t.id},'${(t.title||'').replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </div>`).join('');
+  } catch(e){ el.innerHTML=`<div class="status-box status-err">❌ ${e.message}</div>`; }
+}
+
+function openUploadTemplateForm() {
+  // Pakai form marketing dengan tipe surat
+  openMktForm(null, 'surat');
+}
+
+async function updateSuratStatus(id, status) {
+  try {
+    await sbPatch('outgoing_letters', id, {status, updated_at:new Date().toISOString()});
+    toast(`✅ Status → ${status}`,'ok');
     await loadSuratList();
   } catch(e){ toast('❌ '+e.message,'err'); }
 }
 
-async function deleteSurat(id){
-  if(!confirm('Hapus surat ini dari arsip?')) return;
+async function deleteSurat(id) {
+  if(!confirm('Hapus surat dari arsip?')) return;
   try {
-    await sbDelete('outgoing_letters',id);
+    await sbDelete('outgoing_letters', id);
     toast('🗑 Surat dihapus','info');
     await loadSuratList();
   } catch(e){ toast('❌ '+e.message,'err'); }
-}
-
-// ── Letter Templates ─────────────────────────────
-async function loadLetterTemplates(){
-  try {
-    const data = await sbGet('marketing_templates','select=*&type=eq.surat&order=title');
-    const grid = document.getElementById('letter-templates-grid');
-    if(!grid) return;
-    if(!data || !data.length){
-      grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="ico">✉️</div><h3>Belum ada template surat</h3><p>Klik "+ Upload Template" untuk menambah.</p></div>`;
-      return;
-    }
-    grid.innerHTML = data.map(t=>`
-      <div class="card">
-        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px">✉️ ${t.title}</div>
-        <div style="font-size:11px;color:var(--gray);margin-bottom:10px">${(t.content||'').substring(0,80)}...</div>
-        <div class="btn-row">
-          <button class="btn btn-teal btn-sm" onclick="useLetterTemplate(${t.id})">Gunakan</button>
-          <button class="btn btn-ghost btn-sm" onclick="openMktForm(${t.id})">✏️ Edit</button>
-        </div>
-      </div>`).join('');
-  } catch(e){}
-}
-
-function openLetterTemplateForm(){
-  openModal(`
-    <div class="modal-header">
-      <div class="modal-title">✉️ Upload Template Surat</div>
-      <button class="modal-close" onclick="closeModalForce()">✕</button>
-    </div>
-    <div class="form-group">
-      <label>Nama Template *</label>
-      <input type="text" id="lt-title" placeholder="Template Penawaran Apotek">
-    </div>
-    <div class="form-group">
-      <label>Isi Template (gunakan placeholder: [NAMA_TUJUAN], [TANGGAL], [PERIHAL])</label>
-      <textarea id="lt-content" rows="12" placeholder="Ketik atau paste template surat di sini...">${getDefaultLetterContent()}</textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-teal" onclick="saveLetterTemplate()">💾 Simpan Template</button>
-    </div>`);
-}
-
-async function saveLetterTemplate(){
-  const title   = document.getElementById('lt-title').value.trim();
-  const content = document.getElementById('lt-content').value.trim();
-  if(!title||!content){ toast('Wajib diisi','err'); return; }
-  try {
-    await sbPost('marketing_templates',{ title, content, type:'surat', is_active:true });
-    toast('✅ Template tersimpan','ok');
-    closeModalForce();
-    loadLetterTemplates();
-  } catch(e){ toast('❌ '+e.message,'err'); }
-}
-
-function useLetterTemplate(id){
-  switchSuratTab('list', document.querySelector('.tabs .tab-btn'));
-  setTimeout(()=>openSuratForm(), 200);
 }
