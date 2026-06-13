@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════
-// MODULE: Partner Database v2
+// MODULE: Partner Database v3
 // - Full CRUD + Pipeline + Deals
+// - User tracking setiap aksi
+// - Deals modal pakai overlay terpisah (bukan modal utama)
 // ═══════════════════════════════════════════
 
 const PARTNER_CATEGORIES = [
@@ -14,11 +16,16 @@ const PARTNER_STATUSES = [
 ];
 const STATUS_COLORS = {
   'Prospect':'#F59E0B','Dihubungi':'#0EA5E9','Meeting':'#8B5CF6',
-  'Proposal Dikirim':'#F97316','MOU':'#06B6D4','Aktif':'#22C55E','Tidak Berminat':'#EF4444'
+  'Proposal Dikirim':'#F97316','MOU':'#06B6D4','Aktif':'#22C55E',
+  'Tidak Berminat':'#EF4444'
 };
 
-let PS = { all:[], filtered:[], page:1, perPage:25, search:'', filterCat:'', filterStatus:'', view:'table' };
+let PS = {
+  all:[], filtered:[], page:1, perPage:25,
+  search:'', filterCat:'', filterStatus:'', view:'table'
+};
 
+// ── Render Page ───────────────────────────────────
 async function renderPartners(params={}) {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
@@ -33,14 +40,12 @@ async function renderPartners(params={}) {
       </div>
     </div>
 
-    <!-- Pipeline Progress Bar -->
     <div class="card" style="padding:14px 18px;margin-bottom:14px">
       <div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">Sales Pipeline</div>
-      <div id="pipeline-bar" style="display:flex;gap:3px;height:28px;border-radius:8px;overflow:hidden;cursor:pointer"></div>
+      <div id="pipeline-bar" style="display:flex;gap:3px;height:28px;border-radius:8px;overflow:hidden"></div>
       <div id="pipeline-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"></div>
     </div>
 
-    <!-- Table View -->
     <div id="pv-table">
       <div class="table-wrap">
         <div class="table-toolbar">
@@ -61,7 +66,6 @@ async function renderPartners(params={}) {
       <div id="partner-pgn"></div>
     </div>
 
-    <!-- Pipeline Kanban -->
     <div id="pv-kanban" style="display:none">
       <div id="kanban-board" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px"></div>
     </div>`;
@@ -70,10 +74,11 @@ async function renderPartners(params={}) {
   if (params.highlight) highlightPartner(params.highlight);
 }
 
+// ── Load & Filter ─────────────────────────────────
 async function loadPartners() {
   try {
     const data = await sbGet('partners','select=*&order=created_at.desc');
-    PS.all = Array.isArray(data)?data:[];
+    PS.all = Array.isArray(data) ? data : [];
     PS.page = 1;
     applyPSFilter();
     renderPipelineBar();
@@ -93,41 +98,50 @@ function psFilter() {
 function applyPSFilter() {
   PS.filtered = PS.all.filter(p=>{
     const q=PS.search;
-    const mQ=!q||['partner_name','pic_name','address','phone','partner_code','notes'].some(k=>(p[k]||'').toLowerCase().includes(q));
-    const mC=!PS.filterCat||p.category===PS.filterCat;
-    const mS=!PS.filterStatus||p.status===PS.filterStatus;
+    const mQ=!q||['partner_name','pic_name','address','phone','partner_code','notes']
+      .some(k=>(p[k]||'').toLowerCase().includes(q));
+    const mC=!PS.filterCat    || p.category===PS.filterCat;
+    const mS=!PS.filterStatus || p.status===PS.filterStatus;
     return mQ&&mC&&mS;
   });
   if(PS.view==='table') renderPTable(); else renderKanban();
 }
 
+// ── Pipeline Bar ──────────────────────────────────
 function renderPipelineBar() {
   const total=PS.all.length||1;
   const counts={};
   PARTNER_STATUSES.forEach(s=>counts[s]=0);
   PS.all.forEach(p=>{if(counts[p.status]!==undefined)counts[p.status]++;});
 
-  document.getElementById('pipeline-bar').innerHTML=PARTNER_STATUSES.map(s=>{
+  document.getElementById('pipeline-bar').innerHTML = PARTNER_STATUSES.map(s=>{
     const c=STATUS_COLORS[s]||'#ccc';
-    return counts[s]>0?`<div style="flex:${counts[s]};background:${c};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;min-width:0;cursor:pointer" onclick="filterByPStatus('${s}')" title="${s}: ${counts[s]}">${Math.round(counts[s]/total*100)>=8?counts[s]:''}</div>`:''
+    return counts[s]>0
+      ? `<div style="flex:${counts[s]};background:${c};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;cursor:pointer;min-width:0"
+          onclick="filterByPStatus('${s}')" title="${s}: ${counts[s]}">
+          ${Math.round(counts[s]/total*100)>=8?counts[s]:''}
+         </div>` : '';
   }).join('');
 
-  document.getElementById('pipeline-legend').innerHTML=PARTNER_STATUSES.map(s=>`
+  document.getElementById('pipeline-legend').innerHTML = PARTNER_STATUSES.map(s=>`
     <div style="display:flex;align-items:center;gap:5px;cursor:pointer" onclick="filterByPStatus('${s}')">
       <div style="width:10px;height:10px;border-radius:2px;background:${STATUS_COLORS[s]||'#ccc'}"></div>
       <span style="font-size:11px;color:var(--gray)">${s} <strong style="color:var(--text)">${counts[s]}</strong></span>
     </div>`).join('');
 }
 
-function filterByPStatus(s){
+function filterByPStatus(s) {
   PS.filterStatus=s;
-  document.getElementById('ps-status')&&(document.getElementById('ps-status').value=s);
-  PS.page=1;applyPSFilter();
+  const el = document.getElementById('ps-status');
+  if(el) el.value=s;
+  PS.page=1; applyPSFilter();
 }
 
+// ── Table ─────────────────────────────────────────
 function renderPTable() {
   const {filtered,page,perPage}=PS;
   document.getElementById('ps-count').textContent=`${filtered.length} dari ${PS.all.length}`;
+
   if(!filtered.length){
     document.getElementById('partner-tbody').innerHTML=`
       <div class="empty-state">
@@ -137,22 +151,22 @@ function renderPTable() {
       </div>`;
     document.getElementById('partner-pgn').innerHTML=''; return;
   }
+
   const start=(page-1)*perPage;
   const rows=filtered.slice(start,start+perPage);
-  const sc=STATUS_COLORS;
 
   document.getElementById('partner-tbody').innerHTML=`
     <table>
       <thead><tr>
         <th>#</th><th>Kode</th><th>Nama Partner</th><th>Kategori</th>
-        <th>PIC & Kontak</th><th>Status</th><th>Kerjasama</th><th>Aksi</th>
+        <th>PIC & Kontak</th><th>Status</th><th>Dibuat Oleh</th><th>Aksi</th>
       </tr></thead>
       <tbody>
         ${rows.map((p,i)=>{
           const wn=(p.phone||'').replace(/\D/g,'');
           const wu=wn?`https://wa.me/${wn.startsWith('0')?'62'+wn.slice(1):wn}`:'';
           const mu=p.latitude&&p.longitude?`https://maps.google.com/?q=${p.latitude},${p.longitude}`:'';
-          const stColor=sc[p.status]||'#94A3B8';
+          const stColor=STATUS_COLORS[p.status]||'#94A3B8';
           return `<tr id="prow-${p.id}">
             <td style="color:#bbb;font-size:11px">${start+i+1}</td>
             <td style="font-size:11px;color:var(--gray);font-family:monospace">${p.partner_code||'—'}</td>
@@ -167,17 +181,19 @@ function renderPTable() {
             </td>
             <td>
               <span class="badge" style="background:${stColor}20;color:${stColor};font-size:11px;cursor:pointer"
-                onclick="quickStatusChange(${p.id},'${p.status}')">${p.status||'Prospect'}</span>
+                onclick="quickStatusChange(${p.id},'${p.status||'Prospect'}')">
+                ${p.status||'Prospect'}
+              </span>
             </td>
-            <td>
-              <button class="btn btn-ghost btn-sm" onclick="openDealsModal(${p.id},'${(p.partner_name||'').replace(/'/g,"\\'")}')">
-                🤝 Kerjasama
-              </button>
+            <td style="font-size:11px;color:var(--gray)">
+              ${p.assigned_name||p.created_by_name||'—'}
+              ${p.created_at?`<div style="font-size:10px;color:#bbb">${timeAgo(p.created_at)}</div>`:''}
             </td>
             <td>
               <div class="act-row">
                 ${wu?`<button class="act-btn wa" onclick="window.open('${wu}','_blank')" title="WA">💬</button>`:''}
                 ${mu?`<button class="act-btn maps" onclick="window.open('${mu}','_blank')" title="Maps">🗺</button>`:''}
+                <button class="act-btn" onclick="showDealsOverlay(${p.id},'${(p.partner_name||'').replace(/'/g,"\\'")}')">🤝</button>
                 <button class="act-btn edit" onclick="openPartnerForm(${p.id})">✏️</button>
                 <button class="act-btn del" onclick="deletePartner(${p.id},'${(p.partner_name||'').replace(/'/g,"\\'")}')">🗑</button>
               </div>
@@ -190,12 +206,15 @@ function renderPTable() {
   const pages=Math.ceil(filtered.length/perPage);
   document.getElementById('partner-pgn').innerHTML=pages>1?`
     <div class="pagination">
-      ${Array.from({length:pages},(_,i)=>`<button class="pg-btn${i+1===page?' active':''}" onclick="goPP(${i+1})">${i+1}</button>`).join('')}
-    </div>`:'';
+      ${Array.from({length:pages},(_,i)=>`
+        <button class="pg-btn${i+1===page?' active':''}" onclick="goPP(${i+1})">${i+1}</button>
+      `).join('')}
+    </div>`:''  ;
 }
 
 function goPP(p){PS.page=p;renderPTable();window.scrollTo(0,200);}
 
+// ── Kanban ────────────────────────────────────────
 function renderKanban() {
   const board=document.getElementById('kanban-board');
   if(!board)return;
@@ -209,12 +228,14 @@ function renderKanban() {
         </div>
         <div style="background:#fff;border-radius:0 0 8px 8px;padding:6px;min-height:100px;box-shadow:var(--shadow)">
           ${cards.map(p=>`
-            <div style="background:${col}12;border-radius:6px;padding:8px 10px;margin-bottom:5px;cursor:pointer;border-left:3px solid ${col}" onclick="openPartnerForm(${p.id})">
+            <div style="background:${col}12;border-radius:6px;padding:8px 10px;margin-bottom:5px;cursor:pointer;border-left:3px solid ${col}"
+              onclick="openPartnerForm(${p.id})">
               <div style="font-size:12px;font-weight:700;color:var(--navy)">${p.partner_name||'—'}</div>
               <div style="font-size:11px;color:var(--gray)">${catIcon(p.category)} ${p.category||''}</div>
               ${p.pic_name?`<div style="font-size:11px;color:var(--gray)">👤 ${p.pic_name}</div>`:''}
-              ${p.phone?`<div style="font-size:11px;color:var(--teal)">${p.phone}</div>`:''}
-            </div>`).join('')||`<div style="text-align:center;padding:16px;color:#ccc;font-size:11px">Kosong</div>`}
+              ${p.assigned_name?`<div style="font-size:10px;color:var(--teal)">📋 ${p.assigned_name}</div>`:''}
+            </div>`).join('')||
+          `<div style="text-align:center;padding:16px;color:#ccc;font-size:11px">Kosong</div>`}
         </div>
       </div>`;
   }).join('');
@@ -226,13 +247,13 @@ function togglePView() {
     PS.view='kanban';
     document.getElementById('pv-table').style.display='none';
     document.getElementById('pv-kanban').style.display='block';
-    btn.textContent='📊 Table View';
+    if(btn) btn.textContent='📊 Table View';
     renderKanban();
   } else {
     PS.view='table';
     document.getElementById('pv-table').style.display='block';
     document.getElementById('pv-kanban').style.display='none';
-    btn.textContent='📋 Pipeline View';
+    if(btn) btn.textContent='📋 Pipeline View';
     renderPTable();
   }
 }
@@ -240,13 +261,16 @@ function togglePView() {
 function highlightPartner(id) {
   setTimeout(()=>{
     const row=document.getElementById(`prow-${id}`);
-    if(row){row.style.background='#FFFDE7';row.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>row.style.background='',2000);}
+    if(row){
+      row.style.background='#FFFDE7';
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>row.style.background='',2000);
+    }
   },300);
 }
 
-// Quick status change dropdown
+// ── Quick Status ──────────────────────────────────
 function quickStatusChange(id, currentStatus) {
-  const opts = PARTNER_STATUSES.map(s=>`<option value="${s}"${s===currentStatus?' selected':''}>${s}</option>`).join('');
   openModal(`
     <div class="modal-header">
       <div class="modal-title">Update Status Partner</div>
@@ -254,37 +278,60 @@ function quickStatusChange(id, currentStatus) {
     </div>
     <div class="form-group">
       <label>Status Baru</label>
-      <select id="qs-status" style="font-size:15px;padding:12px">${opts}</select>
+      <select id="qs-status" style="font-size:15px;padding:12px">
+        ${PARTNER_STATUSES.map(s=>`<option value="${s}"${s===currentStatus?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Catatan (opsional)</label>
+      <textarea id="qs-note" rows="2" placeholder="Hasil follow up, alasan perubahan status..."></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-teal" onclick="saveQuickStatus(${id})">✅ Update Status</button>
+      <button class="btn btn-teal" onclick="saveQuickStatus(${id})">✅ Update</button>
     </div>`);
 }
 
 async function saveQuickStatus(id) {
   const status = document.getElementById('qs-status').value;
+  const note   = document.getElementById('qs-note').value.trim();
+  const user   = getUserName ? getUserName() : 'User';
   try {
-    await sbPatch('partners',id,{status,updated_at:new Date().toISOString()});
-    await logActivity('update','partners',id,`Status diubah ke ${status}`,'');
+    await sbPatch('partners', id, {
+      status,
+      updated_at: new Date().toISOString(),
+      assigned_name: user,
+    });
+    await logActivity('update','partners', id,
+      `Status diubah ke "${status}"${note?' — '+note:''}`, '');
     toast(`✅ Status → ${status}`,'ok');
     closeModalForce();
     await loadPartners();
-  } catch(e){toast('❌ '+e.message,'err');}
+  } catch(e){ toast('❌ '+e.message,'err'); }
 }
 
-// ── Form ──────────────────────────────────────────
+// ── Form Add/Edit ─────────────────────────────────
 async function openPartnerForm(id=null) {
   let p={};
   if(id){
     const d=await sbGet('partners',`select=*&id=eq.${id}`);
     p=d[0]||{};
   }
+  const user = getUserName ? getUserName() : 'User';
+
   openModal(`
     <div class="modal-header">
       <div class="modal-title">${id?'✏️ Edit Partner':'➕ Tambah Partner'}</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
+
+    ${id ? `
+    <div style="background:var(--lgray);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);display:flex;gap:16px;flex-wrap:wrap">
+      ${p.assigned_name?`<span>👤 Dibuat oleh: <strong style="color:var(--navy)">${p.assigned_name}</strong></span>`:''}
+      ${p.created_at?`<span>📅 Dibuat: <strong>${formatDate(p.created_at)}</strong></span>`:''}
+      ${p.updated_at?`<span>🔄 Update: <strong>${timeAgo(p.updated_at)}</strong></span>`:''}
+    </div>` : ''}
+
     <div class="form-row">
       <div class="form-group">
         <label>Kode Partner</label>
@@ -298,7 +345,8 @@ async function openPartnerForm(id=null) {
       </div>
       <div class="form-group" style="grid-column:1/-1">
         <label>Nama Partner *</label>
-        <input type="text" id="pf-name" value="${p.partner_name||''}" placeholder="Nama klinik, apotek, perusahaan...">
+        <input type="text" id="pf-name" value="${p.partner_name||''}"
+          placeholder="Nama klinik, apotek, perusahaan...">
       </div>
       <div class="form-group">
         <label>Kategori *</label>
@@ -308,8 +356,14 @@ async function openPartnerForm(id=null) {
         </select>
       </div>
       <div class="form-group">
-        <label>Nama PIC</label>
-        <input type="text" id="pf-pic" value="${p.pic_name||''}" placeholder="Nama kontak utama">
+        <label>Assigned To (Sales)</label>
+        <input type="text" id="pf-assigned" value="${p.assigned_name||user}"
+          placeholder="Nama sales yang handle">
+      </div>
+      <div class="form-group">
+        <label>Nama PIC (dari partner)</label>
+        <input type="text" id="pf-pic" value="${p.pic_name||''}"
+          placeholder="Nama kontak di partner">
       </div>
       <div class="form-group">
         <label>No. Telepon / WA</label>
@@ -325,12 +379,14 @@ async function openPartnerForm(id=null) {
       </div>
       <div class="form-group" style="grid-column:1/-1">
         <label>Catatan</label>
-        <textarea id="pf-notes" rows="3" placeholder="Hasil kunjungan, info penting, next action...">${p.notes||''}</textarea>
+        <textarea id="pf-notes" rows="3"
+          placeholder="Hasil kunjungan, info penting, next action...">${p.notes||''}</textarea>
       </div>
     </div>
+
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      ${id?`<button class="btn btn-outline" onclick="closeModalForce();setTimeout(()=>openDealsModal(${id},'${(p.partner_name||'').replace(/'/g,"\\'")}'),150)">🤝 Kelola Kerjasama</button>`:''}
+      ${id?`<button class="btn btn-outline" onclick="closeModalForce();setTimeout(()=>showDealsOverlay(${id},'${(p.partner_name||'').replace(/'/g,"\\'")}'),200)">🤝 Kelola Kerjasama</button>`:''}
       <button class="btn btn-teal" onclick="savePartner(${id||'null'})">
         ${id?'💾 Simpan':'➕ Tambah'}
       </button>
@@ -338,60 +394,131 @@ async function openPartnerForm(id=null) {
 }
 
 async function savePartner(id) {
-  const name=document.getElementById('pf-name').value.trim();
-  const cat=document.getElementById('pf-cat').value;
-  if(!name){toast('Nama wajib diisi','err');return;}
-  if(!cat){toast('Kategori wajib dipilih','err');return;}
+  const name = document.getElementById('pf-name').value.trim();
+  const cat  = document.getElementById('pf-cat').value;
+  if(!name){ toast('Nama wajib diisi','err'); return; }
+  if(!cat){  toast('Kategori wajib dipilih','err'); return; }
 
-  const payload={
-    partner_code: document.getElementById('pf-code').value.trim()||autoCode(cat),
-    partner_name: name,
-    category:     cat,
-    pic_name:     document.getElementById('pf-pic').value.trim(),
-    phone:        document.getElementById('pf-phone').value.trim(),
-    email:        document.getElementById('pf-email').value.trim(),
-    address:      document.getElementById('pf-addr').value.trim(),
-    status:       document.getElementById('pf-status').value,
-    notes:        document.getElementById('pf-notes').value.trim(),
-    updated_at:   new Date().toISOString(),
+  const user = getUserName ? getUserName() : 'User';
+  const payload = {
+    partner_code:  document.getElementById('pf-code').value.trim() || autoCode(cat),
+    partner_name:  name,
+    category:      cat,
+    assigned_name: document.getElementById('pf-assigned').value.trim() || user,
+    pic_name:      document.getElementById('pf-pic').value.trim(),
+    phone:         document.getElementById('pf-phone').value.trim(),
+    email:         document.getElementById('pf-email').value.trim(),
+    address:       document.getElementById('pf-addr').value.trim(),
+    status:        document.getElementById('pf-status').value,
+    notes:         document.getElementById('pf-notes').value.trim(),
+    updated_at:    new Date().toISOString(),
   };
 
   try {
-    if(id){
-      await sbPatch('partners',id,payload);
-      await logActivity('update','partners',id,'Partner diupdate',name);
+    if(id) {
+      await sbPatch('partners', id, payload);
+      await logActivity('update','partners', id,
+        `Partner diupdate oleh ${user}`, name);
       toast('✅ Partner diupdate','ok');
     } else {
-      const res=await sbPost('partners',payload);
-      if(res&&res[0]) await logActivity('create','partners',res[0].id,'Partner baru ditambahkan',name);
+      const res = await sbPost('partners', payload);
+      if(res && res[0]) {
+        await logActivity('create','partners', res[0].id,
+          `Partner baru ditambahkan oleh ${user}`, name);
+      }
       toast('✅ Partner ditambahkan','ok');
     }
     closeModalForce();
     await loadPartners();
-  } catch(e){toast('❌ '+e.message,'err');}
+  } catch(e){ toast('❌ '+e.message,'err'); }
 }
 
-async function deletePartner(id,name) {
-  if(!confirm(`Hapus "${name}"?\nSemua data kerjasama terkait akan ikut terhapus.`))return;
-  try{
-    await sbDelete('partners',id);
-    await logActivity('delete','partners',id,'Partner dihapus',name);
+async function deletePartner(id, name) {
+  if(!confirm(`Hapus "${name}"?\nSemua data kerjasama terkait akan ikut terhapus.`)) return;
+  const user = getUserName ? getUserName() : 'User';
+  try {
+    await sbDelete('partners', id);
+    await logActivity('delete','partners', id,
+      `Partner dihapus oleh ${user}`, name);
     toast(`🗑 "${name}" dihapus`,'info');
     await loadPartners();
-  } catch(e){toast('❌ '+e.message,'err');}
+  } catch(e){ toast('❌ '+e.message,'err'); }
 }
 
+// ── Deals Overlay (TERPISAH dari modal utama) ─────
+// Pakai overlay sendiri agar tidak konflik dengan modal
+function showDealsOverlay(partnerId, partnerName) {
+  // Tutup modal utama kalau masih terbuka
+  document.getElementById('modal-overlay')?.classList.remove('open');
+
+  // Hapus overlay lama kalau ada
+  document.getElementById('deals-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'deals-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;
+    display:flex;align-items:center;justify-content:center;padding:14px`;
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:14px;max-width:620px;width:100%;
+      max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+
+      <!-- Header -->
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);
+        display:flex;align-items:center;justify-content:space-between;
+        position:sticky;top:0;background:#fff;z-index:10;border-radius:14px 14px 0 0">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy)">🤝 Output Kerjasama</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px">${partnerName}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-teal btn-sm"
+            onclick="openDealForm(${partnerId},null,'${partnerName.replace(/'/g,"\\'")}')">
+            ➕ Tambah Output
+          </button>
+          <button onclick="document.getElementById('deals-overlay').remove()"
+            style="background:var(--lgray);border:none;border-radius:50%;width:30px;height:30px;
+            cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:18px 20px">
+        <div id="deals-summary-${partnerId}"></div>
+        <div id="deals-list-${partnerId}">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Close on backdrop click
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) overlay.remove();
+  });
+
+  // Load deals
+  loadDeals(partnerId);
+}
+
+// ── Export CSV ────────────────────────────────────
 function exportPartnerCSV() {
-  const data=PS.filtered.length?PS.filtered:PS.all;
-  if(!data.length){toast('Tidak ada data','warn');return;}
-  const h=['No','Kode','Nama','Kategori','PIC','Telepon','Email','Alamat','Status','Catatan'];
-  const rows=data.map((p,i)=>[
-    i+1,p.partner_code||'',p.partner_name||'',p.category||'',p.pic_name||'',
-    p.phone||'',p.email||'',p.address||'',p.status||'',p.notes||''
+  const data = PS.filtered.length ? PS.filtered : PS.all;
+  if(!data.length){ toast('Tidak ada data','warn'); return; }
+  const h = ['No','Kode','Nama','Kategori','PIC Partner','Sales/Assigned',
+             'Telepon','Email','Alamat','Status','Catatan','Dibuat'];
+  const rows = data.map((p,i)=>[
+    i+1, p.partner_code||'', p.partner_name||'', p.category||'',
+    p.pic_name||'', p.assigned_name||'', p.phone||'', p.email||'',
+    p.address||'', p.status||'', p.notes||'',
+    p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : ''
   ].map(v=>`"${String(v).replace(/"/g,'""')}"`));
-  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
-  a.download=`Partners_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.csv`;
-  a.click();toast('📥 CSV diunduh','ok');
+  const csv = [h,...rows].map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `Partners_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.csv`;
+  a.click();
+  toast('📥 CSV diunduh','ok');
 }
