@@ -248,14 +248,14 @@ function shareMktWA(id) {
 }
 
 // ── Form Add / Edit ───────────────────────────────
-async function openMktForm(id=null) {
+async function openMktForm(id=null, defaultType=null) {
   let t = {};
   if (id) {
     const data = await sbGet('marketing_templates',`select=*&id=eq.${id}`);
     t = data[0] || {};
   }
 
-  const currentType = t.type || 'wa_message';
+  const currentType = t.type || defaultType || 'wa_message';
   const typeInfo = MKT_TYPES.find(x=>x.key===currentType) || MKT_TYPES[0];
 
   openModal(`
