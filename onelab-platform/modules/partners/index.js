@@ -330,7 +330,7 @@ async function openPartnerForm(id=null) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      ${id?`<button class="btn btn-outline" onclick="closeModalForce();openDealsModal(${id},'${(p.partner_name||'').replace(/'/g,"\\'")}')">🤝 Kelola Kerjasama</button>`:''}
+      ${id?`<button class="btn btn-outline" onclick="closeModalForce();setTimeout(()=>openDealsModal(${id},'${(p.partner_name||'').replace(/'/g,"\\'")}'),150)">🤝 Kelola Kerjasama</button>`:''}
       <button class="btn btn-teal" onclick="savePartner(${id||'null'})">
         ${id?'💾 Simpan':'➕ Tambah'}
       </button>
