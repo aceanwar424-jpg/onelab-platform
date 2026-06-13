@@ -4,8 +4,8 @@
 
 const ALL_PAGES = [
   'dashboard','partners','maps','marketing','voucher','surat',
-  'mou','leads','okr','finance','inventory','hrd','homecare',
-  'settings','users'
+  'mou','leads','okr','finance','finance-report','finance-comm',
+  'inventory','hrd','homecare','settings','users'
 ];
 
 const ROLES = {
@@ -19,20 +19,20 @@ const ROLES = {
     label: 'Direktur', color: '#0A2342',
     desc: 'Semua modul, approval, laporan keuangan',
     pages: ['dashboard','partners','maps','marketing','voucher','surat',
-            'mou','leads','finance','inventory','hrd','homecare','settings'],
+            'mou','leads','okr','finance','finance-report','finance-comm','inventory','hrd','homecare','settings'],
     canDelete: true, canBulkDelete: false, canExport: true, canManageUsers: false,
   },
   manager: {
     label: 'Manager', color: '#00897B',
     desc: 'Semua operasional kecuali HRD & sistem',
     pages: ['dashboard','partners','maps','marketing','voucher','surat',
-            'mou','leads','finance','inventory','homecare','settings'],
+            'mou','leads','okr','finance','finance-report','finance-comm','inventory','homecare','settings'],
     canDelete: true, canBulkDelete: false, canExport: true, canManageUsers: false,
   },
   sales: {
     label: 'Sales', color: '#1565C0',
     desc: 'Partner, maps, marketing, voucher, leads',
-    pages: ['dashboard','partners','maps','marketing','voucher','leads','settings'],
+    pages: ['dashboard','partners','maps','marketing','voucher','leads','okr','settings'],
     canDelete: false, canBulkDelete: false, canExport: false, canManageUsers: false,
   },
   operasional: {
@@ -68,19 +68,22 @@ function applyRoleMenu() {
   window.roleConfig = rc;
 
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    if (btn.classList.contains('nav-item-soon')) return; // skip soon items
-    const page = btn.getAttribute('data-page');
-    // normalize: finance-report → finance, hrd-leave → hrd, etc
+    // Skip soon items — always hidden
+    if (btn.classList.contains('nav-item-soon')) return;
+    // Skip users nav — handled separately below
+    if (btn.id === 'nav-users') return;
+
+    const page     = btn.getAttribute('data-page');
     const basePage = page ? page.split('-')[0] : '';
     const allowed  = rc.pages.includes(page) || rc.pages.includes(basePage);
     btn.style.display = allowed ? '' : 'none';
   });
 
-  // User Management hanya super_admin
+  // User Management — only super_admin
   const navUsers = document.getElementById('nav-users');
   if (navUsers) navUsers.style.display = (role === 'super_admin') ? '' : 'none';
 
-  // Update role badge di sidebar
+  // Update role badge
   const roleEl = document.getElementById('user-role-sidebar');
   if (roleEl) roleEl.textContent = rc.label;
 }
