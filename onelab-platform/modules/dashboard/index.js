@@ -180,3 +180,4 @@ async function loadDashboardData() {
       `<div style="grid-column:1/-1"><div class="status-box status-err">❌ ${e.message}</div></div>`;
   }
 }
+

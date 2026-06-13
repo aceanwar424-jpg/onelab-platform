@@ -39,13 +39,11 @@
     <button class="nav-item" onclick="navigate('voucher')" data-page="voucher">
       <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
     </button>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('leads')" data-page="leads">
       <span class="nav-icon">🎯</span><span class="nav-label">Leads Management</span>
-      <span class="nav-soon">soon</span>
     </button>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('okr')" data-page="okr">
       <span class="nav-icon">📈</span><span class="nav-label">OKR & Target Sales</span>
-      <span class="nav-soon">soon</span>
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">OPERASIONAL LAB</div>
@@ -56,9 +54,8 @@
       <span class="nav-icon">🏥</span><span class="nav-label">Project MCU</span>
       <span class="nav-soon">soon</span>
     </button>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('mou')" data-page="mou">
       <span class="nav-icon">📜</span><span class="nav-label">MOU / Perjanjian</span>
-      <span class="nav-soon">soon</span>
     </button>
     <button class="nav-item nav-item-soon">
       <span class="nav-icon">🔬</span><span class="nav-label">Hasil Pemeriksaan</span>
@@ -66,13 +63,8 @@
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">HOME CARE</div>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🏠</span><span class="nav-label">Order Home Care</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kunjungan</span>
-      <span class="nav-soon">soon</span>
+    <button class="nav-item" onclick="navigate('homecare')" data-page="homecare">
+      <span class="nav-icon">🏠</span><span class="nav-label">Order & Jadwal</span>
     </button>
     <button class="nav-item nav-item-soon">
       <span class="nav-icon">🩺</span><span class="nav-label">Rekam Medis</span>
@@ -80,45 +72,24 @@
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">FINANCE</div>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('finance')" data-page="finance">
       <span class="nav-icon">💰</span><span class="nav-label">Invoice & Tagihan</span>
-      <span class="nav-soon">soon</span>
     </button>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('finance')" data-page="finance-report">
       <span class="nav-icon">💳</span><span class="nav-label">Laporan Keuangan</span>
-      <span class="nav-soon">soon</span>
     </button>
-    <button class="nav-item nav-item-soon">
+    <button class="nav-item" onclick="navigate('finance')" data-page="finance-comm">
       <span class="nav-icon">🏆</span><span class="nav-label">Komisi Sales</span>
-      <span class="nav-soon">soon</span>
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">INVENTORY</div>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">📦</span><span class="nav-label">Stock & Reagen</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🛒</span><span class="nav-label">Purchase Request</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🏭</span><span class="nav-label">Supplier Database</span>
-      <span class="nav-soon">soon</span>
+    <button class="nav-item" onclick="navigate('inventory')" data-page="inventory">
+      <span class="nav-icon">📦</span><span class="nav-label">Stock & Logistik</span>
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">HRD & SDM</div>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">👥</span><span class="nav-label">Data Karyawan</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🕐</span><span class="nav-label">Absensi & Cuti</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">💵</span><span class="nav-label">Penggajian</span>
-      <span class="nav-soon">soon</span>
+    <button class="nav-item" onclick="navigate('hrd')" data-page="hrd">
+      <span class="nav-icon">👥</span><span class="nav-label">Karyawan & HRD</span>
     </button>
 
     <div class="nav-section-label" style="margin-top:14px">SISTEM</div>
@@ -184,6 +155,17 @@
 <script src="modules/settings.js"></script>
 
 <script src="modules/settings_users.js"></script>
+<script src="modules/mou.js"></script>
+<script src="modules/leads.js"></script>
+<script src="modules/finance.js"></script>
+<script src="modules/inventory.js"></script>
+<script src="modules/hrd.js"></script>
+<script src="modules/homecare.js"></script>
+<script src="modules/leads.js"></script>
+<script src="modules/mou.js"></script>
+<script src="modules/homecare.js"></script>
+<script src="modules/inventory.js"></script>
+<script src="modules/hrd.js"></script>
 
 <script>
 window.addEventListener('DOMContentLoaded', async () => {

@@ -12,6 +12,7 @@ async function renderSettings() {
       <button class="tab-btn" onclick="switchSetTab('users',this)">👥 Pengguna</button>
       <button class="tab-btn" onclick="switchSetTab('activity',this)">📋 Log Aktivitas</button>
       <button class="tab-btn" onclick="switchSetTab('data',this)">🗄 Data</button>
+      <button class="tab-btn" onclick="switchSetTab('masterdata',this)">📋 Master Data</button>
       ${isSuperAdmin ? `<button class="tab-btn" onclick="switchSetTab('admin',this)">🔐 Super Admin</button>` : ''}
     </div>
 
@@ -130,12 +131,16 @@ async function renderSettings() {
 function switchSetTab(tab, btn) {
   document.querySelectorAll('#set-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['general','users','activity','data','admin'].forEach(t=>{
+  ['general','users','activity','data','admin','masterdata'].forEach(t=>{
     const el = document.getElementById(`set-${t}`);
     if (el) el.style.display = t===tab?'block':'none';
   });
   if(tab==='users') loadSetUsers();
   if(tab==='activity') loadSetActivity();
+  if(tab==='masterdata') renderMasterData().then(html=>{
+    const el=document.getElementById('masterdata-content');
+    if(el) el.innerHTML=html;
+  });
 }
 
 async function checkSetConn() {
@@ -312,4 +317,153 @@ function copyAdminSQL(key) {
   navigator.clipboard.writeText(sql)
     .then(() => toast('📋 SQL tersalin — paste di Supabase SQL Editor','ok'))
     .catch(() => toast('❌ Gagal copy','err'));
+}
+
+// ── Master Data Management (in settings) ──
+async function renderMasterData() {
+  return `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">🏥 Master Kategori Partner</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Kelola jenis/kategori mitra yang tersedia di form Partner Database.
+        </div>
+        <div id="master-partner-cats" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+          ${['Apotek','Klinik Pratama','Klinik Utama','Dokter Praktik','Perusahaan SME',
+             'Komunitas','Sekolah / Kampus','Gym & Sport Club','Lainnya']
+            .map(c=>`<span style="background:var(--lgray);padding:3px 9px;border-radius:12px;font-size:11px">${c}</span>`).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--gray)">💡 Edit di source code PARTNER_CATEGORIES</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">🔬 Master Layanan Lab</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Jenis pemeriksaan dan layanan yang tersedia untuk MCU, Home Care, dll.
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="openMasterServices()">⚙️ Kelola Layanan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">💰 Master Harga</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Tarif standar per jenis pemeriksaan untuk kalkulasi RAB otomatis.
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="navigate('inventory')">📦 Kelola di Inventory</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">👤 Identitas Organisasi</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Nama, alamat, logo, kontak OneLab — dipakai di invoice, surat, voucher.
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="openOrgSettings()">⚙️ Edit Identitas</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">📄 Nomor Urut Dokumen</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Reset atau lihat nomor urut surat, invoice, dan voucher.
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="loadDocSequences()">👁 Lihat Urutan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">🌐 API & Integrasi</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+          Google Maps API key, Supabase connection, dan integrasi eksternal.
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="switchSetTab('general',document.querySelector('#set-tabs .tab-btn'))">⚙️ Ke Pengaturan Umum</button>
+      </div>
+
+    </div>`;
+}
+
+async function openMasterServices() {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">🔬 Master Layanan Lab</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:14px">
+      Daftar layanan standar OneLab — digunakan di Home Care, MCU, dan Voucher.
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${['Darah Lengkap','Urin Lengkap','Kolesterol Total','Gula Darah Puasa','HbA1c',
+         'Asam Urat','Fungsi Hati (SGOT/SGPT)','Fungsi Ginjal (Ureum/Kreatinin)',
+         'Thyroid (TSH/T4)','Rapid Test COVID','Swab PCR','EKG','Tekanan Darah',
+         'Indeks Massa Tubuh','Skrining Kanker Serviks','Gene Solution Colon',
+         'Gene Solution Cervical','Gut Health','Konsultasi Dokter']
+        .map(s=>`<span style="background:var(--mint);color:var(--teal);padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600">${s}</span>`)
+        .join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+    </div>`);
+}
+
+async function openOrgSettings() {
+  const orgName  = localStorage.getItem('ol_org_name')  || 'OneLab Diagnostics by Plebo';
+  const orgAddr  = localStorage.getItem('ol_org_addr')  || 'Bintaro Jaya, Jl. Elang Raya No.15, Tangsel';
+  const orgPhone = localStorage.getItem('ol_org_phone') || '(021) xxxx-xxxx';
+  const orgEmail = localStorage.getItem('ol_org_email') || 'info@onelab.id';
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">👤 Identitas Organisasi</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nama Organisasi</label>
+      <input type="text" id="org-name" value="${orgName}">
+    </div>
+    <div class="form-group">
+      <label>Alamat</label>
+      <input type="text" id="org-addr" value="${orgAddr}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>No. Telepon</label>
+        <input type="text" id="org-phone" value="${orgPhone}">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="org-email" value="${orgEmail}">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveOrgSettings()">💾 Simpan</button>
+    </div>`);
+}
+
+function saveOrgSettings() {
+  localStorage.setItem('ol_org_name',  document.getElementById('org-name').value.trim());
+  localStorage.setItem('ol_org_addr',  document.getElementById('org-addr').value.trim());
+  localStorage.setItem('ol_org_phone', document.getElementById('org-phone').value.trim());
+  localStorage.setItem('ol_org_email', document.getElementById('org-email').value.trim());
+  toast('✅ Identitas organisasi disimpan','ok');
+  closeModalForce();
+}
+
+async function loadDocSequences() {
+  try {
+    const data = await sbGet('letter_sequences','select=*&order=year.desc,month.desc,type_code');
+    openModal(`
+      <div class="modal-header">
+        <div class="modal-title">📄 Nomor Urut Dokumen</div>
+        <button class="modal-close" onclick="closeModalForce()">✕</button>
+      </div>
+      <table><thead><tr><th>Tahun</th><th>Bulan</th><th>Tipe</th><th>Urutan Terakhir</th></tr></thead>
+      <tbody>${(data||[]).map(d=>`<tr>
+        <td>${d.year}</td><td>${d.month}</td>
+        <td style="font-family:monospace">${d.type_code}</td>
+        <td style="font-weight:700;color:var(--navy)">${d.last_seq}</td>
+      </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--gray)">Belum ada data</td></tr>'}
+      </tbody></table>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+      </div>`);
+  } catch(e){ toast('❌ '+e.message,'err'); }
 }
