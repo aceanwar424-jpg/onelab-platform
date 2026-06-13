@@ -120,7 +120,12 @@ async function renderSettings() {
         </div>
 
       </div>
-    </div>`;\n\n  checkSetConn();\n  loadSetStats();\n  if (isSuperAdmin) loadAdminInfo();\n}
+    </div>`;
+
+  checkSetConn();
+  loadSetStats();
+  if (isSuperAdmin) loadAdminInfo();
+}
 
 function switchSetTab(tab, btn) {
   document.querySelectorAll('#set-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
