@@ -275,16 +275,21 @@ async function renderOKR() {
     </div>
 
     <!-- Period selector -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-      <select id="okr-period" class="table-filter" style="min-width:160px" onchange="loadOKR()">
-        ${[...Array(4)].map((_,i)=>{
-          const q = Math.ceil((now.getMonth()+1)/3) - i;
-          const yr = q < 1 ? now.getFullYear()-1 : now.getFullYear();
-          const qr = q < 1 ? 4+q : q;
-          return `<option value="${yr}-Q${qr}">Q${qr} ${yr}</option>`;
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <select id="okr-period" class="table-filter" style="min-width:180px" onchange="loadOKR()">
+        <option value="">📋 Semua Periode</option>
+        ${[...Array(8)].map((_,i)=>{
+          const totalQ = Math.ceil((now.getMonth()+1)/3) - i;
+          const yr = totalQ <= 0 ? now.getFullYear()-1+(Math.floor((totalQ-1)/4)) : now.getFullYear();
+          const qr = ((totalQ - 1) % 4 + 4) % 4 + 1;
+          const isNow = i === 0;
+          return `<option value="${yr}-Q${qr}" ${isNow?'selected':''}>Q${qr} ${yr}${isNow?' (Sekarang)':''}</option>`;
         }).join('')}
+        <option value="${now.getFullYear()}">${now.getFullYear()} (Tahunan)</option>
+        <option value="${now.getFullYear()-1}">${now.getFullYear()-1} (Tahunan)</option>
       </select>
       <button class="btn btn-outline btn-sm" onclick="loadOKR()">🔄 Refresh</button>
+      <span id="okr-count" style="font-size:12px;color:var(--gray)"></span>
     </div>
 
     <div id="okr-list"><div class="loading-row"><div class="spinner"></div></div></div>`;
@@ -295,11 +300,18 @@ async function renderOKR() {
 async function loadOKR() {
   const period = document.getElementById('okr-period')?.value || '';
   try {
-    const data = await sbGet('okr_targets',`select=*&order=created_at.desc${period?`&period=eq.${period}`:''}`);
+    let query = 'select=*&order=created_at.desc';
+    if (period) query += `&period=eq.${period}`;
+    const data = await sbGet('okr_targets', query);
     okrAll = Array.isArray(data) ? data : [];
+    const countEl = document.getElementById('okr-count');
+    if (countEl) countEl.textContent = `${okrAll.length} OKR${period ? '' : ' (semua periode)'}`;
     renderOKRList();
   } catch(e) {
     document.getElementById('okr-list').innerHTML =
+      `<div class="status-box status-err">❌ ${e.message}</div>`;
+  }
+}
       `<div class="status-box status-err">❌ ${e.message}</div>`;
   }
 }
