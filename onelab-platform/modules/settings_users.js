@@ -1,109 +1,98 @@
 // ═══════════════════════════════════════════
-// MODULE: User Management & Role/Permission
-// - Super admin kelola semua user
-// - Assign role per user
-// - Kontrol menu visibility per role
+// MODULE: User Management & Role/Permission v2
 // ═══════════════════════════════════════════
 
-// ── Role definitions ──────────────────────
+const ALL_PAGES = [
+  'dashboard','partners','maps','marketing','voucher','surat',
+  'mou','leads','okr','finance','inventory','hrd','homecare',
+  'settings','users'
+];
+
 const ROLES = {
   super_admin: {
-    label: 'Super Admin',
-    color: '#7B1FA2',
+    label: 'Super Admin', color: '#7B1FA2',
     desc: 'Akses penuh semua modul + kelola user',
-    pages: ['dashboard','partners','maps','marketing','voucher','surat','settings','users'],
-    canDelete: true,
-    canBulkDelete: true,
-    canExport: true,
-    canManageUsers: true,
+    pages: ALL_PAGES,
+    canDelete: true, canBulkDelete: true, canExport: true, canManageUsers: true,
   },
   direktur: {
-    label: 'Direktur',
-    color: '#0A2342',
-    desc: 'Semua modul, approval, laporan',
-    pages: ['dashboard','partners','maps','marketing','voucher','surat','settings'],
-    canDelete: true,
-    canBulkDelete: false,
-    canExport: true,
-    canManageUsers: false,
+    label: 'Direktur', color: '#0A2342',
+    desc: 'Semua modul, approval, laporan keuangan',
+    pages: ['dashboard','partners','maps','marketing','voucher','surat',
+            'mou','leads','finance','inventory','hrd','homecare','settings'],
+    canDelete: true, canBulkDelete: false, canExport: true, canManageUsers: false,
   },
   manager: {
-    label: 'Manager',
-    color: '#00897B',
-    desc: 'Semua modul kecuali pengaturan sistem',
-    pages: ['dashboard','partners','maps','marketing','voucher','surat','settings'],
-    canDelete: true,
-    canBulkDelete: false,
-    canExport: true,
-    canManageUsers: false,
+    label: 'Manager', color: '#00897B',
+    desc: 'Semua operasional kecuali HRD & sistem',
+    pages: ['dashboard','partners','maps','marketing','voucher','surat',
+            'mou','leads','finance','inventory','homecare','settings'],
+    canDelete: true, canBulkDelete: false, canExport: true, canManageUsers: false,
   },
   sales: {
-    label: 'Sales',
-    color: '#1565C0',
-    desc: 'Partner, maps, marketing kit, voucher',
-    pages: ['dashboard','partners','maps','marketing','voucher','settings'],
-    canDelete: false,
-    canBulkDelete: false,
-    canExport: false,
-    canManageUsers: false,
+    label: 'Sales', color: '#1565C0',
+    desc: 'Partner, maps, marketing, voucher, leads',
+    pages: ['dashboard','partners','maps','marketing','voucher','leads','settings'],
+    canDelete: false, canBulkDelete: false, canExport: false, canManageUsers: false,
   },
   operasional: {
-    label: 'Operasional Lab',
-    color: '#2E7D32',
-    desc: 'Surat keluar, operasional lab',
-    pages: ['dashboard','surat','settings'],
-    canDelete: false,
-    canBulkDelete: false,
-    canExport: false,
-    canManageUsers: false,
+    label: 'Operasional Lab', color: '#2E7D32',
+    desc: 'Surat, inventory, home care, lab',
+    pages: ['dashboard','surat','mou','inventory','homecare','settings'],
+    canDelete: false, canBulkDelete: false, canExport: false, canManageUsers: false,
+  },
+  hrd_staff: {
+    label: 'HRD Staff', color: '#E65100',
+    desc: 'Data karyawan, absensi, leave request',
+    pages: ['dashboard','hrd','settings'],
+    canDelete: false, canBulkDelete: false, canExport: false, canManageUsers: false,
+  },
+  finance_staff: {
+    label: 'Finance Staff', color: '#00838F',
+    desc: 'Invoice, pembayaran, laporan keuangan',
+    pages: ['dashboard','finance','settings'],
+    canDelete: false, canBulkDelete: false, canExport: true, canManageUsers: false,
   },
   viewer: {
-    label: 'Viewer',
-    color: '#546E7A',
-    desc: 'Hanya lihat dashboard',
+    label: 'Viewer', color: '#546E7A',
+    desc: 'Hanya lihat dashboard & laporan',
     pages: ['dashboard','settings'],
-    canDelete: false,
-    canBulkDelete: false,
-    canExport: false,
-    canManageUsers: false,
+    canDelete: false, canBulkDelete: false, canExport: false, canManageUsers: false,
   },
 };
 
-// ── Apply menu visibility based on role ───
+// ── Apply menu visibility ─────────────────
 function applyRoleMenu() {
   const role = getUserRole();
-  const roleConfig = ROLES[role] || ROLES.sales;
-  const allowedPages = roleConfig.pages;
+  const rc   = ROLES[role] || ROLES.sales;
+  window.roleConfig = rc;
 
-  // Hide/show nav items
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+    if (btn.classList.contains('nav-item-soon')) return; // skip soon items
     const page = btn.getAttribute('data-page');
-    if (!btn.classList.contains('nav-item-soon')) {
-      btn.style.display = allowedPages.includes(page) ? '' : 'none';
-    }
+    // normalize: finance-report → finance, hrd-leave → hrd, etc
+    const basePage = page ? page.split('-')[0] : '';
+    const allowed  = rc.pages.includes(page) || rc.pages.includes(basePage);
+    btn.style.display = allowed ? '' : 'none';
   });
 
-  // Show User Management only for super_admin
+  // User Management hanya super_admin
   const navUsers = document.getElementById('nav-users');
-  if (navUsers) {
-    navUsers.style.display = (role === 'super_admin') ? '' : 'none';
-  }
+  if (navUsers) navUsers.style.display = (role === 'super_admin') ? '' : 'none';
 
-  // Store role config globally
-  window.roleConfig = roleConfig;
+  // Update role badge di sidebar
+  const roleEl = document.getElementById('user-role-sidebar');
+  if (roleEl) roleEl.textContent = rc.label;
 }
 
-// ── Render User Management Page ───────────
+// ── Render User Management ────────────────
 async function renderUsers() {
-  const myRole = getUserRole();
-  if (myRole !== 'super_admin') {
+  if (getUserRole() !== 'super_admin') {
     document.getElementById('main-content').innerHTML = `
       <div class="empty-state" style="min-height:60vh">
-        <div class="ico">🔒</div>
-        <h3>Akses Ditolak</h3>
+        <div class="ico">🔒</div><h3>Akses Ditolak</h3>
         <p>Hanya Super Admin yang bisa mengelola user.</p>
-      </div>`;
-    return;
+      </div>`; return;
   }
 
   document.getElementById('main-content').innerHTML = `
@@ -115,20 +104,17 @@ async function renderUsers() {
       </div>
     </div>
 
-    <!-- Role Legend -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <!-- Role Guide -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
       ${Object.entries(ROLES).map(([key,r])=>`
-        <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+        <div style="padding:5px 10px;background:#fff;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;gap:6px">
           <div style="width:8px;height:8px;border-radius:2px;background:${r.color}"></div>
           <span style="font-size:11px;font-weight:600;color:var(--navy)">${r.label}</span>
-          <span style="font-size:10px;color:var(--gray)">${r.desc}</span>
         </div>`).join('')}
     </div>
 
     <div class="table-wrap">
-      <div id="users-tbody">
-        <div class="loading-row"><div class="spinner"></div></div>
-      </div>
+      <div id="users-tbody"><div class="loading-row"><div class="spinner"></div></div></div>
     </div>`;
 
   await loadUsers();
@@ -136,9 +122,8 @@ async function renderUsers() {
 
 async function loadUsers() {
   try {
-    // Load dari user_profiles
-    const profiles = await sbGet('user_profiles','select=*&order=created_at.asc');
-    renderUsersTable(Array.isArray(profiles) ? profiles : []);
+    const data = await sbGet('user_profiles','select=*&order=created_at.asc');
+    renderUsersTable(Array.isArray(data) ? data : []);
   } catch(e) {
     document.getElementById('users-tbody').innerHTML =
       `<div class="status-box status-err" style="margin:16px">❌ ${e.message}</div>`;
@@ -150,140 +135,128 @@ function renderUsersTable(users) {
   if (!users.length) {
     el.innerHTML = `
       <div class="empty-state">
-        <div class="ico">👤</div>
-        <h3>Belum ada user terdaftar</h3>
-        <p>User akan muncul di sini setelah mendaftar dan login pertama kali.</p>
+        <div class="ico">👤</div><h3>Belum ada user</h3>
+        <p>User muncul di sini setelah login pertama kali.</p>
       </div>`; return;
   }
-
   el.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>User</th><th>Role</th><th>Akses Modul</th>
-        <th>Terdaftar</th><th>Last Login</th><th>Aksi</th>
-      </tr></thead>
-      <tbody>
-        ${users.map(u => {
-          const role = u.role || 'sales';
-          const rc = ROLES[role] || ROLES.sales;
-          const isMe = u.id === window.currentUser?.id;
-          return `<tr>
-            <td>
-              <div style="display:flex;align-items:center;gap:10px">
-                <div style="width:34px;height:34px;border-radius:50%;background:${rc.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">
-                  ${(u.full_name||'U').charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--navy)">${u.full_name||'—'} ${isMe?'<span style="font-size:10px;color:var(--teal)">(Saya)</span>':''}</div>
-                  <div style="font-size:11px;color:var(--gray)">${u.phone||'—'}</div>
-                </div>
+    <table><thead><tr>
+      <th>User</th><th>Role</th><th>Akses Modul</th><th>Terdaftar</th><th>Aksi</th>
+    </tr></thead><tbody>
+    ${users.map(u => {
+      const role = u.role||'sales';
+      const rc   = ROLES[role]||ROLES.sales;
+      const isMe = u.id === window.currentUser?.id;
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:34px;height:34px;border-radius:50%;background:${rc.color};color:#fff;
+              display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">
+              ${(u.full_name||'U').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy)">
+                ${u.full_name||'—'} ${isMe?'<span style="font-size:10px;color:var(--teal)">(Saya)</span>':''}
               </div>
-            </td>
-            <td>
-              <span style="background:${rc.color}20;color:${rc.color};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">${rc.label}</span>
-            </td>
-            <td>
-              <div style="display:flex;gap:3px;flex-wrap:wrap;max-width:200px">
-                ${rc.pages.map(p=>`<span style="background:var(--lgray);padding:2px 6px;border-radius:4px;font-size:10px;color:var(--gray)">${p}</span>`).join('')}
-              </div>
-            </td>
-            <td style="font-size:11px;color:var(--gray)">${u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '—'}</td>
-            <td style="font-size:11px;color:var(--gray)">${u.updated_at ? timeAgo(u.updated_at) : '—'}</td>
-            <td>
-              <div class="act-row">
-                <button class="act-btn edit" onclick="openEditUserRole('${u.id}','${u.full_name||''}','${role}')">✏️ Role</button>
-                ${!isMe ? `<button class="act-btn del" onclick="resetUserPassword('${u.id}','${u.full_name||''}')">🔑</button>` : ''}
-              </div>
-            </td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+              <div style="font-size:11px;color:var(--gray)">${u.phone||'—'}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span style="background:${rc.color}20;color:${rc.color};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">
+            ${rc.label}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;max-width:220px">
+            ${rc.pages.map(p=>`<span style="background:var(--lgray);padding:2px 5px;border-radius:4px;font-size:10px">${p}</span>`).join('')}
+          </div>
+        </td>
+        <td style="font-size:11px;color:var(--gray)">
+          ${u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '—'}
+        </td>
+        <td>
+          <div class="act-row">
+            <button class="act-btn edit" onclick="openEditUserRole('${u.id}','${(u.full_name||'').replace(/'/g,"\\'")}','${role}')">✏️ Role</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
 }
 
-// ── Edit User Role ────────────────────────
 function openEditUserRole(userId, userName, currentRole) {
   openModal(`
     <div class="modal-header">
       <div class="modal-title">✏️ Edit Role — ${userName}</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
-
     <div class="form-group">
-      <label>Role / Jabatan</label>
-      <select id="ur-role" style="font-size:14px;padding:12px">
-        ${Object.entries(ROLES).map(([key,r])=>`
-          <option value="${key}" ${key===currentRole?'selected':''}>${r.label} — ${r.desc}</option>
-        `).join('')}
+      <label>Role</label>
+      <select id="ur-role" onchange="previewRole(this.value)">
+        ${Object.entries(ROLES).map(([k,r])=>`
+          <option value="${k}" ${k===currentRole?'selected':''}>${r.label} — ${r.desc}</option>`).join('')}
       </select>
     </div>
-
-    <div id="ur-preview" style="margin-top:14px"></div>
-
+    <div id="ur-preview" style="margin-top:10px"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-teal" onclick="saveUserRole('${userId}')">💾 Simpan Role</button>
+      <button class="btn btn-teal" onclick="saveUserRole('${userId}')">💾 Simpan</button>
     </div>`);
+  previewRole(currentRole);
+}
 
-  // Preview on change
-  document.getElementById('ur-role').addEventListener('change', function() {
-    const rc = ROLES[this.value];
-    document.getElementById('ur-preview').innerHTML = `
-      <div style="background:var(--lgray);border-radius:8px;padding:12px 14px">
-        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px">Akses yang diberikan:</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-          ${rc.pages.map(p=>`<span style="background:#fff;border:1px solid var(--border);padding:3px 8px;border-radius:6px;font-size:11px">${p}</span>`).join('')}
-        </div>
-        <div style="font-size:11px;color:var(--gray)">
-          ${rc.canDelete?'✅ Bisa hapus data':'❌ Tidak bisa hapus'} &nbsp;·&nbsp;
-          ${rc.canExport?'✅ Bisa export CSV':'❌ Tidak bisa export'} &nbsp;·&nbsp;
-          ${rc.canManageUsers?'✅ Bisa kelola user':'❌ Tidak bisa kelola user'}
-        </div>
-      </div>`;
-  });
-  document.getElementById('ur-role').dispatchEvent(new Event('change'));
+function previewRole(role) {
+  const rc = ROLES[role]||ROLES.sales;
+  const el = document.getElementById('ur-preview');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="background:var(--lgray);border-radius:8px;padding:10px 12px">
+      <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">Akses halaman:</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+        ${rc.pages.map(p=>`<span style="background:#fff;border:1px solid var(--border);padding:2px 7px;border-radius:5px;font-size:11px">${p}</span>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--gray)">
+        ${rc.canDelete?'✅ Bisa hapus':'❌ Tidak bisa hapus'} &nbsp;·&nbsp;
+        ${rc.canExport?'✅ Bisa export':'❌ Tidak bisa export'}
+      </div>
+    </div>`;
 }
 
 async function saveUserRole(userId) {
   const role = document.getElementById('ur-role').value;
   try {
-    await sbPatch('user_profiles', userId, { role, updated_at: new Date().toISOString() });
+    await sbPatch('user_profiles', userId, {role, updated_at: new Date().toISOString()});
     toast('✅ Role diupdate','ok');
     closeModalForce();
     await loadUsers();
   } catch(e) { toast('❌ '+e.message,'err'); }
 }
 
-async function resetUserPassword(userId, userName) {
-  if (!confirm(`Reset password untuk "${userName}"?\nUser akan menerima email reset password.`)) return;
-  toast('📧 Fitur reset password via email akan segera hadir','info');
-}
-
-// ── Invite User ───────────────────────────
 function openInviteUserForm() {
   openModal(`
     <div class="modal-header">
-      <div class="modal-title">➕ Undang User Baru</div>
+      <div class="modal-title">➕ Tambah User Profile</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
-    <div style="background:#FFF8E1;border-radius:8px;padding:12px 14px;font-size:12px;color:#5D4037;margin-bottom:14px">
-      ⚠️ User baru perlu mendaftar sendiri di halaman login menggunakan email yang sama.
-      Setelah mendaftar dan login pertama kali, role bisa diatur di sini.
+    <div style="background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:12px;color:#5D4037;margin-bottom:12px">
+      ℹ️ User mendaftar sendiri di halaman login. Setelah login pertama, role bisa diatur di sini.
     </div>
     <div class="form-group">
-      <label>Nama Lengkap</label>
+      <label>Nama Lengkap *</label>
       <input type="text" id="inv-name" placeholder="Nama karyawan">
     </div>
-    <div class="form-group">
-      <label>Role</label>
-      <select id="inv-role">
-        ${Object.entries(ROLES).map(([key,r])=>`
-          <option value="${key}" ${key==='sales'?'selected':''}>${r.label}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>No. HP / WA</label>
-      <input type="text" id="inv-phone" placeholder="08xxxxxxxxxx">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Role</label>
+        <select id="inv-role">
+          ${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${k==='sales'?'selected':''}>${r.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>No. HP / WA</label>
+        <input type="text" id="inv-phone" placeholder="08xxxxxxxxxx">
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
@@ -297,66 +270,10 @@ async function createUserProfile() {
   const phone = document.getElementById('inv-phone').value.trim();
   if (!name) { toast('Nama wajib diisi','err'); return; }
   try {
-    // Create placeholder profile — will be linked when user registers
-    await sbPost('user_profiles', {
-      full_name: name,
-      role,
-      phone,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-    toast('✅ Profil dibuat. User bisa login dengan akun Supabase.','ok');
+    await sbPost('user_profiles', {full_name:name, role, phone,
+      created_at:new Date().toISOString(), updated_at:new Date().toISOString()});
+    toast('✅ Profil dibuat','ok');
     closeModalForce();
     await loadUsers();
-  } catch(e) { toast('❌ '+e.message,'err'); }
-}
-
-// ── Bulk Delete (super admin only) ────────
-function openBulkDeletePanel() {
-  const role = getUserRole();
-  if (role !== 'super_admin') { toast('Hanya Super Admin','err'); return; }
-
-  openModal(`
-    <div class="modal-header">
-      <div class="modal-title">🗑 Bulk Delete — Super Admin</div>
-      <button class="modal-close" onclick="closeModalForce()">✕</button>
-    </div>
-    <div style="background:#FFEBEE;border-radius:8px;padding:12px 14px;font-size:13px;color:#B71C1C;margin-bottom:14px">
-      ⚠️ <strong>Peringatan:</strong> Aksi ini tidak bisa dibatalkan. Data yang dihapus permanen.
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-danger" onclick="bulkDeleteConfirm('partners','Semua Partner?')">
-        🗑 Hapus Semua Partner
-      </button>
-      <button class="btn btn-danger" onclick="bulkDeleteConfirm('partner_deals','Semua Output Kerjasama?')">
-        🗑 Hapus Semua Output Kerjasama
-      </button>
-      <button class="btn btn-danger" onclick="bulkDeleteConfirm('vouchers','Semua Voucher?')">
-        🗑 Hapus Semua Voucher
-      </button>
-      <button class="btn btn-danger" onclick="bulkDeleteConfirm('activity_logs','Semua Activity Log?')">
-        🗑 Bersihkan Activity Log
-      </button>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-    </div>`);
-}
-
-async function bulkDeleteConfirm(table, label) {
-  const code = prompt(`Ketik "HAPUS" untuk konfirmasi hapus ${label}`);
-  if (code !== 'HAPUS') { toast('Dibatalkan','info'); return; }
-  try {
-    // Delete all — use filter that matches everything
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=gt.0`, {
-      method: 'DELETE',
-      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' }
-    });
-    if (res.ok) {
-      toast(`✅ ${label} berhasil dihapus`,'ok');
-      await logActivity('bulk_delete', table, null, `Bulk delete ${table} oleh ${getUserName()}`, '');
-    } else {
-      throw new Error(await res.text());
-    }
   } catch(e) { toast('❌ '+e.message,'err'); }
 }
