@@ -6,7 +6,7 @@ let currentPage = 'dashboard';
 const PAGE_TITLES = {
   dashboard:'Dashboard', partners:'Partner Database', maps:'Maps Prospecting',
   marketing:'Marketing Kit', voucher:'Voucher Builder',
-  surat:'Surat Keluar', settings:'Pengaturan'
+  surat:'Surat Keluar', settings:'Pengaturan', users:'User Management'
 };
 
 function navigate(page, params={}) {
@@ -46,6 +46,7 @@ function navigate(page, params={}) {
       case 'voucher':   renderVoucher(); break;
       case 'surat':     renderSurat(); break;
       case 'settings':  renderSettings(); break;
+      case 'users':     renderUsers(); break;
     }
   }, 60);
 

@@ -19,10 +19,13 @@
   </div>
 
   <nav class="sidebar-nav">
+
     <div class="nav-section-label">UTAMA</div>
     <button class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard">
       <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
     </button>
+
+    <div class="nav-section-label" style="margin-top:14px">MARKETING & SALES</div>
     <button class="nav-item" onclick="navigate('partners')" data-page="partners">
       <span class="nav-icon">🤝</span><span class="nav-label">Partner Database</span>
       <span class="nav-badge" id="badge-partners">0</span>
@@ -30,24 +33,102 @@
     <button class="nav-item" onclick="navigate('maps')" data-page="maps">
       <span class="nav-icon">🗺</span><span class="nav-label">Maps Prospecting</span>
     </button>
-
-    <div class="nav-section-label" style="margin-top:14px">MARKETING</div>
     <button class="nav-item" onclick="navigate('marketing')" data-page="marketing">
       <span class="nav-icon">📣</span><span class="nav-label">Marketing Kit</span>
     </button>
     <button class="nav-item" onclick="navigate('voucher')" data-page="voucher">
       <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
     </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🎯</span><span class="nav-label">Leads Management</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">📈</span><span class="nav-label">OKR & Target Sales</span>
+      <span class="nav-soon">soon</span>
+    </button>
 
-    <div class="nav-section-label" style="margin-top:14px">OPERASIONAL</div>
+    <div class="nav-section-label" style="margin-top:14px">OPERASIONAL LAB</div>
     <button class="nav-item" onclick="navigate('surat')" data-page="surat">
       <span class="nav-icon">📄</span><span class="nav-label">Surat Keluar</span>
     </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🏥</span><span class="nav-label">Project MCU</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">📜</span><span class="nav-label">MOU / Perjanjian</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🔬</span><span class="nav-label">Hasil Pemeriksaan</span>
+      <span class="nav-soon">soon</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">HOME CARE</div>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🏠</span><span class="nav-label">Order Home Care</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kunjungan</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🩺</span><span class="nav-label">Rekam Medis</span>
+      <span class="nav-soon">soon</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">FINANCE</div>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">💰</span><span class="nav-label">Invoice & Tagihan</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">💳</span><span class="nav-label">Laporan Keuangan</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🏆</span><span class="nav-label">Komisi Sales</span>
+      <span class="nav-soon">soon</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">INVENTORY</div>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">📦</span><span class="nav-label">Stock & Reagen</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🛒</span><span class="nav-label">Purchase Request</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🏭</span><span class="nav-label">Supplier Database</span>
+      <span class="nav-soon">soon</span>
+    </button>
+
+    <div class="nav-section-label" style="margin-top:14px">HRD & SDM</div>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">👥</span><span class="nav-label">Data Karyawan</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">🕐</span><span class="nav-label">Absensi & Cuti</span>
+      <span class="nav-soon">soon</span>
+    </button>
+    <button class="nav-item nav-item-soon">
+      <span class="nav-icon">💵</span><span class="nav-label">Penggajian</span>
+      <span class="nav-soon">soon</span>
+    </button>
 
     <div class="nav-section-label" style="margin-top:14px">SISTEM</div>
+    <button class="nav-item" onclick="navigate('users')" data-page="users" id="nav-users" style="display:none">
+      <span class="nav-icon">👤</span><span class="nav-label">User Management</span>
+    </button>
     <button class="nav-item" onclick="navigate('settings')" data-page="settings">
       <span class="nav-icon">⚙️</span><span class="nav-label">Pengaturan</span>
     </button>
+
   </nav>
 
   <div class="sidebar-user" id="sidebar-user" style="display:none">
@@ -102,9 +183,10 @@
 <script src="modules/surat.js"></script>
 <script src="modules/settings.js"></script>
 
+<script src="modules/settings_users.js"></script>
+
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
-  // Check auth
   const token = localStorage.getItem('ol_token');
   if (token) {
     try {
@@ -120,6 +202,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (profile && profile[0]) window.currentUser.profile = profile[0];
           } catch(e) {}
           setupAppUI();
+          applyRoleMenu();
           checkConnection();
           navigate('dashboard');
           return;
@@ -127,7 +210,6 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
     } catch(e) {}
   }
-  // No valid session — show login
   showLoginScreen();
 });
 

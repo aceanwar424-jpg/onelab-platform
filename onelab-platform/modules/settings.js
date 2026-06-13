@@ -1,4 +1,7 @@
 async function renderSettings() {
+  const role = getUserRole();
+  const isSuperAdmin = role === 'super_admin';
+
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
       <div><h1>Pengaturan</h1><p>Konfigurasi sistem, pengguna, dan koneksi</p></div>
@@ -9,6 +12,7 @@ async function renderSettings() {
       <button class="tab-btn" onclick="switchSetTab('users',this)">👥 Pengguna</button>
       <button class="tab-btn" onclick="switchSetTab('activity',this)">📋 Log Aktivitas</button>
       <button class="tab-btn" onclick="switchSetTab('data',this)">🗄 Data</button>
+      ${isSuperAdmin ? `<button class="tab-btn" onclick="switchSetTab('admin',this)">🔐 Super Admin</button>` : ''}
     </div>
 
     <div id="set-general">
@@ -66,17 +70,64 @@ async function renderSettings() {
           <button class="btn btn-danger btn-sm" onclick="exportAllData()">📥 Export Semua Data (Backup)</button>
         </div>
       </div>
-    </div>`;
+    </div>
 
-  checkSetConn();
-  loadSetStats();
-}
+    <div id="set-admin" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+        <!-- User & Role -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">👤 User & Role Management</div>
+          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Kelola akun, role, dan hak akses semua pengguna platform.</p>
+          <button class="btn btn-teal" onclick="navigate('users')">🔑 Buka User Management</button>
+        </div>
+
+        <!-- Bulk Delete -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;color:var(--danger)">🗑 Bulk Delete</div>
+          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Hapus massal data untuk reset atau pembersihan. Tidak bisa dibatalkan.</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('partners')">Hapus Semua Partner</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('partner_deals')">Hapus Semua Kerjasama</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('vouchers')">Hapus Semua Voucher</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('voucher_campaigns')">Hapus Semua Campaign</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('marketing_templates')">Hapus Semua Template</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('outgoing_letters')">Hapus Arsip Surat</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('activity_logs')">Bersihkan Activity Log</button>
+          </div>
+        </div>
+
+        <!-- Reset Password -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">🔒 Keamanan</div>
+          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Info akun aktif dan koneksi Supabase.</p>
+          <div style="font-size:12px;background:var(--lgray);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+            <div><strong>User ID:</strong> <span id="admin-uid" style="color:var(--teal)">—</span></div>
+            <div style="margin-top:4px"><strong>Role:</strong> <span id="admin-role" style="color:var(--navy)">—</span></div>
+            <div style="margin-top:4px"><strong>Email:</strong> <span id="admin-email" style="color:var(--gray)">—</span></div>
+          </div>
+        </div>
+
+        <!-- Email Confirmation Fix -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">⚡ Quick Fix SQL</div>
+          <p style="font-size:13px;color:var(--gray);margin-bottom:10px">SQL siap pakai untuk fix umum. Copy dan jalankan di Supabase SQL Editor.</p>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-outline btn-sm" onclick="copyAdminSQL('confirm_email')">📋 Fix Email Confirmation</button>
+            <button class="btn btn-outline btn-sm" onclick="copyAdminSQL('disable_rls')">📋 Disable RLS semua tabel</button>
+            <button class="btn btn-outline btn-sm" onclick="copyAdminSQL('check_tables')">📋 Check semua tabel</button>
+          </div>
+        </div>
+
+      </div>
+    </div>`;\n\n  checkSetConn();\n  loadSetStats();\n  if (isSuperAdmin) loadAdminInfo();\n}
 
 function switchSetTab(tab, btn) {
   document.querySelectorAll('#set-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['general','users','activity','data'].forEach(t=>{
-    document.getElementById(`set-${t}`).style.display = t===tab?'block':'none';
+  ['general','users','activity','data','admin'].forEach(t=>{
+    const el = document.getElementById(`set-${t}`);
+    if (el) el.style.display = t===tab?'block':'none';
   });
   if(tab==='users') loadSetUsers();
   if(tab==='activity') loadSetActivity();
@@ -175,4 +226,85 @@ async function exportAllData() {
     a.download=`OneLab_Backup_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.csv`;
     a.click(); toast('📥 Backup diunduh','ok');
   } catch(e){ toast('❌ '+e.message,'err'); }
+}
+
+// ── Admin helper functions ────────────────
+function loadAdminInfo() {
+  const u = window.currentUser;
+  if (!u) return;
+  const uid = document.getElementById('admin-uid');
+  const rol = document.getElementById('admin-role');
+  const eml = document.getElementById('admin-email');
+  if (uid) uid.textContent = u.id?.substring(0,12)+'...';
+  if (rol) rol.textContent = getUserRole();
+  if (eml) eml.textContent = u.email || '—';
+}
+
+async function bulkDeleteTable(table) {
+  const labels = {
+    partners: 'Semua Partner',
+    partner_deals: 'Semua Output Kerjasama',
+    vouchers: 'Semua Voucher',
+    voucher_campaigns: 'Semua Campaign Voucher',
+    marketing_templates: 'Semua Template Marketing',
+    outgoing_letters: 'Semua Arsip Surat',
+    activity_logs: 'Semua Activity Log',
+  };
+  const label = labels[table] || table;
+  const code = prompt(`⚠️ Hapus ${label}?\n\nKetik "HAPUS" untuk konfirmasi:`);
+  if (code !== 'HAPUS') { toast('Dibatalkan','info'); return; }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=gt.0`, {
+      method: 'DELETE',
+      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' }
+    });
+    if (res.ok || res.status === 204) {
+      toast(`✅ ${label} berhasil dihapus`,'ok');
+      await logActivity('bulk_delete', table, null, `Bulk delete ${table} oleh ${getUserName()}`, '');
+    } else {
+      const err = await res.text();
+      throw new Error(err);
+    }
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+const ADMIN_SQL = {
+  confirm_email: `-- Fix email confirmation — jalankan di Supabase SQL Editor
+UPDATE auth.users 
+SET email_confirmed_at = now() 
+WHERE email_confirmed_at IS NULL;`,
+
+  disable_rls: `-- Disable RLS semua tabel
+ALTER TABLE public.partners DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.partner_deals DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.partner_contacts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mous DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.marketing_templates DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.outgoing_letters DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.letter_sequences DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.voucher_campaigns DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vouchers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_logs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documents DISABLE ROW LEVEL SECURITY;`,
+
+  check_tables: `-- Cek semua tabel dan jumlah kolom
+SELECT 
+  table_name,
+  (SELECT COUNT(*) FROM information_schema.columns c 
+   WHERE c.table_name = t.table_name AND c.table_schema = 'public') as jumlah_kolom
+FROM information_schema.tables t
+WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+ORDER BY table_name;`,
+};
+
+function copyAdminSQL(key) {
+  const sql = ADMIN_SQL[key];
+  if (!sql) return;
+  navigator.clipboard.writeText(sql)
+    .then(() => toast('📋 SQL tersalin — paste di Supabase SQL Editor','ok'))
+    .catch(() => toast('❌ Gagal copy','err'));
 }

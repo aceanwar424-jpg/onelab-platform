@@ -180,3 +180,12 @@ async function loadDashboardData() {
       `<div style="grid-column:1/-1"><div class="status-box status-err">❌ ${e.message}</div></div>`;
   }
 }
+
+// Reference DEAL_TYPES from deals.js
+const DEAL_TYPES_REF = [
+  {key:'MCU',color:'#0EA5E9'},{key:'Wellness',color:'#22C55E'},{key:'Branding',color:'#8B5CF6'},
+  {key:'OfficeCare',color:'#F97316'},{key:'HomeCare',color:'#EF4444'},{key:'Personal',color:'#EC4899'},
+  {key:'LabDiagnostic',color:'#14B8A6'},{key:'Screening',color:'#F59E0B'},{key:'HealthDay',color:'#6366F1'},
+  {key:'Lainnya',color:'#94A3B8'},
+];
+const DEAL_TYPES = DEAL_TYPES_REF;

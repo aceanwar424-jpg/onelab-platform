@@ -695,3 +695,21 @@ td { padding: 11px 14px; vertical-align: middle; }
   color: var(--white);
   border-color: var(--teal);
 }
+
+/* ── Nav soon items ──────────────────────────────── */
+.nav-item-soon {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+.nav-soon {
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(255,255,255,.15);
+  color: rgba(255,255,255,.7);
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: auto;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
