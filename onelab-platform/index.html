@@ -9,7 +9,9 @@
 </head>
 <body>
 
+<!-- ═══ SIDEBAR ═══ -->
 <aside class="sidebar" id="sidebar">
+
   <div class="sidebar-logo">
     <div class="logo-mark">OL</div>
     <div class="logo-text">
@@ -18,133 +20,204 @@
     </div>
   </div>
 
-  <nav class="sidebar-nav">
+  <button class="sidebar-toggle" onclick="toggleMini()" id="toggle-btn" title="Sembunyikan menu">‹</button>
 
-    <div class="nav-section-label">UTAMA</div>
-    <button class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard">
-      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
-    </button>
+  <nav class="sidebar-nav" id="sidebar-nav">
 
-    <div class="nav-section-label" style="margin-top:14px">MARKETING & SALES</div>
-    <button class="nav-item" onclick="navigate('partners')" data-page="partners">
-      <span class="nav-icon">🤝</span><span class="nav-label">Partner Database</span>
-      <span class="nav-badge" id="badge-partners">0</span>
-    </button>
-    <button class="nav-item" onclick="navigate('maps')" data-page="maps">
-      <span class="nav-icon">🗺</span><span class="nav-label">Maps Prospecting</span>
-    </button>
-    <button class="nav-item" onclick="navigate('marketing')" data-page="marketing">
-      <span class="nav-icon">📣</span><span class="nav-label">Marketing Kit</span>
-    </button>
-    <button class="nav-item" onclick="navigate('voucher')" data-page="voucher">
-      <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
-    </button>
-    <button class="nav-item" onclick="navigate('leads')" data-page="leads">
-      <span class="nav-icon">🎯</span><span class="nav-label">Leads Management</span>
-    </button>
-    <button class="nav-item" onclick="navigate('okr')" data-page="okr">
-      <span class="nav-icon">📈</span><span class="nav-label">OKR & Target Sales</span>
-    </button>
+    <!-- UTAMA -->
+    <div class="nav-group">
+      <div class="nav-group-label">Utama</div>
+      <button class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard" data-tooltip="Dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">OPERASIONAL LAB</div>
-    <button class="nav-item" onclick="navigate('surat')" data-page="surat">
-      <span class="nav-icon">📄</span><span class="nav-label">Surat Keluar</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🏥</span><span class="nav-label">Project MCU</span>
-      <span class="nav-soon">soon</span>
-    </button>
-    <button class="nav-item" onclick="navigate('mou')" data-page="mou">
-      <span class="nav-icon">📜</span><span class="nav-label">MOU / Perjanjian</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🔬</span><span class="nav-label">Hasil Pemeriksaan</span>
-      <span class="nav-soon">soon</span>
-    </button>
+    <!-- MARKETING & SALES -->
+    <div class="nav-group">
+      <div class="nav-group-label">Marketing & Sales</div>
+      <button class="nav-item" onclick="navigate('partners')" data-page="partners" data-tooltip="Partner Database">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-label">Partner Database</span>
+        <span class="nav-badge" id="badge-partners" style="display:none">0</span>
+      </button>
+      <button class="nav-item" onclick="navigate('maps')" data-page="maps" data-tooltip="Maps Prospecting">
+        <span class="nav-icon">🗺</span>
+        <span class="nav-label">Maps Prospecting</span>
+      </button>
+      <button class="nav-item" onclick="navigate('leads')" data-page="leads" data-tooltip="Leads Management">
+        <span class="nav-icon">🎯</span>
+        <span class="nav-label">Leads Management</span>
+      </button>
+      <button class="nav-item" onclick="navigate('marketing')" data-page="marketing" data-tooltip="Marketing Kit">
+        <span class="nav-icon">📣</span>
+        <span class="nav-label">Marketing Kit</span>
+      </button>
+      <button class="nav-item" onclick="navigate('voucher')" data-page="voucher" data-tooltip="Voucher Builder">
+        <span class="nav-icon">🎟</span>
+        <span class="nav-label">Voucher Builder</span>
+      </button>
+      <button class="nav-item" onclick="navigate('okr')" data-page="okr" data-tooltip="OKR & Target Sales">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">OKR & Target Sales</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">HOME CARE</div>
-    <button class="nav-item" onclick="navigate('homecare')" data-page="homecare">
-      <span class="nav-icon">🏠</span><span class="nav-label">Order & Jadwal</span>
-    </button>
-    <button class="nav-item nav-item-soon">
-      <span class="nav-icon">🩺</span><span class="nav-label">Rekam Medis</span>
-      <span class="nav-soon">soon</span>
-    </button>
+    <!-- OPERASIONAL LAB -->
+    <div class="nav-group">
+      <div class="nav-group-label">Operasional Lab</div>
+      <button class="nav-item" onclick="navigate('surat')" data-page="surat" data-tooltip="Surat Keluar">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Surat Keluar</span>
+      </button>
+      <button class="nav-item" onclick="navigate('mou')" data-page="mou" data-tooltip="MOU / Perjanjian">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">MOU / Perjanjian</span>
+      </button>
+      <button class="nav-item nav-item-soon" data-tooltip="Project MCU">
+        <span class="nav-icon">🏥</span>
+        <span class="nav-label">Project MCU</span>
+        <span class="nav-soon">soon</span>
+      </button>
+      <button class="nav-item nav-item-soon" data-tooltip="Hasil Pemeriksaan">
+        <span class="nav-icon">🔬</span>
+        <span class="nav-label">Hasil Pemeriksaan</span>
+        <span class="nav-soon">soon</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">FINANCE</div>
-    <button class="nav-item" onclick="navigate('finance')" data-page="finance">
-      <span class="nav-icon">💰</span><span class="nav-label">Invoice & Tagihan</span>
-    </button>
-    <button class="nav-item" onclick="navigate('finance')" data-page="finance-report">
-      <span class="nav-icon">💳</span><span class="nav-label">Laporan Keuangan</span>
-    </button>
-    <button class="nav-item" onclick="navigate('finance')" data-page="finance-comm">
-      <span class="nav-icon">🏆</span><span class="nav-label">Komisi Sales</span>
-    </button>
+    <!-- HOME CARE & KLINIK -->
+    <div class="nav-group">
+      <div class="nav-group-label">Home Care & Klinik</div>
+      <button class="nav-item" onclick="navigate('homecare')" data-page="homecare" data-tooltip="Order Home Care">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Order Home Care</span>
+      </button>
+      <button class="nav-item nav-item-soon" data-tooltip="Jadwal Kunjungan">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Jadwal Kunjungan</span>
+        <span class="nav-soon">soon</span>
+      </button>
+      <button class="nav-item nav-item-soon" data-tooltip="Rekam Medis">
+        <span class="nav-icon">🩺</span>
+        <span class="nav-label">Rekam Medis</span>
+        <span class="nav-soon">soon</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">INVENTORY</div>
-    <button class="nav-item" onclick="navigate('inventory')" data-page="inventory">
-      <span class="nav-icon">📦</span><span class="nav-label">Stock & Logistik</span>
-    </button>
+    <!-- FINANCE -->
+    <div class="nav-group">
+      <div class="nav-group-label">Finance & Billing</div>
+      <button class="nav-item" onclick="navigate('finance')" data-page="finance" data-tooltip="Invoice & Tagihan">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Invoice & Tagihan</span>
+      </button>
+      <button class="nav-item" onclick="navigate('finance')" data-page="finance-report" data-tooltip="Laporan Keuangan">
+        <span class="nav-icon">💳</span>
+        <span class="nav-label">Laporan Keuangan</span>
+      </button>
+      <button class="nav-item" onclick="navigate('finance')" data-page="finance-comm" data-tooltip="Komisi Sales">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Komisi Sales</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">HRD & SDM</div>
-    <button class="nav-item" onclick="navigate('hrd')" data-page="hrd">
-      <span class="nav-icon">👥</span><span class="nav-label">Karyawan & HRD</span>
-    </button>
+    <!-- INVENTORY -->
+    <div class="nav-group">
+      <div class="nav-group-label">Inventory & Logistik</div>
+      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory" data-tooltip="Stock & Reagen">
+        <span class="nav-icon">📦</span>
+        <span class="nav-label">Stock & Reagen</span>
+      </button>
+      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory" data-tooltip="Purchase Request">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-label">Purchase Request</span>
+      </button>
+      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory" data-tooltip="Supplier Database">
+        <span class="nav-icon">🏭</span>
+        <span class="nav-label">Supplier Database</span>
+      </button>
+    </div>
 
-    <div class="nav-section-label" style="margin-top:14px">SISTEM</div>
-    <button class="nav-item" onclick="navigate('users')" data-page="users" id="nav-users" style="display:none">
-      <span class="nav-icon">👤</span><span class="nav-label">User Management</span>
-    </button>
-    <button class="nav-item" onclick="navigate('settings')" data-page="settings">
-      <span class="nav-icon">⚙️</span><span class="nav-label">Pengaturan</span>
-    </button>
+    <!-- HRD -->
+    <div class="nav-group">
+      <div class="nav-group-label">HRD & SDM</div>
+      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd" data-tooltip="Data Karyawan">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Data Karyawan</span>
+      </button>
+      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd" data-tooltip="Absensi & Cuti">
+        <span class="nav-icon">🕐</span>
+        <span class="nav-label">Absensi & Cuti</span>
+      </button>
+      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd" data-tooltip="Penggajian">
+        <span class="nav-icon">💵</span>
+        <span class="nav-label">Penggajian</span>
+      </button>
+    </div>
+
+    <!-- SISTEM -->
+    <div class="nav-group">
+      <div class="nav-group-label">Sistem</div>
+      <button class="nav-item" onclick="navigate('users')" data-page="users" id="nav-users" style="display:none" data-tooltip="User Management">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">User Management</span>
+      </button>
+      <button class="nav-item" onclick="navigate('settings')" data-page="settings" data-tooltip="Pengaturan">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Pengaturan</span>
+      </button>
+    </div>
 
   </nav>
 
+  <!-- User info -->
   <div class="sidebar-user" id="sidebar-user" style="display:none">
     <div class="user-avatar" id="user-avatar">U</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="user-name-sidebar">User</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.5)" id="user-role-sidebar">sales</div>
+    <div class="user-info">
+      <div class="user-name" id="user-name-sidebar">User</div>
+      <div class="user-role" id="user-role-sidebar">—</div>
     </div>
-    <button onclick="doLogout()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:4px" title="Logout">⏻</button>
+    <button onclick="doLogout()" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0" title="Logout">⏻</button>
   </div>
 
   <div class="sidebar-footer">
     <div class="conn-status">
       <span class="conn-dot" id="conn-dot"></span>
-      <span id="conn-label" style="font-size:11px;color:rgba(255,255,255,.5)">Memeriksa...</span>
+      <span id="conn-label" style="font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden">Memeriksa...</span>
     </div>
   </div>
+
 </aside>
 
+<!-- ═══ TOPBAR ═══ -->
 <div class="topbar" id="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
   <div class="topbar-title" id="topbar-title">Dashboard</div>
   <div class="topbar-right">
-    <button class="btn btn-teal btn-sm topbar-add-btn" style="display:none">+</button>
+    <div class="topbar-date" id="topbar-date"></div>
     <div style="font-size:12px;color:var(--gray)" id="topbar-user"></div>
   </div>
 </div>
 
+<!-- ═══ MAIN ═══ -->
 <main class="main-content" id="main-content">
   <div class="loading-row" style="min-height:80vh"><div class="spinner"></div></div>
 </main>
 
+<!-- Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal-box" id="modal-box"></div>
 </div>
 <div class="toast-container" id="toast-container"></div>
 
-<!-- CORE -->
+<!-- ═══ SCRIPTS ═══ -->
 <script src="js/core/api.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/core/router.js"></script>
 <script src="js/core/storage.js"></script>
 <script src="js/auth.js"></script>
 
-<!-- MODULES -->
 <script src="modules/dashboard/index.js"></script>
 <script src="modules/partners/index.js"></script>
 <script src="modules/partners/deals.js"></script>
@@ -152,17 +225,63 @@
 <script src="modules/marketing.js"></script>
 <script src="modules/voucher.js"></script>
 <script src="modules/surat.js"></script>
-<script src="modules/settings.js"></script>
-<script src="modules/settings_users.js"></script>
 <script src="modules/mou.js"></script>
 <script src="modules/leads.js"></script>
 <script src="modules/finance.js"></script>
 <script src="modules/inventory.js"></script>
 <script src="modules/hrd.js"></script>
 <script src="modules/homecare.js"></script>
+<script src="modules/settings.js"></script>
+<script src="modules/settings_users.js"></script>
 
 <script>
+// ── Sidebar mini/expand ──────────────────
+let isMini = localStorage.getItem('ol_mini') === '1';
+
+function applyMiniState() {
+  const sidebar  = document.getElementById('sidebar');
+  const topbar   = document.getElementById('topbar');
+  const main     = document.getElementById('main-content');
+  const btn      = document.getElementById('toggle-btn');
+  if (isMini) {
+    sidebar.classList.add('mini');
+    topbar.classList.add('mini');
+    main.classList.add('mini');
+    if (btn) btn.textContent = '›';
+  } else {
+    sidebar.classList.remove('mini');
+    topbar.classList.remove('mini');
+    main.classList.remove('mini');
+    if (btn) btn.textContent = '‹';
+  }
+}
+
+function toggleMini() {
+  isMini = !isMini;
+  localStorage.setItem('ol_mini', isMini ? '1' : '0');
+  applyMiniState();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar')?.classList.toggle('open');
+}
+
+// ── Date display ─────────────────────────
+function updateDate() {
+  const el = document.getElementById('topbar-date');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('id-ID',{
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
+}
+
+// ── Boot ─────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  applyMiniState();
+  updateDate();
+  setInterval(updateDate, 60000);
+
   const token = localStorage.getItem('ol_token');
   if (token) {
     try {
@@ -192,11 +311,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 function setupAppUI() {
   const name = getUserName();
   const role = getUserRole();
+  const rc   = (typeof ROLES !== 'undefined' && ROLES[role]) ? ROLES[role] : {label: role};
+
   document.getElementById('sidebar-user').style.display = 'flex';
-  document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('user-avatar').textContent    = name.charAt(0).toUpperCase();
   document.getElementById('user-name-sidebar').textContent = name;
-  document.getElementById('user-role-sidebar').textContent = role;
-  document.getElementById('topbar-user').textContent = name;
+  document.getElementById('user-role-sidebar').textContent = rc.label || role;
+  document.getElementById('topbar-user').textContent    = name;
+
+  // Show badge
+  const badge = document.getElementById('badge-partners');
+  if (badge) badge.style.display = '';
 }
 
 async function checkConnection() {
@@ -204,11 +329,11 @@ async function checkConnection() {
   const lbl = document.getElementById('conn-label');
   try {
     await sbGet('partners','select=count&limit=1');
-    dot.className = 'conn-dot ok';
-    lbl.textContent = 'Terhubung';
+    if (dot) dot.className = 'conn-dot ok';
+    if (lbl) lbl.textContent = 'Terhubung';
   } catch(e) {
-    dot.className = 'conn-dot error';
-    lbl.textContent = 'Offline';
+    if (dot) dot.className = 'conn-dot error';
+    if (lbl) lbl.textContent = 'Offline';
   }
 }
 
