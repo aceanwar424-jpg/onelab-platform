@@ -37,7 +37,7 @@ function navigate(page, params={}) {
     case 'surat':      renderSurat();          break;
     case 'mou':        renderMOU();            break;
     case 'leads':      renderLeads();          break;
-    case 'okr':        renderLeads();          break;
+    case 'okr':        renderOKR();            break;
     case 'finance':    renderFinance();        break;
     case 'inventory':  renderInventory();      break;
     case 'hrd':        renderHRD();            break;
