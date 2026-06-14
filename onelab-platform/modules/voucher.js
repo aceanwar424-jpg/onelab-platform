@@ -702,4 +702,3 @@ function bulkShareWA(){
 }
 
 // ── Utils ───────────────────────────────────────── catch(e){ return null; }
-}
