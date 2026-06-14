@@ -35,26 +35,27 @@ async function renderLeads() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
       <div>
-        <h1>Leads Management</h1>
+        <h1>🎯 Leads Management</h1>
         <p>Pipeline prospek — dari kontak pertama sampai closing</p>
       </div>
       <div class="btn-row">
-        <button class="btn btn-ghost btn-sm" onclick="navigate('maps')">🗺 Cari di Maps</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('maps')">🗺 Maps</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderLeadsKanban()">📊 Kanban</button>
         <button class="btn btn-teal" onclick="openLeadForm()">+ Tambah Lead</button>
       </div>
     </div>
 
-    <!-- Funnel KPI -->
-    <div id="leads-funnel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:16px"></div>
+    <!-- Funnel steps — Virtu style horizontal -->
+    <div class="funnel-steps" id="leads-funnel"></div>
 
     <!-- Reminder Alert -->
-    <div id="leads-reminder"></div>
+    <div id="leads-reminder" style="margin-bottom:14px"></div>
 
-    <!-- Filter -->
-    <div class="table-wrap" style="margin-bottom:14px">
+    <!-- Filter toolbar + table -->
+    <div class="table-wrap">
       <div class="table-toolbar">
-        <input class="table-search" id="ld-q" placeholder="🔍 Cari nama, perusahaan, PIC..." 
-          oninput="leadsFilter.search=this.value;applyLeadsFilter()" style="flex:1">
+        <input class="table-search" id="ld-q" placeholder="Cari nama, perusahaan, PIC..."
+          oninput="leadsFilter.search=this.value;applyLeadsFilter()">
         <select class="table-filter" id="ld-status" onchange="leadsFilter.status=this.value;applyLeadsFilter()">
           <option value="">Semua Status</option>
           ${LEAD_STATUSES.map(s=>`<option value="${s.key}">${s.label}</option>`).join('')}
@@ -63,7 +64,8 @@ async function renderLeads() {
           <option value="">Semua Sumber</option>
           ${LEAD_SOURCES.map(s=>`<option>${s}</option>`).join('')}
         </select>
-        <span id="ld-count" style="font-size:12px;color:var(--text3);white-space:nowrap"></span>
+        <button class="btn btn-ghost btn-sm" onclick="exportLeadsCSV()">📥 Export</button>
+        <span id="ld-count" style="font-size:12px;color:var(--text3);white-space:nowrap;margin-left:auto"></span>
       </div>
       <div id="leads-tbody">
         <div class="loading-row"><div class="spinner"></div></div>
@@ -71,6 +73,43 @@ async function renderLeads() {
     </div>`;
 
   await loadLeads();
+}
+
+function exportLeadsCSV() {
+  if (!leadsAll.length) { toast('Tidak ada data','warn'); return; }
+  const rows = ['Nama,Perusahaan,Kontak,Status,Sumber,Follow-up,Nilai,Sales'];
+  leadsAll.forEach(l => rows.push(`"${l.lead_name||''}", "${l.company||''}", "${l.contact_name||''}", "${l.status||''}", "${l.source||''}", "${l.followup_date||''}", "${l.estimated_value||0}", "${l.assigned_name||''}"`));
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'leads.csv'; a.click();
+}
+
+function renderLeadsKanban() {
+  const board = document.getElementById('leads-tbody');
+  if (!board) return;
+  const statuses = LEAD_STATUSES.filter(s=>!['Won','Lost'].includes(s.key));
+  board.innerHTML = `<div style="display:flex;gap:12px;overflow-x:auto;padding:16px;min-height:400px">
+    ${statuses.map(st => {
+      const cards = leadsAll.filter(l=>l.status===st.key);
+      return `<div class="kanban-col">
+        <div class="kanban-col-header">
+          <span class="kanban-col-title">
+            <span style="width:8px;height:8px;border-radius:50%;background:${st.color};display:inline-block"></span>
+            ${st.label}
+          </span>
+          <span class="kanban-col-count">${cards.length}</span>
+        </div>
+        ${cards.slice(0,15).map(l=>`
+          <div class="kanban-card" onclick="openLeadDetail(${l.id})">
+            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px">${l.lead_name||l.company||'—'}</div>
+            ${l.company&&l.lead_name?`<div style="font-size:11px;color:var(--text3)">${l.company}</div>`:''}
+            <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:center">
+              <span style="font-size:11px;color:var(--text3)">${l.assigned_name||'—'}</span>
+              ${l.estimated_value?`<span style="font-size:11px;font-weight:700;color:var(--teal)">${formatCurrency(l.estimated_value)}</span>`:''}
+            </div>
+          </div>`).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 async function loadLeads() {
@@ -89,19 +128,27 @@ async function loadLeads() {
 function renderLeadsFunnel() {
   const el = document.getElementById('leads-funnel');
   if (!el) return;
-  const counts = {};
-  LEAD_STATUSES.forEach(s => counts[s.key] = 0);
-  leadsAll.forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+  const today = new Date().toISOString().split('T')[0];
+  const active = leadsAll.filter(l=>!['Won','Lost'].includes(l.status));
+  const overdue = leadsAll.filter(l=>l.followup_date&&l.followup_date<today&&!['Won','Lost'].includes(l.status));
 
-  el.innerHTML = LEAD_STATUSES.map(s => `
-    <div onclick="leadsFilter.status='${s.key}';document.getElementById('ld-status').value='${s.key}';applyLeadsFilter()"
-      style="background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;
-        border:2px solid ${leadsFilter.status===s.key?s.color:'var(--border)'};
-        border-top:4px solid ${s.color};transition:all .15s;text-align:center">
-      <div style="font-size:20px;font-weight:800;color:${s.color}">${counts[s.key]}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:2px;font-weight:600">${s.label}</div>
+  const steps = [
+    { key:'all',   label:'Total Leads',  count:leadsAll.length,  color:'#0891B2' },
+    ...LEAD_STATUSES.filter(s=>!['Won','Lost'].includes(s.key)).map(s=>({
+      key:s.key, label:s.label, count:leadsAll.filter(l=>l.status===s.key).length, color:s.color
+    })),
+    { key:'Won',   label:'Won ✓',        count:leadsAll.filter(l=>l.status==='Won').length,  color:'#22C55E' },
+    { key:'overdue',label:'Overdue',     count:overdue.length, color:'#EF4444' },
+  ];
+
+  el.innerHTML = steps.map(s=>`
+    <div class="funnel-step ${leadsFilter.status===s.key||(!leadsFilter.status&&s.key==='all')?'active':''}"
+      onclick="${s.key==='all'?'leadsFilter.status=\'\';applyLeadsFilter()':s.key==='overdue'?'leadsFilter.status=\'\';applyLeadsFilter()':'leadsFilter.status=\''+s.key+'\';applyLeadsFilter()'}">
+      <div class="fs-count" style="${leadsFilter.status===s.key||(!leadsFilter.status&&s.key==='all')?'color:#fff':'color:'+s.color}">${s.count}</div>
+      <div class="fs-label">${s.label}</div>
     </div>`).join('');
 }
+
 
 function renderLeadsReminder() {
   const el = document.getElementById('leads-reminder');

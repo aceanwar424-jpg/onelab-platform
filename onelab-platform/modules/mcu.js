@@ -138,15 +138,18 @@ const RAB_TEMPLATE = [
   ]},
 ];
 
-let mcuProjects = [];
 let mcuCurrentId = null;
+let mcuFilter = { search:'', status:'', type:'' };
+let mcuProjects = [];
 
 // ── RENDER MCU LIST ───────────────────────────
 async function renderMCU(params={}) {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
-      <div><h1>Project MCU</h1>
-        <p>Manajemen project MCU korporat — RAB, 25 tahapan, tracking realisasi</p></div>
+      <div>
+        <h1>🏥 Project MCU</h1>
+        <p>Manajemen project MCU korporat — RAB, 25 tahapan, tracking realisasi</p>
+      </div>
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" onclick="navigate('partners')">🤝 Partner</button>
         <button class="btn btn-ghost btn-sm" onclick="navigate('corporate')">🏢 Corporate</button>
@@ -155,33 +158,34 @@ async function renderMCU(params={}) {
     </div>
 
     <!-- KPI -->
-    <div id="mcu-kpi" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">
-      <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:20px" id="mcu-kpi">
+      ${[1,2,3,4,5,6].map(()=>`<div class="kpi-card"><div class="kpi-icon" style="background:var(--bg2)"><div class="spinner" style="width:16px;height:16px;border-width:2px"></div></div><div><div class="kpi-val">—</div><div class="kpi-label">Memuat...</div></div></div>`).join('')}
     </div>
 
-    <!-- Filter -->
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <input class="table-search" id="mcu-q" placeholder="🔍 Cari nama project, partner..."
-        oninput="filterMCU()" style="flex:1">
-      <select class="table-filter" id="mcu-status" onchange="filterMCU()">
-        <option value="">Semua Status</option>
-        <option>Planning</option><option>Active</option>
-        <option>Completed</option><option>Cancelled</option>
-      </select>
-      <select class="table-filter" id="mcu-type" onchange="filterMCU()">
-        <option value="">Semua Tipe</option>
-        <option>MCU</option><option>HealthDay</option>
-        <option>Screening</option><option>Wellness</option>
-      </select>
-    </div>
+    <!-- Filter toolbar -->
+    <div class="table-wrap" style="margin-bottom:0">
+      <div class="table-toolbar">
+        <input class="table-search" id="mcu-q" placeholder="Cari nama project, partner..."
+          oninput="mcuFilter.search=this.value.toLowerCase();filterMCU()" style="flex:1">
+        <select class="table-filter" id="mcu-status" onchange="mcuFilter.status=this.value;filterMCU()">
+          <option value="">Semua Status</option>
+          <option>Planning</option><option>Aktif</option><option>Selesai</option><option>Batal</option>
+        </select>
+        <select class="table-filter" id="mcu-type" onchange="mcuFilter.type=this.value;filterMCU()">
+          <option value="">Semua Tipe</option>
+          <option>MCU</option><option>HealthDay</option><option>Screening</option><option>Vaksinasi</option><option>Lainnya</option>
+        </select>
+      </div>
 
-    <div id="mcu-list">
-      <div class="loading-row"><div class="spinner"></div></div>
+      <!-- Project list -->
+      <div id="mcu-list" style="padding:0">
+        <div class="loading-row"><div class="spinner"></div></div>
+      </div>
     </div>`;
 
   await loadMCUProjects();
-  if (params.project_id) openMCUDetail(params.project_id);
 }
+
 
 async function loadMCUProjects() {
   try {
@@ -196,125 +200,123 @@ async function loadMCUProjects() {
 }
 
 function renderMCUKPI() {
-  const el = document.getElementById('mcu-kpi'); if (!el) return;
-  const active    = mcuProjects.filter(p=>p.status==='Active').length;
-  const completed = mcuProjects.filter(p=>p.status==='Completed').length;
-  const planning  = mcuProjects.filter(p=>p.status==='Planning').length;
-  const totalVal  = mcuProjects.reduce((s,p)=>s+(p.value||0),0);
-  const totalRab  = mcuProjects.reduce((s,p)=>s+(p.rab_total||0),0);
-  const totalActual = mcuProjects.reduce((s,p)=>s+(p.rab_actual||0),0);
+  const el = document.getElementById('mcu-kpi');
+  if (!el) return;
+  const total    = mcuProjects.length;
+  const aktif    = mcuProjects.filter(p=>p.status==='Aktif').length;
+  const planning = mcuProjects.filter(p=>p.status==='Planning').length;
+  const selesai  = mcuProjects.filter(p=>p.status==='Selesai').length;
+  const totalVal = mcuProjects.reduce((s,p)=>s+(p.value||0),0);
+  const totalRAB = mcuProjects.reduce((s,p)=>s+(p.rab_total||0),0);
 
-  el.innerHTML = [
-    {icon:'📋',val:mcuProjects.length,        label:'Total Project',   color:'#0A2342'},
-    {icon:'🔥',val:active,                    label:'Aktif',           color:'#22C55E'},
-    {icon:'📅',val:planning,                  label:'Planning',        color:'#0EA5E9'},
-    {icon:'✅',val:completed,                 label:'Selesai',         color:'#8B5CF6'},
-    {icon:'💰',val:formatCurrency(totalVal),  label:'Total Nilai',     color:'#F59E0B'},
-    {icon:'📊',val:formatCurrency(totalRab),  label:'Total RAB Plan',  color:'#EF4444'},
-  ].map(k=>`
-    <div style="background:#fff;border-radius:10px;padding:12px 14px;border:1px solid var(--border);border-left:4px solid ${k.color}">
-      <div style="font-size:18px">${k.icon}</div>
-      <div style="font-size:${String(k.val).length>8?'12px':'18px'};font-weight:800;color:${k.color}">${k.val}</div>
-      <div style="font-size:10px;color:var(--gray)">${k.label}</div>
+  const kpis = [
+    { icon:'📁', val:total,               label:'Total Project',   color:'#0891B2' },
+    { icon:'🔥', val:aktif,               label:'Aktif',           color:'#EF4444' },
+    { icon:'📋', val:planning,            label:'Planning',        color:'#8B5CF6' },
+    { icon:'✅', val:selesai,             label:'Selesai',         color:'#22C55E' },
+    { icon:'💰', val:formatCurrency(totalVal), label:'Total Nilai',color:'#F59E0B' },
+    { icon:'📊', val:formatCurrency(totalRAB), label:'Total RAB Plan',color:'#06B6D4'},
+  ];
+
+  el.innerHTML = kpis.map(k=>`
+    <div class="kpi-card" style="border-top:3px solid ${k.color}">
+      <div class="kpi-icon" style="background:${k.color}15;font-size:20px">${k.icon}</div>
+      <div>
+        <div class="kpi-val" style="font-size:${typeof k.val==='string'&&k.val.length>8?'14px':'20px'}">${k.val}</div>
+        <div class="kpi-label">${k.label}</div>
+      </div>
     </div>`).join('');
 }
 
+
 function filterMCU() {
-  const q  = (document.getElementById('mcu-q')?.value||'').toLowerCase();
-  const st = document.getElementById('mcu-status')?.value||'';
-  const tp = document.getElementById('mcu-type')?.value||'';
-  const f  = mcuProjects.filter(p=>
-    (!q  || (p.project_name||'').toLowerCase().includes(q)||(p.partner_name||'').toLowerCase().includes(q)) &&
-    (!st || p.status===st) &&
-    (!tp || p.project_type===tp)
-  );
-  renderMCUList(f);
+  let data = [...mcuProjects];
+  const q = (mcuFilter.search||'').toLowerCase();
+  const s = mcuFilter.status;
+  const t = mcuFilter.type;
+  if (q) data = data.filter(p=>(p.project_name||'').toLowerCase().includes(q)||(p.partner_name||'').toLowerCase().includes(q));
+  if (s) data = data.filter(p=>p.status===s);
+  if (t) data = data.filter(p=>p.project_type===t);
+  renderMCUKPI();
+  renderMCUList(data);
 }
+
 
 function renderMCUList(projects) {
   const el = document.getElementById('mcu-list');
+  if (!el) return;
+
   if (!projects.length) {
-    el.innerHTML=`<div class="empty-state">
+    el.innerHTML = `<div class="empty-state">
       <div class="ico">🏥</div>
-      <h3>${mcuProjects.length?'Tidak ada hasil':'Belum ada project MCU'}</h3>
-      <p>Buat dari Partner Database atau langsung dari sini.</p>
-      <button class="btn btn-teal" style="margin-top:12px" onclick="openMCUForm()">+ Buat Project</button>
+      <h3>${mcuProjects.length ? 'Tidak ada hasil filter' : 'Belum ada Project MCU'}</h3>
+      <p>Buat project MCU baru untuk memulai tracking 25 tahapan.</p>
+      <button class="btn btn-teal" style="margin-top:14px" onclick="openMCUForm()">+ Buat Project MCU</button>
     </div>`; return;
   }
 
+  const STATUS_COLORS = {
+    'Planning':'#8B5CF6','Aktif':'#22C55E','Selesai':'#0891B2','Batal':'#EF4444','Lewat':'#F59E0B'
+  };
+
   el.innerHTML = projects.map(p => {
-    const stColors = {Planning:'#0EA5E9',Active:'#22C55E',Completed:'#8B5CF6',Cancelled:'#EF4444'};
-    const stColor  = stColors[p.status]||'#94A3B8';
-    const progress = p.current_step ? Math.round((p.current_step/25)*100) : 0;
-    const daysLeft = p.end_date ? Math.ceil((new Date(p.end_date)-new Date())/86400000) : null;
-    const rabPct   = p.rab_total&&p.rab_actual ? Math.round(p.rab_actual/p.rab_total*100) : 0;
+    const progress  = Math.round(((p.current_step||0) / 25) * 100);
+    const sc        = STATUS_COLORS[p.status] || '#94A3B8';
+    const stepLabel = MCU_STEPS[(p.current_step||1)-1]?.name || 'Deal & Negosiasi';
 
     return `
-      <div class="card" style="margin-bottom:12px;cursor:pointer"
-        onclick="openMCUDetail(${p.id})"
-        onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.12)'"
-        onmouseout="this.style.boxShadow=''">
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div style="width:4px;min-height:80px;border-radius:2px;background:${stColor};flex-shrink:0;margin-top:4px"></div>
+      <div style="border-bottom:1px solid var(--border);padding:16px 20px;transition:background .15s"
+        onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+
+          <!-- Left accent -->
+          <div style="width:4px;align-self:stretch;border-radius:4px;background:${sc};flex-shrink:0;margin:-4px 0"></div>
+
+          <!-- Main info -->
           <div style="flex:1;min-width:0">
-            <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-              <div>
-                <div style="font-size:15px;font-weight:700;color:var(--navy)">${p.project_name||'—'}</div>
-                <div style="font-size:12px;color:var(--gray);margin-top:2px">
-                  🏢 ${p.partner_name||'—'} · ${p.project_type||'MCU'} · 
-                  👤 ${p.pic_onelab||'—'} · 📍 ${p.location||'—'}
-                </div>
-              </div>
-              <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-                <span style="background:${stColor}20;color:${stColor};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">${p.status}</span>
-                ${daysLeft!==null?`<span style="background:${daysLeft<7?'#FFEBEE':daysLeft<14?'#FFF8E1':'#E8F5E9'};
-                  color:${daysLeft<7?'#C62828':daysLeft<14?'#F57F17':'#2E7D32'};
-                  padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600">
-                  ${daysLeft>0?daysLeft+'h':'Lewat'}
-                </span>`:''}
-              </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="font-weight:800;font-size:14px;color:var(--text);cursor:pointer"
+                onclick="openMCUDetail(${p.id})">${p.project_name}</span>
+              <span style="background:${sc}20;color:${sc};font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px">${p.status}</span>
+              ${p.project_type&&p.project_type!=='MCU'?`<span class="badge badge-gray" style="font-size:10px">${p.project_type}</span>`:''}
+            </div>
+            <div style="font-size:12px;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+              ${p.partner_name?`<span>🏢 ${p.partner_name}</span>`:''}
+              <span>👤 ${p.created_by_name||'—'}</span>
+              ${p.start_date?`<span>📅 ${formatDateShort(p.start_date)}</span>`:''}
+              ${p.target_participants?`<span>👥 ${p.target_participants} peserta</span>`:''}
             </div>
 
-            <!-- Progress Tahapan -->
-            <div style="margin-top:10px">
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:4px">
-                <span>Tahap ${p.current_step||0}/25 — <strong style="color:var(--navy)">${p.current_step?MCU_STEPS[(p.current_step||1)-1]?.name:'Belum mulai'}</strong></span>
-                <span style="font-weight:700;color:${progress>=100?'#22C55E':'var(--navy)'}">${progress}%</span>
+            <!-- Progress -->
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;height:8px;background:var(--bg2);border-radius:8px;overflow:hidden;cursor:pointer"
+                onclick="openMCUDetail(${p.id})" title="Klik untuk lihat tahapan">
+                <div style="height:100%;width:${progress}%;background:linear-gradient(90deg,${sc},${sc}99);border-radius:8px;transition:width .5s"></div>
               </div>
-              <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px">
-                ${MCU_GROUPS.map(g=>{
-                  const gSteps = MCU_STEPS.filter(s=>s.group===g);
-                  const gDone  = gSteps.filter(s=>s.no<=(p.current_step||0)).length;
-                  return `<div style="flex:${gSteps.length};background:${GROUP_COLORS[g]}30;position:relative;overflow:hidden">
-                    <div style="position:absolute;left:0;top:0;height:100%;width:${Math.round(gDone/gSteps.length*100)}%;background:${GROUP_COLORS[g]}"></div>
-                  </div>`;
-                }).join('')}
-              </div>
+              <span style="font-size:12px;font-weight:700;color:${sc};white-space:nowrap">${progress}%</span>
             </div>
-
-            <!-- RAB Plan vs Actual -->
-            ${p.rab_total?`
-              <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-                <span style="font-size:11px;color:var(--gray)">RAB Plan: <strong style="color:var(--navy)">${formatCurrency(p.rab_total)}</strong></span>
-                ${p.rab_actual?`<span style="font-size:11px;color:var(--gray)">Aktual: <strong style="color:${rabPct>100?'#EF4444':'#22C55E'}">${formatCurrency(p.rab_actual)}</strong></span>
-                <div style="background:var(--lgray);border-radius:4px;height:4px;flex:1;min-width:60px;overflow:hidden">
-                  <div style="height:100%;width:${Math.min(100,rabPct)}%;background:${rabPct>100?'#EF4444':'#22C55E'}"></div>
-                </div>
-                <span style="font-size:11px;font-weight:700;color:${rabPct>100?'#EF4444':'#22C55E'}">${rabPct}%</span>`:''}
-              </div>`:''}
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">
+              Tahap ${p.current_step||1}/25 — <span style="color:var(--text);font-weight:600">${stepLabel}</span>
+            </div>
           </div>
 
+          <!-- Right side -->
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:14px;font-weight:800;color:var(--navy)">${p.value?formatCurrency(p.value):'—'}</div>
-            <div style="font-size:11px;color:var(--gray)">Nilai Project</div>
-            ${p.target_participants?`<div style="font-size:13px;font-weight:600;color:var(--teal);margin-top:4px">${p.target_participants} peserta</div>`:''}
+            ${p.value?`<div style="font-size:13px;font-weight:800;color:var(--text)">Nilai Project</div>
+              <div style="font-size:15px;font-weight:800;color:var(--teal)">${formatCurrency(p.value)}</div>`:''}
+            <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm" onclick="openMCUDetail(${p.id})">📋 Detail</button>
+              <button class="btn btn-outline btn-sm" onclick="openMCUForm(${p.id})">✏️</button>
+              <button class="btn btn-sm" style="background:var(--teal);color:#fff" onclick="advanceMCUStep(${p.id},${p.current_step||0})">▶ Lanjut</button>
+            </div>
           </div>
+
         </div>
       </div>`;
   }).join('');
 }
 
-// ── MCU FORM ──────────────────────────────────
+
 async function openMCUForm(id=null, prefillPartnerId=null, prefillDealId=null) {
   let p = {};
   if (id) { const d=await sbGet('projects',`select=*&id=eq.${id}`); p=d[0]||{}; }

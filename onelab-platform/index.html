@@ -46,11 +46,9 @@
         <span class="nav-icon">🎯</span><span class="nav-label">Leads Management</span>
       </button>
       <button class="nav-item" onclick="navigate('marketing')" data-page="marketing" data-tooltip="Marketing Kit">
-        <span class="nav-icon">📣</span><span class="nav-label">Marketing Kit</span>
+        <span class="nav-icon">📣</span><span class="nav-label">Marketing &amp; Voucher</span>
       </button>
-      <button class="nav-item" onclick="navigate('marketing');setTimeout(()=>switchMktSection('voucher'),300)" data-page="voucher" data-tooltip="Voucher Builder (dalam Marketing Kit)">
-        <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
-      </button>
+
       <button class="nav-item" onclick="navigate('okr')" data-page="okr" data-tooltip="OKR & Target Sales">
         <span class="nav-icon">📈</span><span class="nav-label">OKR &amp; Target Sales</span>
       </button>
@@ -363,13 +361,28 @@ window.addEventListener('DOMContentLoaded', async () => {
   showLoginScreen();
 });
 
+
+  // ── ROLES ──────────────────────────────────
+  const ROLES = {
+    'super_admin':  { label: 'Super Admin',  color: '#7C3AED' },
+    'admin':        { label: 'Admin',        color: '#0891B2' },
+    'manager':      { label: 'Manager',      color: '#0891B2' },
+    'sales':        { label: 'Sales',        color: '#10B981' },
+    'lab':          { label: 'Lab Staff',    color: '#F59E0B' },
+    'finance':      { label: 'Finance',      color: '#EF4444' },
+    'hrd':          { label: 'HRD',          color: '#8B5CF6' },
+    'cashier':      { label: 'Kasir',        color: '#F97316' },
+    'dokter':       { label: 'Dokter',       color: '#06B6D4' },
+  };
+
 function setupAppUI() {
   const name = getUserName();
   const role = getUserRole();
   const rc   = (typeof ROLES !== 'undefined' && ROLES[role]) ? ROLES[role] : {label: role};
 
+  const initials2 = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('sidebar-user').style.display  = 'flex';
-  document.getElementById('user-avatar').textContent     = name.charAt(0).toUpperCase();
+  document.getElementById('user-avatar').textContent     = initials2 || name.charAt(0).toUpperCase();
   document.getElementById('user-name-sidebar').textContent = name;
   document.getElementById('user-role-sidebar').textContent = rc.label || role;
   const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();

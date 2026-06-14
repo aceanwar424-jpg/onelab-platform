@@ -762,6 +762,22 @@ select { cursor: pointer; }
   z-index: 500;
   padding: 20px;
 }
+/* ── MODAL OVERLAY (class-based show/hide) ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11,31,58,.55);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+}
+.modal-overlay.open {
+  display: flex;
+}
+
 
 .modal-box {
   background: var(--white);
@@ -1141,3 +1157,262 @@ select { cursor: pointer; }
 /* Sidebar footer compat */
 .sidebar-footer { display: none; }
 .conn-status { display: flex; align-items: center; gap: 7px; }
+
+/* ══════════════════════════════════════
+   MARKETING & SALES — VIRTU-STYLE UI
+══════════════════════════════════════ */
+
+/* Page header breadcrumb like Virtu */
+.ms-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 0;
+}
+
+.ms-tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text3);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  position: relative;
+}
+
+.ms-tab:hover { background: var(--bg2); color: var(--text); }
+.ms-tab.active {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+  background: #EFF9FC;
+}
+
+.ms-tab .ms-tab-badge {
+  background: var(--teal);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Funnel steps — horizontal */
+.funnel-steps {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.funnel-step {
+  flex: 1;
+  min-width: 100px;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-right: none;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  text-align: center;
+}
+.funnel-step:first-child { border-radius: var(--r) 0 0 var(--r); }
+.funnel-step:last-child  { border-radius: 0 var(--r) var(--r) 0; border-right: 1px solid var(--border); }
+.funnel-step:hover { background: var(--bg2); }
+.funnel-step.active { background: var(--teal); border-color: var(--teal); }
+.funnel-step.active .fs-count { color: #fff; }
+.funnel-step.active .fs-label { color: rgba(255,255,255,.8); }
+
+.fs-count { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
+.fs-label { font-size: 10.5px; font-weight: 600; color: var(--text3); margin-top: 3px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Kanban board */
+.kanban-col {
+  min-width: 230px;
+  max-width: 260px;
+  background: var(--bg2);
+  border-radius: var(--r-md);
+  padding: 12px;
+  flex-shrink: 0;
+}
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.kanban-col-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kanban-col-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  background: var(--white);
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.kanban-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: var(--shadow-xs);
+}
+.kanban-card:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+
+/* Table toolbar */
+.table-wrap {
+  background: var(--white);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.table-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.table-search {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px 8px 34px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+}
+.table-search:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(8,145,178,.1); }
+.table-filter {
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  background: var(--white);
+  color: var(--text2);
+  cursor: pointer;
+  min-width: 130px;
+}
+.table-filter:focus { outline: none; border-color: var(--teal); }
+
+/* Activity timeline */
+.activity-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+.activity-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.activity-tl-item {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+.activity-tl-item::before {
+  content: '';
+  position: absolute;
+  left: -21px; top: 14px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px var(--teal);
+}
+.activity-tl-type { font-size: 11px; font-weight: 700; color: var(--teal); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
+.activity-tl-note { font-size: 13px; color: var(--text2); line-height: 1.4; }
+.activity-tl-meta { font-size: 11px; color: var(--text3); margin-top: 5px; display: flex; gap: 8px; }
+
+/* Pipeline progress bar — thick version */
+.pipeline-bar-thick {
+  display: flex;
+  height: 32px;
+  border-radius: var(--r);
+  overflow: hidden;
+  gap: 2px;
+}
+.pipeline-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  transition: flex .4s ease;
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pipeline-segment span { overflow: hidden; text-overflow: clip; padding: 0 4px; }
+
+/* MCU Progress steps */
+.mcu-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+.mcu-step-cell {
+  padding: 8px 6px;
+  border-radius: var(--r-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  font-size: 10px;
+}
+.mcu-step-cell.done {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.mcu-step-cell.current {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(245,158,11,.2);
+}
+.mcu-step-cell:hover { transform: scale(1.05); }
+
+/* Virtu-style section header */
+.section-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
