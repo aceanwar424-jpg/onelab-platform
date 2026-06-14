@@ -84,39 +84,44 @@ let mktSearch = '';
 async function renderMarketing() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
-      <div><h1>Marketing Kit</h1><p>Template, proposal, skrip, voucher — semua tersimpan & siap pakai</p></div>
+      <div>
+        <h1>📣 Marketing &amp; Voucher</h1>
+        <p>Template konten, proposal, skrip, dan manajemen voucher campaign</p>
+      </div>
       <div class="btn-row" id="mkt-header-btns">
         <button class="btn btn-teal" onclick="openMktForm()">+ Tambah Template</button>
       </div>
     </div>
 
-    <!-- Main section tabs -->
-    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border)">
-      <button id="mkt-section-template" class="tab-btn active"
-        onclick="switchMktSection('template')">📣 Template & Konten</button>
-      <button id="mkt-section-voucher" class="tab-btn"
-        onclick="switchMktSection('voucher')">🎟 Voucher Builder</button>
+    <!-- Section Tabs — Virtu style -->
+    <div class="ms-topbar" style="margin-bottom:20px">
+      <button id="mkt-section-template" class="ms-tab active"
+        onclick="switchMktSection('template')">
+        📣 Template &amp; Konten
+      </button>
+      <button id="mkt-section-voucher" class="ms-tab"
+        onclick="switchMktSection('voucher')">
+        🎟 Voucher Builder
+      </button>
     </div>
 
     <!-- Template section -->
     <div id="mkt-section-template-content">
-      <div class="tabs" id="mkt-tabs" style="overflow-x:auto;white-space:nowrap">
+      <div class="tabs" id="mkt-tabs">
         <button class="tab-btn active" onclick="filterMkt('all',this)">Semua</button>
         ${MKT_TYPES.map(t=>`
           <button class="tab-btn" onclick="filterMkt('${t.key}',this)">${t.label}</button>`).join('')}
       </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <input class="table-search" id="mkt-q" placeholder="🔍 Cari template..."
-        oninput="mktSearch=this.value.toLowerCase();renderMktGrid(applyMktFilter())" style="flex:1;min-width:180px">
-      <select class="table-filter" id="mkt-ch" onchange="renderMktGrid(applyMktFilter())">
-        ${MKT_CHANNELS.map(c=>`<option>${c}</option>`).join('')}
-      </select>
-    </div>
-
-    <div id="mkt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
-      <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <input class="table-search" id="mkt-q" placeholder="Cari template..."
+          oninput="mktSearch=this.value.toLowerCase();renderMktGrid(applyMktFilter())" style="flex:1;min-width:200px">
+        <select class="table-filter" id="mkt-ch" onchange="renderMktGrid(applyMktFilter())">
+          ${MKT_CHANNELS.map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div id="mkt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
     </div>
 
     <!-- Voucher section (hidden by default) -->
@@ -124,6 +129,86 @@ async function renderMarketing() {
   `;
 
   await loadMktTemplates();
+}
+
+
+// ── Section Switcher ─────────────────────────
+function switchMktSection(section) {
+  // Update tab buttons
+  document.querySelectorAll('[id^="mkt-section-"]').forEach(el => {
+    if (!el.id.endsWith('-content')) el.classList.remove('active');
+  });
+  const tabBtn = document.getElementById(`mkt-section-${section}`);
+  if (tabBtn) tabBtn.classList.add('active');
+
+  // Show/hide content divs
+  const tpl = document.getElementById('mkt-section-template-content');
+  const vch = document.getElementById('mkt-section-voucher-content');
+
+  if (section === 'template') {
+    if (tpl) tpl.style.display = '';
+    if (vch) vch.style.display = 'none';
+    // Update header button
+    const hdr = document.getElementById('mkt-header-btns');
+    if (hdr) hdr.innerHTML = `<button class="btn btn-teal" onclick="openMktForm()">+ Tambah Template</button>`;
+  } else if (section === 'voucher') {
+    if (tpl) tpl.style.display = 'none';
+    if (vch) {
+      vch.style.display = '';
+      // Inject voucher UI into the content div
+      vch.innerHTML = `<div class="loading-row"><div class="spinner"></div></div>`;
+      renderVoucherInline(vch);
+    }
+    // Update header button
+    const hdr = document.getElementById('mkt-header-btns');
+    if (hdr) hdr.innerHTML = `<button class="btn btn-teal" onclick="openCampaignForm()">+ Campaign Baru</button>`;
+  }
+}
+
+async function renderVoucherInline(container) {
+  try {
+    // Render voucher tabs inside the container
+    container.innerHTML = `
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab-btn active" onclick="switchVoucherTab('campaigns',this)">🎯 Campaign</button>
+        <button class="tab-btn" onclick="switchVoucherTab('vouchers',this)">🎟 Daftar Voucher</button>
+        <button class="tab-btn" onclick="switchVoucherTab('redeem',this)">✅ Redeem</button>
+      </div>
+      <div id="campaigns-tab">
+        <div id="campaigns-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <div id="vouchers-tab" style="display:none">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="table-search" id="vc-q" placeholder="Cari voucher..." oninput="filterVouchers()">
+            <select class="table-filter" id="vc-status" onchange="filterVouchers()">
+              <option value="">Semua Status</option>
+              <option>Aktif</option><option>Terpakai</option><option>Expired</option><option>Draft</option>
+            </select>
+          </div>
+          <div id="vouchers-tbody"></div>
+        </div>
+      </div>
+      <div id="redeem-tab" style="display:none">
+        <div class="card" style="max-width:500px;margin:0 auto">
+          <div class="card-title" style="margin-bottom:16px">✅ Redeem Voucher</div>
+          <div class="form-group">
+            <label>Kode Voucher</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="redeem-code" placeholder="Masukkan kode voucher..." style="flex:1;text-transform:uppercase">
+              <button class="btn btn-teal" onclick="redeemVoucher()">Cek & Redeem</button>
+            </div>
+          </div>
+          <div id="redeem-result"></div>
+        </div>
+      </div>`;
+    // Load campaign data
+    if (typeof loadCampaigns === 'function') await loadCampaigns();
+  } catch(e) {
+    container.innerHTML = `<div class="status-box status-err">❌ ${e.message}</div>`;
+  }
 }
 
 async function loadMktTemplates() {

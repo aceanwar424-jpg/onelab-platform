@@ -116,11 +116,26 @@ function timeAgo(d) {
 
 
 function getUserName() {
-  return window.currentUser?.profile?.full_name || window.currentUser?.email?.split('@')[0] || 'User';
+  return window.currentUser?.profile?.full_name 
+      || window.currentUser?.user_metadata?.full_name
+      || window.currentUser?.email?.split('@')[0] 
+      || 'User';
 }
 function getUserRole() {
-  return window.currentUser?.profile?.role || 'sales';
+  return window.currentUser?.profile?.role 
+      || window.currentUser?.user_metadata?.role 
+      || 'sales';
 }
+function getRoleLabel(role) {
+  if (typeof ROLES !== 'undefined' && ROLES[role]) return ROLES[role].label;
+  const map = {
+    'super_admin':'Super Admin','admin':'Admin','manager':'Manager',
+    'sales':'Sales','lab':'Lab Staff','finance':'Finance',
+    'hrd':'HRD','cashier':'Kasir','dokter':'Dokter','direktur':'Direktur'
+  };
+  return map[role] || role || 'User';
+}
+
 function isAdmin() {
   return getUserRole() === 'admin';
 }
