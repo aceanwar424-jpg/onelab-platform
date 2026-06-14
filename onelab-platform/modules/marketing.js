@@ -84,17 +84,27 @@ let mktSearch = '';
 async function renderMarketing() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
-      <div><h1>Marketing Kit</h1><p>Template WA, flyer, proposal, skrip, surat — semua tersimpan & siap pakai</p></div>
-      <div class="btn-row">
+      <div><h1>Marketing Kit</h1><p>Template, proposal, skrip, voucher — semua tersimpan & siap pakai</p></div>
+      <div class="btn-row" id="mkt-header-btns">
         <button class="btn btn-teal" onclick="openMktForm()">+ Tambah Template</button>
       </div>
     </div>
 
-    <div class="tabs" id="mkt-tabs" style="overflow-x:auto;white-space:nowrap">
-      <button class="tab-btn active" onclick="filterMkt('all',this)">Semua</button>
-      ${MKT_TYPES.map(t=>`
-        <button class="tab-btn" onclick="filterMkt('${t.key}',this)">${t.label}</button>`).join('')}
+    <!-- Main section tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border)">
+      <button id="mkt-section-template" class="tab-btn active"
+        onclick="switchMktSection('template')">📣 Template & Konten</button>
+      <button id="mkt-section-voucher" class="tab-btn"
+        onclick="switchMktSection('voucher')">🎟 Voucher Builder</button>
     </div>
+
+    <!-- Template section -->
+    <div id="mkt-section-template-content">
+      <div class="tabs" id="mkt-tabs" style="overflow-x:auto;white-space:nowrap">
+        <button class="tab-btn active" onclick="filterMkt('all',this)">Semua</button>
+        ${MKT_TYPES.map(t=>`
+          <button class="tab-btn" onclick="filterMkt('${t.key}',this)">${t.label}</button>`).join('')}
+      </div>
 
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <input class="table-search" id="mkt-q" placeholder="🔍 Cari template..."
@@ -106,7 +116,12 @@ async function renderMarketing() {
 
     <div id="mkt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
       <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
-    </div>`;
+    </div>
+    </div>
+
+    <!-- Voucher section (hidden by default) -->
+    <div id="mkt-section-voucher-content" style="display:none"></div>
+  `;
 
   await loadMktTemplates();
 }

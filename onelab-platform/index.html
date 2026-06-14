@@ -48,7 +48,7 @@
       <button class="nav-item" onclick="navigate('marketing')" data-page="marketing" data-tooltip="Marketing Kit">
         <span class="nav-icon">📣</span><span class="nav-label">Marketing Kit</span>
       </button>
-      <button class="nav-item" onclick="navigate('voucher')" data-page="voucher" data-tooltip="Voucher Builder">
+      <button class="nav-item" onclick="navigate('marketing');setTimeout(()=>switchMktSection('voucher'),300)" data-page="voucher" data-tooltip="Voucher Builder (dalam Marketing Kit)">
         <span class="nav-icon">🎟</span><span class="nav-label">Voucher Builder</span>
       </button>
       <button class="nav-item" onclick="navigate('okr')" data-page="okr" data-tooltip="OKR & Target Sales">

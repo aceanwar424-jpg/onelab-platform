@@ -505,3 +505,40 @@ SELECT table_name,
 FROM information_schema.tables t
 WHERE table_schema='public' AND table_type='BASE TABLE'
 ORDER BY table_name;
+
+-- ── CORPORATE EMPLOYEES ──────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.corporate_employees (
+  id             bigint generated always as identity primary key,
+  corporate_id   bigint references public.corporates(id) on delete cascade,
+  corporate_name text,
+  full_name      text not null,
+  employee_id    text,                    -- NIK / ID karyawan
+  department     text,
+  gender         text,                    -- M, F
+  birth_date     date,
+  phone          text,
+  email          text,
+  status         text default 'Non-Aktif', -- Non-Aktif (terdaftar), Aktif (booking)
+  package_id     bigint references public.packages(id),
+  package_name   text,
+  notes          text,
+  created_at     timestamp default now(),
+  updated_at     timestamp default now()
+);
+
+ALTER TABLE public.corporate_employees DISABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_corp_emp_corp    ON public.corporate_employees(corporate_id);
+CREATE INDEX IF NOT EXISTS idx_corp_emp_status  ON public.corporate_employees(status);
+
+-- ── UPDATE RAB ITEMS (add qty_actual, total_actual) ──────────
+ALTER TABLE public.rab_items
+  ADD COLUMN IF NOT EXISTS qty_actual   numeric default 0,
+  ADD COLUMN IF NOT EXISTS total_actual numeric default 0,
+  ADD COLUMN IF NOT EXISTS notes        text;      -- stores source|scheme
+
+-- ── UPDATE PROJECTS (add rab_actual, corporate_id) ───────────
+ALTER TABLE public.projects
+  ADD COLUMN IF NOT EXISTS rab_actual   numeric default 0,
+  ADD COLUMN IF NOT EXISTS corporate_id bigint references public.corporates(id);
+
+SELECT 'corporate_employees + RAB updates done' as status;

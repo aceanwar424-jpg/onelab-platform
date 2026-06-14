@@ -45,7 +45,7 @@ async function renderMaps() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
       <div><h1>Maps Prospecting</h1>
-        <p>Cari mitra via Google Maps → import langsung ke Partner Database</p></div>
+        <p>Cari mitra via Google Maps → import langsung ke Leads Management</p></div>
     </div>
 
     <!-- API Key -->
@@ -521,46 +521,56 @@ async function importOneMaps(idx) {
 async function importSelectedMaps() {
   if (!mapsState.selected.size) { toast('Pilih dulu','warn'); return; }
   const btn = document.getElementById('maps-import-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Import...'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Import ke Leads...'; }
 
-  let added = 0, updated = 0, skipped = 0;
+  let added = 0, skipped = 0;
+  const user = getUserName ? getUserName() : 'User';
+
   for (const idx of mapsState.selected) {
     const r = mapsState.results[idx];
     try {
-      if (r.in_db && r.db_phone) { skipped++; continue; }
-      if (r.in_db && !r.db_phone && r.phone) {
-        await sbPatch('partners', r.db_id,
-          { phone: r.phone, updated_at: new Date().toISOString() });
-        updated++; r.db_phone = r.phone; continue;
-      }
-      if (r.in_db) { skipped++; continue; }
+      // Check if already in leads
+      const existing = await sbGet('leads',
+        `select=id&lead_name=ilike.${encodeURIComponent(r.name)}&limit=1`).catch(()=>[]);
+      if (existing?.length) { skipped++; continue; }
 
       const cat = mapCatFromQ(r.category);
-      const res = await sbPost('partners', {
-        partner_code: autoCode(cat),
-        partner_name: r.name,
-        category: cat,
-        phone: r.phone || '',
-        address: r.address || '',
-        latitude: String(r.lat || ''),
-        longitude: String(r.lng || ''),
-        rating: r.rating || null,
-        total_reviews: r.reviews || 0,
-        status: 'Prospect',
-        notes: `Import Google Maps ${new Date().toLocaleDateString('id-ID')}`,
-        updated_at: new Date().toISOString()
+      const res = await sbPost('leads', {
+        lead_name:       r.name,
+        company:         r.name,
+        category:        cat,
+        phone:           r.phone || '',
+        address:         r.address || '',
+        source:          'Maps Prospecting',
+        status:          'Baru',
+        assigned_name:   user,
+        notes:           `Import dari Google Maps · Rating: ${r.rating||'—'} · ${r.reviews||0} reviews`,
+        estimated_value: 0,
+        created_by_name: user,
+        updated_at:      new Date().toISOString(),
       });
       if (res && res[0]) {
-        await logActivity('create','partners', res[0].id, 'Import dari Maps', r.name);
-        r.in_db = true; r.db_id = res[0].id; added++;
+        await logActivity('create','leads', res[0].id, `Import dari Maps: ${r.name}`, r.name);
+        added++;
       }
     } catch(e) { skipped++; }
   }
 
   mapsState.selected = new Set();
   if (btn) { btn.disabled = false; btn.textContent = '⬆ Import'; }
-  toast(`✅ ${added} ditambah, ${updated} diupdate, ${skipped} skip`, 'ok');
-  if (added > 0 || updated > 0) await renderMapsResults();
+  
+  if (added > 0) {
+    toast(`✅ ${added} prospek masuk ke Leads Management`, 'ok', 4000);
+    // Show quick nav button
+    const el = document.getElementById('maps-result-header');
+    if (el) el.innerHTML += `
+      <button class="btn btn-teal btn-sm" onclick="navigate('leads')" style="margin-left:8px">
+        🎯 Buka Leads →
+      </button>`;
+  } else {
+    toast(`⚠️ ${skipped} sudah ada di Leads`, 'warn');
+  }
+  await renderMapsResults();
   updateMapsImportBtn();
 }
 

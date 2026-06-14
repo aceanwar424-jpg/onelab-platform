@@ -595,6 +595,311 @@ async function deleteCorp(id) {
   catch(e) { toast('❌ '+e.message,'err'); }
 }
 
+
+// ══════════════════════════════════════════
+// CORPORATE: Employee/Participant Management
+// ══════════════════════════════════════════
+async function openCorpEmployees(corpId, corpName) {
+  const emps = await sbGet('corporate_employees',
+    `select=*&corporate_id=eq.${corpId}&order=full_name.asc`).catch(()=>[]);
+
+  const active   = (emps||[]).filter(e=>e.status==='Aktif').length;
+  const inactive = (emps||[]).filter(e=>e.status==='Non-Aktif').length;
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">👥 Data Karyawan — ${corpName}</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="badge badge-green">${active} Aktif</span>
+        <span class="badge badge-gray">${inactive} Non-Aktif</span>
+        <button class="modal-close" onclick="closeModalForce()">✕</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input class="table-search" id="cemp-q" placeholder="🔍 Cari nama, NIK..." 
+        oninput="filterCorpEmps(${corpId})" style="flex:1">
+      <select class="table-filter" id="cemp-status" onchange="filterCorpEmps(${corpId})">
+        <option value="">Semua</option>
+        <option>Aktif</option><option>Non-Aktif</option>
+      </select>
+      <button class="btn btn-teal btn-sm" onclick="openCorpEmpForm(${corpId},'${corpName.replace(/'/g,"\'")}')" >+ Tambah</button>
+      <button class="btn btn-ghost btn-sm" onclick="importCorpEmps(${corpId})">📥 Import CSV</button>
+    </div>
+
+    <div id="cemp-list" style="max-height:400px;overflow-y:auto">
+      ${(emps||[]).length ? `
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <thead><tr style="background:var(--lgray)">
+            <th style="padding:6px 10px;text-align:left">Nama</th>
+            <th style="padding:6px 10px;text-align:left">NIK/ID</th>
+            <th style="padding:6px 10px;text-align:left">Departemen</th>
+            <th style="padding:6px 10px;text-align:left">Tgl Lahir</th>
+            <th style="padding:6px 10px;text-align:left">Status</th>
+            <th style="padding:6px 10px">Aksi</th>
+          </tr></thead>
+          <tbody id="cemp-tbody">
+            ${(emps||[]).map(e=>`<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:6px 10px;font-weight:600">${e.full_name||'—'}</td>
+              <td style="padding:6px 10px;font-family:monospace;font-size:11px">${e.employee_id||'—'}</td>
+              <td style="padding:6px 10px;color:var(--gray)">${e.department||'—'}</td>
+              <td style="padding:6px 10px;color:var(--gray)">${e.birth_date||'—'}</td>
+              <td style="padding:6px 10px">
+                <span style="background:${e.status==='Aktif'?'#E8F5E9':'#F1F5F9'};
+                  color:${e.status==='Aktif'?'#2E7D32':'#546E7A'};
+                  padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700">
+                  ${e.status||'Non-Aktif'}
+                </span>
+              </td>
+              <td style="padding:6px 10px">
+                <div class="act-row">
+                  <button class="act-btn edit" onclick="openCorpEmpForm(${corpId},'${corpName.replace(/'/g,"\'")}',${ e.id})">✏️</button>
+                  <button class="act-btn del" onclick="deleteCorpEmp(${e.id},${corpId},'${corpName.replace(/'/g,"\'")}')">🗑</button>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` :
+        `<div class="empty-state" style="padding:30px">
+          <div class="ico">👥</div>
+          <h3>Belum ada data karyawan</h3>
+          <p>Tambah manual atau import dari CSV</p>
+        </div>`
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+      <button class="btn btn-teal btn-sm" onclick="activateAllCorpEmps(${corpId},'${corpName.replace(/'/g,"\'")}')" style="color:#fff">
+        ✅ Aktifkan Semua untuk MCU
+      </button>
+    </div>`);
+}
+
+async function openCorpEmpForm(corpId, corpName, id=null) {
+  let e = {};
+  if (id) {
+    const d = await sbGet('corporate_employees',`select=*&id=eq.${id}`);
+    e = d[0]||{};
+  }
+  const user = getUserName?getUserName():'User';
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">${id?'✏️ Edit':'➕ Tambah'} Karyawan — ${corpName}</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Nama Lengkap *</label>
+        <input type="text" id="cef-name" value="${e.full_name||''}" placeholder="Nama sesuai KTP">
+      </div>
+      <div class="form-group">
+        <label>NIK / ID Karyawan</label>
+        <input type="text" id="cef-id" value="${e.employee_id||''}" placeholder="NIK perusahaan">
+      </div>
+      <div class="form-group">
+        <label>Departemen / Divisi</label>
+        <input type="text" id="cef-dept" value="${e.department||''}" placeholder="HRD, Produksi...">
+      </div>
+      <div class="form-group">
+        <label>Jenis Kelamin</label>
+        <select id="cef-gender">
+          <option value="M" ${(e.gender||'M')==='M'?'selected':''}>Laki-laki</option>
+          <option value="F" ${e.gender==='F'?'selected':''}>Perempuan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tanggal Lahir</label>
+        <input type="date" id="cef-dob" value="${e.birth_date||''}">
+      </div>
+      <div class="form-group">
+        <label>No. HP</label>
+        <input type="text" id="cef-phone" value="${e.phone||''}" placeholder="08xxxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="cef-email" value="${e.email||''}" placeholder="email@perusahaan.com">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="cef-status">
+          <option value="Non-Aktif" ${(e.status||'Non-Aktif')==='Non-Aktif'?'selected':''}>Non-Aktif (Terdaftar)</option>
+          <option value="Aktif" ${e.status==='Aktif'?'selected':''}>Aktif (Sudah Booking)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Paket MCU</label>
+        <select id="cef-package">
+          <option value="">-- Pilih Paket (opsional) --</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Catatan Medis / Kondisi Khusus</label>
+      <input type="text" id="cef-notes" value="${e.notes||''}" placeholder="Alergi, kondisi khusus...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveCorpEmp(${corpId},${id||'null'})">💾 Simpan</button>
+    </div>`);
+
+  // Load packages
+  try {
+    const pkgs = await sbGet('packages','select=id,nama_paket&is_active=eq.true&order=nama_paket');
+    const sel  = document.getElementById('cef-package');
+    if (sel) {
+      (pkgs||[]).forEach(p=>{
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.nama_paket;
+        if (p.id === e.package_id) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+  } catch(err){}
+}
+
+async function saveCorpEmp(corpId, id) {
+  const name = document.getElementById('cef-name').value.trim();
+  if (!name) { toast('Nama wajib diisi','err'); return; }
+  const user = getUserName?getUserName():'User';
+
+  const payload = {
+    corporate_id: corpId,
+    full_name:    name,
+    employee_id:  document.getElementById('cef-id').value.trim()||null,
+    department:   document.getElementById('cef-dept').value.trim()||null,
+    gender:       document.getElementById('cef-gender').value,
+    birth_date:   document.getElementById('cef-dob').value||null,
+    phone:        document.getElementById('cef-phone').value.trim()||null,
+    email:        document.getElementById('cef-email').value.trim()||null,
+    status:       document.getElementById('cef-status').value,
+    package_id:   parseInt(document.getElementById('cef-package').value)||null,
+    notes:        document.getElementById('cef-notes').value.trim()||null,
+    updated_at:   new Date().toISOString(),
+  };
+
+  try {
+    if (id) { await sbPatch('corporate_employees',id,payload); toast('✅ Diupdate','ok'); }
+    else    { await sbPost('corporate_employees',payload);    toast('✅ Karyawan ditambahkan','ok'); }
+    closeModalForce();
+    // Refresh corporate list without closing
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+async function deleteCorpEmp(id, corpId, corpName) {
+  if (!confirm('Hapus data karyawan ini?')) return;
+  try {
+    await sbDelete('corporate_employees',id);
+    toast('🗑 Dihapus','info');
+    await openCorpEmployees(corpId, corpName);
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+async function activateAllCorpEmps(corpId, corpName) {
+  if (!confirm('Aktifkan semua karyawan terdaftar untuk MCU?
+Status akan berubah dari Non-Aktif → Aktif')) return;
+  try {
+    // Update all non-active employees of this corporate
+    const emps = await sbGet('corporate_employees',
+      `select=id&corporate_id=eq.${corpId}&status=eq.Non-Aktif`);
+    for (const e of (emps||[])) {
+      await sbPatch('corporate_employees',e.id,{status:'Aktif',updated_at:new Date().toISOString()});
+    }
+    toast(`✅ ${(emps||[]).length} karyawan diaktifkan`,'ok');
+    await openCorpEmployees(corpId, corpName);
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+function importCorpEmps(corpId) {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">📥 Import Karyawan dari CSV</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div style="background:#FFF8E1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px">
+      Format CSV: <strong>nama,nik,departemen,gender(M/F),tanggal_lahir,phone,email</strong>
+    </div>
+    <div class="form-group">
+      <label>Upload File CSV</label>
+      <input type="file" id="cemp-csv" accept=".csv" onchange="previewCSVImport(this,${corpId})">
+    </div>
+    <div id="csv-preview" style="max-height:200px;overflow-y:auto;margin-top:10px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" id="csv-import-btn" onclick="processCSVImport(${corpId})" disabled>
+        📥 Import
+      </button>
+    </div>`);
+}
+
+let csvRows = [];
+function previewCSVImport(input, corpId) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('
+').filter(l=>l.trim());
+    csvRows = lines.slice(1).map(l => {
+      const [name,nik,dept,gender,dob,phone,email] = l.split(',').map(v=>v.trim().replace(/"/g,''));
+      return {name,nik,dept,gender,dob,phone,email};
+    }).filter(r=>r.name);
+
+    const el = document.getElementById('csv-preview');
+    if (el) el.innerHTML = `
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">${csvRows.length} data ditemukan</div>
+      <table style="width:100%;font-size:11px;border-collapse:collapse">
+        <thead><tr style="background:var(--lgray)">
+          <th style="padding:4px 8px">Nama</th><th style="padding:4px 8px">NIK</th>
+          <th style="padding:4px 8px">Dept</th><th style="padding:4px 8px">Gender</th>
+        </tr></thead>
+        <tbody>
+          ${csvRows.slice(0,5).map(r=>`<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:4px 8px">${r.name}</td>
+            <td style="padding:4px 8px;font-family:monospace">${r.nik||'—'}</td>
+            <td style="padding:4px 8px">${r.dept||'—'}</td>
+            <td style="padding:4px 8px">${r.gender||'—'}</td>
+          </tr>`).join('')}
+          ${csvRows.length>5?`<tr><td colspan="4" style="padding:4px 8px;color:var(--gray)">...dan ${csvRows.length-5} lainnya</td></tr>`:''}
+        </tbody>
+      </table>`;
+
+    const btn = document.getElementById('csv-import-btn');
+    if (btn) btn.disabled = false;
+  };
+  reader.readAsText(file);
+}
+
+async function processCSVImport(corpId) {
+  if (!csvRows.length) { toast('Tidak ada data','err'); return; }
+  const user = getUserName?getUserName():'User';
+  let added = 0;
+  for (const row of csvRows) {
+    if (!row.name) continue;
+    try {
+      await sbPost('corporate_employees',{
+        corporate_id: corpId,
+        full_name:    row.name,
+        employee_id:  row.nik||null,
+        department:   row.dept||null,
+        gender:       row.gender||null,
+        birth_date:   row.dob||null,
+        phone:        row.phone||null,
+        email:        row.email||null,
+        status:       'Non-Aktif',
+        updated_at:   new Date().toISOString(),
+      });
+      added++;
+    } catch(e){}
+  }
+  toast(`✅ ${added} karyawan berhasil diimport`,'ok');
+  closeModalForce();
+}
+
+// Override openCorpForm to accept prefill
+const _origOpenCorpForm = typeof openCorpForm !== 'undefined' ? openCorpForm : null;
+
 async function openCorpContracts(corpId, corpName) {
   const contracts = await sbGet('corporate_contracts',
     `select=*&corporate_id=eq.${corpId}&order=created_at.desc`).catch(()=>[]);

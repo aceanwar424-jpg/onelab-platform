@@ -658,9 +658,57 @@ async function convertLeadToPartner(id) {
     closeModalForce();
     await loadLeads();
 
-    if (confirm('Buka Partner Database untuk tambah detail kerjasama?')) {
-      navigate('partners');
-    }
+    // Ask about next steps
+    openModal(`
+      <div class="modal-header">
+        <div class="modal-title">✅ Lead Berhasil Diconvert!</div>
+        <button class="modal-close" onclick="closeModalForce()">✕</button>
+      </div>
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:12px">🎉</div>
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">
+          ${lead.lead_name||lead.company} sekarang jadi Partner aktif!
+        </div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:20px">Apa langkah selanjutnya?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <button onclick="closeModalForce();navigate('partners')"
+          style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
+            cursor:pointer;text-align:center;transition:all .2s"
+          onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px">🤝</div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Partner Database</div>
+          <div style="font-size:11px;color:var(--gray)">Kelola output kerjasama</div>
+        </button>
+        <button onclick="closeModalForce();createMOUFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
+          style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
+            cursor:pointer;text-align:center;transition:all .2s"
+          onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px">📜</div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Buat MOU</div>
+          <div style="font-size:11px;color:var(--gray)">Langsung buat perjanjian</div>
+        </button>
+        <button onclick="closeModalForce();createMCUFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
+          style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
+            cursor:pointer;text-align:center;transition:all .2s"
+          onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px">🏥</div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Buat Project MCU</div>
+          <div style="font-size:11px;color:var(--gray)">Setup project & RAB</div>
+        </button>
+        <button onclick="closeModalForce();createCorporateFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
+          style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
+            cursor:pointer;text-align:center;transition:all .2s"
+          onmouseover="this.style.borderColor='#8B5CF6'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:24px">🏢</div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Daftarkan Corporate</div>
+          <div style="font-size:11px;color:var(--gray)">Jika klien korporat dengan kontrak</div>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModalForce();navigate('leads')">Nanti saja</button>
+      </div>
+    `);
   } catch(e) { toast('❌ '+e.message,'err'); }
 }
 
