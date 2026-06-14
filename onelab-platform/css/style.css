@@ -784,3 +784,79 @@ textarea { resize: vertical; min-height: 80px; }
   .page-header { flex-direction: column; }
   .btn-row { width: 100%; }
 }
+
+/* ── v10 Additional Polish ───────────────── */
+
+/* Smooth transitions on all cards */
+.card { transition: box-shadow .2s; }
+.card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+
+/* Better table row hover */
+tr:hover td { background: #F8FAFC !important; }
+
+/* Sidebar mini tooltip */
+.sidebar.mini .nav-item { position: relative; }
+.sidebar.mini .nav-group-label { font-size: 0; padding: 8px 0; }
+
+/* Status pills consistent */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--lgray);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--teal);
+  transition: width .5s ease;
+}
+
+/* Notification dot */
+.notif-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #EF4444;
+  flex-shrink: 0;
+}
+
+/* Grid helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 12px; }
+
+@media(max-width:900px) {
+  .grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Better modal scrollbar */
+.modal-box::-webkit-scrollbar { width: 4px; }
+.modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Sidebar user section */
+.sidebar-user { padding: 12px 16px; }
+.sidebar.mini .sidebar-user .user-info,
+.sidebar.mini .sidebar-user button { display: none; }
+.sidebar.mini .sidebar-user { justify-content: center; }
+
+/* Topbar breadcrumb style */
+.topbar-title { font-size: 15px; font-weight: 600; color: var(--navy); }
+
+/* Better form inputs focus */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal) !important;
+  box-shadow: 0 0 0 3px rgba(0,137,123,.1) !important;
+}

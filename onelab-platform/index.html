@@ -68,34 +68,28 @@
     <!-- ── OPERASIONAL LAB ── -->
     <div class="nav-group">
       <div class="nav-group-label">Operasional Lab</div>
-      <button class="nav-item nav-item-soon" data-tooltip="Check In Sampel">
+      <button class="nav-item nav-item" onclick="navigate('lab')" data-page="lab-checkin" data-tooltip="Check In Sampel">
         <span class="nav-icon">🧪</span><span class="nav-label">Check In Sampel</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Enter Result">
+      <button class="nav-item nav-item" onclick="navigate('lab')" data-page="lab-result" data-tooltip="Enter Result">
         <span class="nav-icon">📝</span><span class="nav-label">Enter Result</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Validasi Hasil">
+      <button class="nav-item nav-item" onclick="navigate('lab')" data-page="lab-validation" data-tooltip="Validasi Hasil">
         <span class="nav-icon">✅</span><span class="nav-label">Validasi Hasil</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Approval">
+      <button class="nav-item nav-item" onclick="navigate('lab')" data-page="lab-approval" data-tooltip="Approval">
         <span class="nav-icon">🔏</span><span class="nav-label">Approval</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Medical Record Lab">
+      <button class="nav-item nav-item" onclick="navigate('lab')" data-page="lab-medrecord" data-tooltip="Medical Record Lab">
         <span class="nav-icon">📁</span><span class="nav-label">Medical Record Lab</span>
-        <span class="nav-soon">soon</span>
       </button>
     </div>
 
     <!-- ── LAYANAN KLINIK ── -->
     <div class="nav-group">
       <div class="nav-group-label">Layanan Klinik</div>
-      <button class="nav-item nav-item-soon" data-tooltip="Admission — FO, BO, Registrasi, Report">
+      <button class="nav-item nav-item" onclick="navigate('admission')" data-page="admission" data-tooltip="Admission — FO, BO, Registrasi, Report">
         <span class="nav-icon">🏨</span><span class="nav-label">Admission</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item nav-item-soon" data-tooltip="Anamnesa Pasien">
         <span class="nav-icon">📋</span><span class="nav-label">Anamnesa</span>
@@ -207,13 +201,11 @@
       <button class="nav-item" onclick="navigate('users')" data-page="users" id="nav-users" style="display:none" data-tooltip="User Management">
         <span class="nav-icon">👤</span><span class="nav-label">User Management</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Product — List, Ref Range, Harga, HPP, Paket">
+      <button class="nav-item nav-item" onclick="navigate('product')" data-page="product" data-tooltip="Product — List, Ref Range, Harga, HPP, Paket">
         <span class="nav-icon">🧬</span><span class="nav-label">Product</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Corporate — List, Kontrak, Health Facility">
+      <button class="nav-item nav-item" onclick="navigate('corporate')" data-page="corporate" data-tooltip="Corporate — List, Kontrak, Health Facility">
         <span class="nav-icon">🏢</span><span class="nav-label">Corporate</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item" onclick="navigate('settings')" data-page="settings" data-tooltip="Pengaturan Sistem">
         <span class="nav-icon">⚙️</span><span class="nav-label">Pengaturan</span>
@@ -283,6 +275,10 @@
 <script src="modules/hrd.js"></script>
 <script src="modules/homecare.js"></script>
 <script src="modules/mcu.js"></script>
+<script src="modules/admission.js"></script>
+<script src="modules/lab.js"></script>
+<script src="modules/config_product.js"></script>
+<script src="modules/config_package.js"></script>
 <script src="modules/settings.js"></script>
 <script src="modules/settings_users.js"></script>
 
