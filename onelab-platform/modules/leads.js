@@ -72,7 +72,8 @@ async function renderLeads() {
       </div>
     </div>`;
 
-  await loadLeads();
+  leadsAll = [];
+    await loadLeads();
 }
 
 function exportLeadsCSV() {
