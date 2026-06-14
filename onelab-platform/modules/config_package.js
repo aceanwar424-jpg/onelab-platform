@@ -930,8 +930,7 @@ async function openCorpContracts(corpId, corpName) {
           </div>
           <div style="text-align:right">
             <span style="background:${ct.status==='Active'?'#E8F5E9':'#FFEBEE'};color:${ct.status==='Active'?'#2E7D32':'#C62828'};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">${ct.status}</span>
-            ${daysLeft!==null?`<div style="font-size:10px;color:${daysLeft<30?'#EF4444':'var(--gray)';margin-top:4px}">${daysLeft>0?daysLeft+'h lagi':'Expired'}</div>`:''}
-          </div>
+            ${daysLeft!==null?`<div style="font-size:10px;color:${daysLeft<30?'#EF4444':'var(--gray)'};margin-top:4px">${daysLeft>0?daysLeft+'h lagi':'Expired'}</div>`:''}
         </div>
       </div>`;
     }).join('')||'<div style="color:var(--gray);font-size:13px">Belum ada kontrak</div>'}
