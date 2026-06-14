@@ -838,8 +838,9 @@ function previewCSVImport(input, corpId) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const lines = e.target.result.split('
-').filter(l=>l.trim());
+    const lines = e.target.result
+  .split('\n')
+  .filter(l => l.trim());
     csvRows = lines.slice(1).map(l => {
       const [name,nik,dept,gender,dob,phone,email] = l.split(',').map(v=>v.trim().replace(/"/g,''));
       return {name,nik,dept,gender,dob,phone,email};
