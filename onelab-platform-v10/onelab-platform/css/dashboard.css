@@ -1,5 +1,0 @@
-/* Dashboard extras */
-.grid-kpi { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
-.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3   { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-@media(max-width:900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
