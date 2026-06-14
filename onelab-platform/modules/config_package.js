@@ -798,8 +798,7 @@ async function deleteCorpEmp(id, corpId, corpName) {
 }
 
 async function activateAllCorpEmps(corpId, corpName) {
-  if (!confirm('Aktifkan semua karyawan terdaftar untuk MCU?
-Status akan berubah dari Non-Aktif → Aktif')) return;
+  if (!confirm('Aktifkan semua karyawan terdaftar untuk MCU?\nStatus akan berubah dari Non-Aktif → Aktif')) return;
   try {
     // Update all non-active employees of this corporate
     const emps = await sbGet('corporate_employees',
