@@ -60,6 +60,21 @@ async function renderDashboard() {
 
   await loadDashboardData();
 }
+async function loadDashboardData() {
+  const now    = new Date();
+  const today  = now.toISOString().split('T')[0];
+  const month  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const tomorrow = new Date(now.getTime() + 86400000).toISOString().split('T')[0];
+
+  try {
+    const [partners, leads, deals, invoices, activity] = await Promise.all([
+      sbGet('partners','select=id,status,assigned_name,created_at').catch(()=>[]),
+      sbGet('leads','select=id,status,estimated_value,assigned_name,followup_date,lead_name,company').catch(()=>[]),
+      sbGet('partner_deals','select=id,deal_name,deal_type,value,status,partner_id,created_at,created_by_name').catch(()=>[]),
+      sbGet('invoices','select=id,total_amount,status,created_at').catch(()=>[]),
+      sbGet('activity_logs','select=*&order=created_at.desc&limit=20').catch(()=>[]),
+    ]);
+    
     const activePartners  = (partners||[]).filter(p=>p.status==='Aktif').length;
     const newPartnersMonth= (partners||[]).filter(p=>p.created_at?.startsWith(month)).length;
 
