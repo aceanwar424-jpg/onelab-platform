@@ -57,7 +57,7 @@ async function renderSettings() {
     <div id="set-activity" style="display:none">
       <div class="table-wrap">
         <div class="table-toolbar">
-          <span style="font-size:13px;font-weight:700;color:var(--navy)">Log Aktivitas</span>
+          <span style="font-size:13px;font-weight:700;color:var(--text)">Log Aktivitas</span>
         </div>
         <div id="set-activity-list" class="loading-row"><div class="spinner"></div></div>
       </div>
@@ -66,7 +66,7 @@ async function renderSettings() {
     <div id="set-data" style="display:none">
       <div class="card" style="max-width:500px">
         <div class="card-title" style="margin-bottom:14px;color:var(--danger)">⚠️ Manajemen Data</div>
-        <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Tindakan berikut tidak dapat dibatalkan. Lakukan dengan hati-hati.</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Tindakan berikut tidak dapat dibatalkan. Lakukan dengan hati-hati.</p>
         <div style="display:flex;flex-direction:column;gap:10px">
           <button class="btn btn-danger btn-sm" onclick="exportAllData()">📥 Export Semua Data (Backup)</button>
         </div>
@@ -79,14 +79,14 @@ async function renderSettings() {
         <!-- User & Role -->
         <div class="card">
           <div class="card-title" style="margin-bottom:12px">👤 User & Role Management</div>
-          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Kelola akun, role, dan hak akses semua pengguna platform.</p>
+          <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Kelola akun, role, dan hak akses semua pengguna platform.</p>
           <button class="btn btn-teal" onclick="navigate('users')">🔑 Buka User Management</button>
         </div>
 
         <!-- Bulk Delete -->
         <div class="card">
           <div class="card-title" style="margin-bottom:12px;color:var(--danger)">🗑 Bulk Delete</div>
-          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Hapus massal data untuk reset atau pembersihan. Tidak bisa dibatalkan.</p>
+          <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Hapus massal data untuk reset atau pembersihan. Tidak bisa dibatalkan.</p>
           <div style="display:flex;flex-direction:column;gap:8px">
             <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('partners')">Hapus Semua Partner</button>
             <button class="btn btn-danger btn-sm" onclick="bulkDeleteTable('partner_deals')">Hapus Semua Kerjasama</button>
@@ -101,18 +101,18 @@ async function renderSettings() {
         <!-- Reset Password -->
         <div class="card">
           <div class="card-title" style="margin-bottom:12px">🔒 Keamanan</div>
-          <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Info akun aktif dan koneksi Supabase.</p>
+          <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Info akun aktif dan koneksi Supabase.</p>
           <div style="font-size:12px;background:var(--lgray);border-radius:8px;padding:10px 12px;margin-bottom:10px">
             <div><strong>User ID:</strong> <span id="admin-uid" style="color:var(--teal)">—</span></div>
-            <div style="margin-top:4px"><strong>Role:</strong> <span id="admin-role" style="color:var(--navy)">—</span></div>
-            <div style="margin-top:4px"><strong>Email:</strong> <span id="admin-email" style="color:var(--gray)">—</span></div>
+            <div style="margin-top:4px"><strong>Role:</strong> <span id="admin-role" style="color:var(--text)">—</span></div>
+            <div style="margin-top:4px"><strong>Email:</strong> <span id="admin-email" style="color:var(--text3)">—</span></div>
           </div>
         </div>
 
         <!-- Email Confirmation Fix -->
         <div class="card">
           <div class="card-title" style="margin-bottom:12px">⚡ Quick Fix SQL</div>
-          <p style="font-size:13px;color:var(--gray);margin-bottom:10px">SQL siap pakai untuk fix umum. Copy dan jalankan di Supabase SQL Editor.</p>
+          <p style="font-size:13px;color:var(--text3);margin-bottom:10px">SQL siap pakai untuk fix umum. Copy dan jalankan di Supabase SQL Editor.</p>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-outline btn-sm" onclick="copyAdminSQL('confirm_email')">📋 Fix Email Confirmation</button>
             <button class="btn btn-outline btn-sm" onclick="copyAdminSQL('disable_rls')">📋 Disable RLS semua tabel</button>
@@ -164,11 +164,11 @@ async function loadSetStats() {
     el.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap">
       ${tables.map((t,i)=>`
         <div style="text-align:center;padding:10px 14px;background:var(--lgray);border-radius:8px;min-width:100px">
-          <div style="font-size:20px;font-weight:800;color:var(--navy)">${Array.isArray(counts[i])?counts[i].length:'?'}</div>
-          <div style="font-size:11px;color:var(--gray);margin-top:2px">${t.replace(/_/g,' ')}</div>
+          <div style="font-size:20px;font-weight:800;color:var(--text)">${Array.isArray(counts[i])?counts[i].length:'?'}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${t.replace(/_/g,' ')}</div>
         </div>`).join('')}
     </div>`;
-  } catch(e){ el.innerHTML='<span style="color:var(--gray);font-size:13px">Gagal load</span>'; }
+  } catch(e){ el.innerHTML='<span style="color:var(--text3);font-size:13px">Gagal load</span>'; }
 }
 
 async function loadSetUsers() {
@@ -182,7 +182,7 @@ async function loadSetUsers() {
         <tbody>${(data||[]).map(u=>`
           <tr><td><strong>${u.full_name||'—'}</strong></td>
               <td><span class="badge ${u.role==='admin'?'badge-teal':'badge-gray'}">${u.role||'sales'}</span></td>
-              <td style="font-size:12px;color:var(--gray)">${formatDateShort(u.created_at)}</td>
+              <td style="font-size:12px;color:var(--text3)">${formatDateShort(u.created_at)}</td>
           </tr>`).join('')}
         </tbody>
       </table>`:
@@ -200,11 +200,11 @@ async function loadSetActivity() {
         <thead><tr><th>Waktu</th><th>Aksi</th><th>Data</th><th>Deskripsi</th><th>User</th></tr></thead>
         <tbody>${(data||[]).map(a=>`
           <tr>
-            <td style="font-size:11px;color:var(--gray);white-space:nowrap">${formatDateShort(a.created_at)}</td>
+            <td style="font-size:11px;color:var(--text3);white-space:nowrap">${formatDateShort(a.created_at)}</td>
             <td><span class="badge ${a.action==='create'?'badge-green':a.action==='delete'?'badge-red':a.action==='update'?'badge-navy':'badge-gray'}">${a.action}</span></td>
             <td style="font-size:12px"><strong>${a.record_name||'—'}</strong></td>
-            <td style="font-size:12px;color:var(--gray)">${a.description||'—'}</td>
-            <td style="font-size:11px;color:var(--gray)">${a.user_name||'—'}</td>
+            <td style="font-size:12px;color:var(--text3)">${a.description||'—'}</td>
+            <td style="font-size:11px;color:var(--text3)">${a.user_name||'—'}</td>
           </tr>`).join('')}
         </tbody>
       </table>`:
@@ -326,7 +326,7 @@ async function renderMasterData() {
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">🏥 Master Kategori Partner</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Kelola jenis/kategori mitra yang tersedia di form Partner Database.
         </div>
         <div id="master-partner-cats" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
@@ -334,12 +334,12 @@ async function renderMasterData() {
              'Komunitas','Sekolah / Kampus','Gym & Sport Club','Lainnya']
             .map(c=>`<span style="background:var(--lgray);padding:3px 9px;border-radius:12px;font-size:11px">${c}</span>`).join('')}
         </div>
-        <div style="font-size:11px;color:var(--gray)">💡 Edit di source code PARTNER_CATEGORIES</div>
+        <div style="font-size:11px;color:var(--text3)">💡 Edit di source code PARTNER_CATEGORIES</div>
       </div>
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">🔬 Master Layanan Lab</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Jenis pemeriksaan dan layanan yang tersedia untuk MCU, Home Care, dll.
         </div>
         <button class="btn btn-teal btn-sm" onclick="openMasterServices()">⚙️ Kelola Layanan</button>
@@ -347,7 +347,7 @@ async function renderMasterData() {
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">💰 Master Harga</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Tarif standar per jenis pemeriksaan untuk kalkulasi RAB otomatis.
         </div>
         <button class="btn btn-teal btn-sm" onclick="navigate('inventory')">📦 Kelola di Inventory</button>
@@ -355,7 +355,7 @@ async function renderMasterData() {
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">👤 Identitas Organisasi</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Nama, alamat, logo, kontak OneLab — dipakai di invoice, surat, voucher.
         </div>
         <button class="btn btn-teal btn-sm" onclick="openOrgSettings()">⚙️ Edit Identitas</button>
@@ -363,7 +363,7 @@ async function renderMasterData() {
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">📄 Nomor Urut Dokumen</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Reset atau lihat nomor urut surat, invoice, dan voucher.
         </div>
         <button class="btn btn-outline btn-sm" onclick="loadDocSequences()">👁 Lihat Urutan</button>
@@ -371,7 +371,7 @@ async function renderMasterData() {
 
       <div class="card">
         <div class="card-title" style="margin-bottom:10px">🌐 API & Integrasi</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
           Google Maps API key, Supabase connection, dan integrasi eksternal.
         </div>
         <button class="btn btn-teal btn-sm" onclick="switchSetTab('general',document.querySelector('#set-tabs .tab-btn'))">⚙️ Ke Pengaturan Umum</button>
@@ -386,7 +386,7 @@ async function openMasterServices() {
       <div class="modal-title">🔬 Master Layanan Lab</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
-    <div style="font-size:13px;color:var(--gray);margin-bottom:14px">
+    <div style="font-size:13px;color:var(--text3);margin-bottom:14px">
       Daftar layanan standar OneLab — digunakan di Home Care, MCU, dan Voucher.
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -459,8 +459,8 @@ async function loadDocSequences() {
       <tbody>${(data||[]).map(d=>`<tr>
         <td>${d.year}</td><td>${d.month}</td>
         <td style="font-family:monospace">${d.type_code}</td>
-        <td style="font-weight:700;color:var(--navy)">${d.last_seq}</td>
-      </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--gray)">Belum ada data</td></tr>'}
+        <td style="font-weight:700;color:var(--text)">${d.last_seq}</td>
+      </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text3)">Belum ada data</td></tr>'}
       </tbody></table>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>

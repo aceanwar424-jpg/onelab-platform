@@ -41,7 +41,7 @@ async function renderCashier() {
     <!-- Queue - Pasien Menunggu Bayar -->
     <div class="card" style="margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:700;color:var(--navy)">⏳ Antrian Pembayaran</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">⏳ Antrian Pembayaran</div>
         <button class="btn btn-ghost btn-sm" onclick="loadCashierQueue()">🔄 Refresh</button>
       </div>
       <div id="cashier-queue">
@@ -81,7 +81,7 @@ async function loadCashierQueue() {
 function renderQueue() {
   const el = document.getElementById('cashier-queue'); if (!el) return;
   if (!cashierQueue.length) {
-    el.innerHTML=`<div style="text-align:center;padding:14px;color:var(--gray);font-size:13px">
+    el.innerHTML=`<div style="text-align:center;padding:14px;color:var(--text3);font-size:13px">
       ✅ Tidak ada antrian pembayaran
     </div>`; return;
   }
@@ -92,8 +92,8 @@ function renderQueue() {
         onclick="openPaymentForm(${a.id})"
         onmouseover="this.style.borderColor='var(--teal)';this.style.background='var(--mint)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--lgray)'">
-        <div style="font-weight:700;color:var(--navy)">${a.patient_name||'—'}</div>
-        <div style="font-size:11px;color:var(--gray)">${a.visit_number||'—'}</div>
+        <div style="font-weight:700;color:var(--text)">${a.patient_name||'—'}</div>
+        <div style="font-size:11px;color:var(--text3)">${a.visit_number||'—'}</div>
         <div style="font-size:14px;font-weight:800;color:var(--teal);margin-top:4px">${formatCurrency(a.net_amount||0)}</div>
         <div style="font-size:10px;color:#F59E0B;margin-top:2px">● Menunggu Bayar</div>
       </div>`).join('')}
@@ -132,7 +132,7 @@ function renderCashierKPI() {
     <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid var(--border);border-left:4px solid ${k.color}">
       <div style="font-size:18px">${k.icon}</div>
       <div style="font-size:${String(k.val).length>8?'11px':'14px'};font-weight:800;color:${k.color}">${k.val}</div>
-      <div style="font-size:10px;color:var(--gray)">${k.label}</div>
+      <div style="font-size:10px;color:var(--text3)">${k.label}</div>
     </div>`).join('');
 }
 
@@ -166,13 +166,13 @@ function renderCashierTable(data) {
       <td style="font-family:monospace;font-size:11px;font-weight:700">${t.transaction_number||'—'}</td>
       <td>
         <div style="font-weight:600">${t.patient_name||'—'}</div>
-        <div style="font-size:10px;color:var(--gray)">${t.visit_number||'—'}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.visit_number||'—'}</div>
       </td>
       <td><span style="background:${tc}20;color:${tc};padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${t.transaction_type||'—'}</span></td>
       <td style="font-size:12px">${pm.icon} ${pm.label}</td>
       <td style="font-weight:800;color:${t.transaction_type==='Refund'?'#EF4444':'var(--navy)'}">${formatCurrency(t.total_amount||0)}</td>
-      <td style="font-size:11px;color:var(--gray)">${t.cashier_name||'—'}</td>
-      <td style="font-size:11px;color:var(--gray)">${t.created_at?new Date(t.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):''}</td>
+      <td style="font-size:11px;color:var(--text3)">${t.cashier_name||'—'}</td>
+      <td style="font-size:11px;color:var(--text3)">${t.created_at?new Date(t.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):''}</td>
       <td>
         <div class="act-row">
           <button class="act-btn" onclick="printReceipt(${t.id})" title="Print Struk">🖨</button>
@@ -549,14 +549,14 @@ async function openCashierReport() {
         <div style="font-size:12px;color:#1565C0">NET REVENUE</div>
       </div>
     </div>
-    <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">Per Metode Pembayaran</div>
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">Per Metode Pembayaran</div>
     ${Object.entries(byMethod).map(([method,amount])=>{
       const pm=PAYMENT_METHODS.find(m=>m.id===method)||{icon:'💰',label:method};
       return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
         <span>${pm.icon} ${pm.label}</span>
         <span style="font-weight:700">${formatCurrency(amount)}</span>
       </div>`;
-    }).join('')||'<div style="color:var(--gray);font-size:13px">Belum ada transaksi</div>'}
+    }).join('')||'<div style="color:var(--text3);font-size:13px">Belum ada transaksi</div>'}
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
       <button class="btn btn-teal btn-sm" onclick="window.print()">🖨 Print</button>

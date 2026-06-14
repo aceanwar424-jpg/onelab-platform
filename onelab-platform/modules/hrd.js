@@ -53,7 +53,7 @@ async function renderHRD() {
     <!-- Leave Tab -->
     <div id="hrd-leave" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:14px;font-weight:700;color:var(--navy)">Pengajuan Cuti & Izin</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text)">Pengajuan Cuti & Izin</div>
         <button class="btn btn-teal btn-sm" onclick="openLeaveForm()">+ Ajukan Cuti</button>
       </div>
       <div class="table-wrap">
@@ -116,7 +116,7 @@ function renderHRDKPI() {
       border-left:4px solid ${k.color}">
       <div style="font-size:20px">${k.icon}</div>
       <div style="font-size:${k.val.toString().length>8?'12px':'16px'};font-weight:800;color:${k.color}">${k.val}</div>
-      <div style="font-size:10px;color:var(--gray)">${k.label}</div>
+      <div style="font-size:10px;color:var(--text3)">${k.label}</div>
     </div>`).join('');
 }
 
@@ -155,23 +155,23 @@ function renderEmpTable(data) {
           ${(e.full_name||'?').charAt(0).toUpperCase()}
         </div>
         <div>
-          <div style="font-weight:700;color:var(--navy)">${e.full_name||'—'}</div>
-          <div style="font-size:11px;color:var(--gray)">${e.employee_id||'—'}</div>
+          <div style="font-weight:700;color:var(--text)">${e.full_name||'—'}</div>
+          <div style="font-size:11px;color:var(--text3)">${e.employee_id||'—'}</div>
         </div>
       </div>
     </td>
     <td>
       <div style="font-size:12px;font-weight:600">${e.position||'—'}</div>
-      <div style="font-size:11px;color:var(--gray)">${e.division||'—'}</div>
+      <div style="font-size:11px;color:var(--text3)">${e.division||'—'}</div>
     </td>
     <td>
       <div style="font-size:12px">${e.phone||'—'}</div>
-      <div style="font-size:11px;color:var(--gray)">${e.email||'—'}</div>
+      <div style="font-size:11px;color:var(--text3)">${e.email||'—'}</div>
     </td>
     <td><span style="background:${(stColors[e.status]||'#94A3B8')}20;color:${stColors[e.status]||'#94A3B8'};
       padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${e.status||'—'}</span></td>
-    <td style="font-size:12px;font-weight:600;color:var(--navy)">${e.base_salary?formatCurrency(e.base_salary):'—'}</td>
-    <td style="font-size:11px;color:var(--gray)">${e.join_date?formatDateShort(e.join_date):'—'}</td>
+    <td style="font-size:12px;font-weight:600;color:var(--text)">${e.base_salary?formatCurrency(e.base_salary):'—'}</td>
+    <td style="font-size:11px;color:var(--text3)">${e.join_date?formatDateShort(e.join_date):'—'}</td>
     <td>
       <div class="act-row">
         <button class="act-btn edit" onclick="openEmpForm(${e.id})">✏️</button>
@@ -253,7 +253,7 @@ async function openEmpForm(id=null) {
     </div>
 
     <div style="border-top:1px solid var(--border);margin:12px 0;padding-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
         Info Penggajian
       </div>
       <div class="form-row">
@@ -359,9 +359,9 @@ function renderLeaveTable(data) {
     return `<tr>
       <td style="font-weight:600">${l.employee_name||'—'}</td>
       <td style="font-size:12px">${l.leave_type||'—'}</td>
-      <td style="font-size:12px;color:var(--gray)">${l.start_date?formatDateShort(l.start_date):'—'}${l.end_date&&l.end_date!==l.start_date?' s/d '+formatDateShort(l.end_date):''}</td>
+      <td style="font-size:12px;color:var(--text3)">${l.start_date?formatDateShort(l.start_date):'—'}${l.end_date&&l.end_date!==l.start_date?' s/d '+formatDateShort(l.end_date):''}</td>
       <td style="text-align:center;font-weight:700">${l.total_days||1}</td>
-      <td style="font-size:12px;color:var(--gray);max-width:150px">${(l.reason||'—').substring(0,40)}</td>
+      <td style="font-size:12px;color:var(--text3);max-width:150px">${(l.reason||'—').substring(0,40)}</td>
       <td><span style="background:${sc}20;color:${sc};padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${l.status||'Pending'}</span></td>
       <td>
         <div class="act-row">
@@ -487,7 +487,7 @@ function renderPayrollTab() {
         {label:'Est. Total Net (stlh BPJS 4%)',val:formatCurrency(totalNet),color:'#22C55E'},
       ].map(k=>`<div class="card" style="text-align:center">
         <div style="font-size:18px;font-weight:800;color:${k.color}">${k.val}</div>
-        <div style="font-size:11px;color:var(--gray)">${k.label}</div>
+        <div style="font-size:11px;color:var(--text3)">${k.label}</div>
       </div>`).join('')}
     </div>
     <div class="table-wrap">
@@ -500,11 +500,11 @@ function renderPayrollTab() {
         const net=(e.base_salary||0)-bpjs;
         return `<tr>
           <td style="font-weight:600">${e.full_name}</td>
-          <td style="font-size:12px;color:var(--gray)">${e.division||'—'}</td>
+          <td style="font-size:12px;color:var(--text3)">${e.division||'—'}</td>
           <td>${e.base_salary?formatCurrency(e.base_salary):'—'}</td>
           <td style="color:#EF4444">${bpjs?formatCurrency(bpjs):'—'}</td>
           <td style="font-weight:700;color:#22C55E">${net?formatCurrency(net):'—'}</td>
-          <td style="font-size:12px;color:var(--gray)">${e.bank_name||'—'} ${e.bank_account||''}</td>
+          <td style="font-size:12px;color:var(--text3)">${e.bank_name||'—'} ${e.bank_account||''}</td>
         </tr>`;
       }).join('')}
       </tbody></table>

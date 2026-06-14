@@ -1,102 +1,65 @@
 // ═══════════════════════════════════════════
-// MODULE: Executive Dashboard v2
-// - KPI: Partner, Leads, Revenue, Pipeline
-// - Follow-up Reminder widget
-// - Team Performance
-// - Pipeline bar + recent activity
+// MODULE: Executive Dashboard v4 — Modern UI
 // ═══════════════════════════════════════════
 
 async function renderDashboard() {
   const user = getUserName ? getUserName() : 'User';
   const now  = new Date();
   const greeting = now.getHours() < 12 ? 'Selamat Pagi' : now.getHours() < 17 ? 'Selamat Siang' : 'Selamat Sore';
+  const dateStr = now.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
       <div>
-        <h1>${greeting}, ${user}! 👋</h1>
-        <p>Ringkasan performa sales dan operasional OneLab hari ini</p>
+        <h1 style="font-size:22px">${greeting}, ${user}! 👋</h1>
+        <p>${dateStr} · Ringkasan performa OneLab hari ini</p>
       </div>
       <div class="btn-row">
-        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">🔄 Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderDashboard()">↻ Refresh</button>
         <button class="btn btn-teal" onclick="navigate('leads');setTimeout(openLeadForm,300)">+ Tambah Lead</button>
       </div>
     </div>
-
-    <!-- Reminder Alert -->
     <div id="dash-reminder"></div>
-
-    <!-- KPI Row 1: Sales -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px" id="dash-kpi">
-      ${[1,2,3,4,5,6].map(i=>`
-        <div class="kpi-card" style="border-left-color:var(--border)">
-          <div class="kpi-icon" style="background:var(--lgray)"><div class="spinner" style="width:20px;height:20px;border-width:2px"></div></div>
-          <div><div class="kpi-val" style="font-size:16px;color:#ccc">—</div><div class="kpi-label">Loading...</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:20px" id="dash-kpi">
+      ${[1,2,3,4,5,6].map(()=>`
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:var(--bg2)"><div class="spinner" style="width:18px;height:18px;border-width:2px"></div></div>
+          <div><div class="kpi-val" style="font-size:20px;color:var(--border2)">—</div><div class="kpi-label">Memuat...</div></div>
         </div>`).join('')}
     </div>
-
-    <!-- Pipeline Bar -->
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:10px">Sales Pipeline</div>
-      <div id="dash-pipeline-bar" style="display:flex;gap:3px;height:10px;border-radius:6px;overflow:hidden;margin-bottom:8px"></div>
-      <div id="dash-pipeline-legend" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+    <div class="card" style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title">📊 Sales Pipeline</div>
+        <span style="font-size:12px;color:var(--text3)" id="dash-pipeline-total">—</span>
+      </div>
+      <div id="dash-pipeline-bar" style="display:flex;gap:3px;height:10px;border-radius:10px;overflow:hidden;margin-bottom:12px;background:var(--bg2)"></div>
+      <div id="dash-pipeline-legend" style="display:flex;gap:14px;flex-wrap:wrap"></div>
     </div>
-
-    <!-- 2 column layout -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-
-      <!-- Follow-up Reminder -->
+    <div class="grid-2" style="margin-bottom:18px">
       <div class="card">
-        <div class="card-title" style="margin-bottom:10px">⏰ Follow-up Hari Ini</div>
-        <div id="dash-followup"><div class="loading-row" style="padding:20px"><div class="spinner"></div></div></div>
+        <div class="card-title" style="margin-bottom:12px">⏰ Follow-up Hari Ini</div>
+        <div id="dash-followup"><div class="loading-row" style="padding:24px"><div class="spinner"></div></div></div>
       </div>
-
-      <!-- Recent Deals -->
       <div class="card">
-        <div class="card-title" style="margin-bottom:10px">🤝 Output Kerjasama Terbaru</div>
-        <div id="dash-deals"><div class="loading-row" style="padding:20px"><div class="spinner"></div></div></div>
+        <div class="card-title" style="margin-bottom:12px">🤝 Kerjasama Terbaru</div>
+        <div id="dash-deals"><div class="loading-row" style="padding:24px"><div class="spinner"></div></div></div>
       </div>
-
     </div>
-
-    <!-- Team Performance + Activity -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-
+    <div class="grid-2">
       <div class="card">
-        <div class="card-title" style="margin-bottom:10px">👥 Team Performance (Bulan Ini)</div>
-        <div id="dash-team"><div class="loading-row" style="padding:20px"><div class="spinner"></div></div></div>
+        <div class="card-title" style="margin-bottom:12px">👥 Team Performance Bulan Ini</div>
+        <div id="dash-team"><div class="loading-row" style="padding:24px"><div class="spinner"></div></div></div>
       </div>
-
       <div class="card">
-        <div class="card-title" style="margin-bottom:10px">📋 Aktivitas Terbaru</div>
+        <div class="card-title" style="margin-bottom:12px">📋 Aktivitas Terbaru</div>
         <div id="dash-activity" style="max-height:280px;overflow-y:auto">
-          <div class="loading-row" style="padding:20px"><div class="spinner"></div></div>
+          <div class="loading-row" style="padding:24px"><div class="spinner"></div></div>
         </div>
       </div>
-
     </div>`;
 
-  // Load all data in parallel
   await loadDashboardData();
 }
-
-async function loadDashboardData() {
-  const now    = new Date();
-  const today  = now.toISOString().split('T')[0];
-  const month  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const tomorrow = new Date(now.getTime() + 86400000).toISOString().split('T')[0];
-
-  try {
-    const [partners, leads, deals, invoices, activity] = await Promise.all([
-      sbGet('partners','select=id,status,assigned_name,created_at').catch(()=>[]),
-      sbGet('leads','select=id,status,estimated_value,assigned_name,followup_date,lead_name,company').catch(()=>[]),
-      sbGet('partner_deals','select=id,deal_name,deal_type,value,status,partner_id,created_at,created_by_name').catch(()=>[]),
-      sbGet('invoices','select=id,total_amount,status,created_at').catch(()=>[]),
-      sbGet('activity_logs','select=*&order=created_at.desc&limit=20').catch(()=>[]),
-    ]);
-
-    // ── KPI Cards ──────────────────────────
-    const totalPartners   = (partners||[]).length;
     const activePartners  = (partners||[]).filter(p=>p.status==='Aktif').length;
     const newPartnersMonth= (partners||[]).filter(p=>p.created_at?.startsWith(month)).length;
 
@@ -129,7 +92,7 @@ async function loadDashboardData() {
         <div style="min-width:0">
           <div class="kpi-val" style="color:${k.color}">${k.val}</div>
           <div class="kpi-label">${k.label}</div>
-          <div style="font-size:10px;color:var(--gray);margin-top:2px">${k.sub}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">${k.sub}</div>
         </div>
       </div>`).join('');
 
@@ -144,6 +107,7 @@ async function loadDashboardData() {
     (partners||[]).forEach(p=>{if(pCounts[p.status]!==undefined)pCounts[p.status]++;});
     const pTotal = Math.max(totalPartners, 1);
 
+    const ptEl=document.getElementById('dash-pipeline-total');if(ptEl)ptEl.textContent=totalPartners+' total partner';
     document.getElementById('dash-pipeline-bar').innerHTML = Object.entries(STATUS_COLORS)
       .filter(([s])=>pCounts[s]>0)
       .map(([s,c])=>`<div style="flex:${pCounts[s]};background:${c};min-width:4px" title="${s}: ${pCounts[s]}"></div>`)
@@ -151,7 +115,7 @@ async function loadDashboardData() {
     document.getElementById('dash-pipeline-legend').innerHTML = Object.entries(STATUS_COLORS)
       .map(([s,c])=>`<div style="display:flex;align-items:center;gap:4px">
         <div style="width:10px;height:10px;border-radius:2px;background:${c}"></div>
-        <span style="font-size:11px;color:var(--gray)">${s} <strong>${pCounts[s]}</strong></span>
+        <span style="font-size:11px;color:var(--text3)">${s} <strong>${pCounts[s]}</strong></span>
       </div>`).join('');
 
     // ── Follow-up Reminder ──────────────────
@@ -175,7 +139,7 @@ async function loadDashboardData() {
               style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
               <div style="width:8px;height:8px;border-radius:50%;background:${isOverdue?'#EF4444':'#F59E0B'};flex-shrink:0"></div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                   ${l.lead_name||l.company||'—'}
                 </div>
                 <div style="font-size:11px;color:${isOverdue?'#EF4444':'#F59E0B'}">
@@ -211,8 +175,8 @@ async function loadDashboardData() {
           return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
             <div style="width:8px;height:32px;border-radius:2px;background:${c};flex-shrink:0"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.deal_name||'—'}</div>
-              <div style="font-size:10px;color:var(--gray)">${d.deal_type||''} · ${d.created_by_name||'—'}</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.deal_name||'—'}</div>
+              <div style="font-size:10px;color:var(--text3)">${d.deal_type||''} · ${d.created_by_name||'—'}</div>
             </div>
             ${d.value?`<div style="font-size:12px;font-weight:700;color:var(--teal);white-space:nowrap">${formatCurrency(d.value)}</div>`:''}
           </div>`;
@@ -248,9 +212,9 @@ async function loadDashboardData() {
                   display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">
                   ${i+1}
                 </div>
-                <span style="font-size:12px;font-weight:600;color:var(--navy)">${name}</span>
+                <span style="font-size:12px;font-weight:600;color:var(--text)">${name}</span>
               </div>
-              <span style="font-size:11px;color:var(--gray)">${s.won} won · ${s.active} aktif</span>
+              <span style="font-size:11px;color:var(--text3)">${s.won} won · ${s.active} aktif</span>
             </div>
             <div style="background:var(--lgray);border-radius:4px;height:6px;overflow:hidden">
               <div style="height:100%;width:${Math.round(s.won/maxWon*100)}%;background:var(--teal);border-radius:4px"></div>
@@ -278,7 +242,7 @@ async function loadDashboardData() {
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;color:var(--text);line-height:1.4">${a.description||a.action||'—'}</div>
-              <div style="font-size:10px;color:var(--gray);margin-top:2px">${a.user_name||'—'} · ${timeAgo(a.created_at)}</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">${a.user_name||'—'} · ${timeAgo(a.created_at)}</div>
             </div>
           </div>`).join('');
       }

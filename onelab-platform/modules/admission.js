@@ -88,7 +88,7 @@ function renderAdmKPI() {
     <div style="background:#fff;border-radius:10px;padding:10px 12px;border:1px solid var(--border);border-left:4px solid ${k.color}">
       <div style="font-size:18px">${k.icon}</div>
       <div style="font-size:16px;font-weight:800;color:${k.color}">${k.val}</div>
-      <div style="font-size:10px;color:var(--gray)">${k.label}</div>
+      <div style="font-size:10px;color:var(--text3)">${k.label}</div>
     </div>`).join('');
 }
 
@@ -128,21 +128,21 @@ function renderAdmList(data) {
       <div class="card" style="padding:12px 16px;border-left:4px solid ${st.color}">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <!-- Visit Number -->
-          <div style="font-size:11px;font-family:monospace;color:var(--gray);min-width:120px">
+          <div style="font-size:11px;font-family:monospace;color:var(--text3);min-width:120px">
             ${a.visit_number||'—'}
           </div>
           <!-- Patient -->
           <div style="flex:1;min-width:150px">
-            <div style="font-weight:700;color:var(--navy)">${a.patient_name||'—'}</div>
-            <div style="font-size:11px;color:var(--gray)">
+            <div style="font-weight:700;color:var(--text)">${a.patient_name||'—'}</div>
+            <div style="font-size:11px;color:var(--text3)">
               ${a.patient_gender||''} ${a.patient_age?'· '+a.patient_age+' thn':''} 
               ${a.patient_phone?'· '+a.patient_phone:''}
             </div>
           </div>
           <!-- Package/Service -->
           <div style="min-width:140px">
-            <div style="font-size:12px;font-weight:600;color:var(--navy)">${a.package_name||'Layanan Individual'}</div>
-            <div style="font-size:11px;color:var(--gray)">${a.visit_type||'Walk-in'}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${a.package_name||'Layanan Individual'}</div>
+            <div style="font-size:11px;color:var(--text3)">${a.visit_type||'Walk-in'}</div>
           </div>
           <!-- Status -->
           <div>
@@ -151,7 +151,7 @@ function renderAdmList(data) {
           </div>
           <!-- Amount -->
           <div style="text-align:right;min-width:100px">
-            <div style="font-size:13px;font-weight:700;color:var(--navy)">${formatCurrency(a.net_amount||0)}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${formatCurrency(a.net_amount||0)}</div>
             <div style="font-size:10px;color:${a.payment_status==='Paid'?'#22C55E':'#F59E0B'}">
               ${a.payment_status||'Unpaid'}
             </div>
@@ -251,7 +251,7 @@ async function openAdmissionForm(id=null) {
     </div>
 
     <!-- Patient Info -->
-    <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Data Pasien</div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Data Pasien</div>
     <div class="form-row">
       <div class="form-group" style="grid-column:1/-1">
         <label>Nama Lengkap *</label>
@@ -290,7 +290,7 @@ async function openAdmissionForm(id=null) {
 
     <!-- Service -->
     <div style="border-top:1px solid var(--border);padding-top:12px;margin:8px 0">
-      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Layanan & Billing</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Layanan & Billing</div>
       <div class="form-row">
         <div class="form-group" style="grid-column:1/-1">
           <label>Paket Pemeriksaan</label>
@@ -437,8 +437,8 @@ async function renderAdmissionReport() {
         {l:'Revenue', v:formatCurrency(admAll.filter(a=>a.payment_status==='Paid').reduce((s,a)=>s+(a.net_amount||0),0))},
         {l:'Unpaid', v:formatCurrency(admAll.filter(a=>a.payment_status==='Unpaid').reduce((s,a)=>s+(a.net_amount||0),0))},
       ].map(k=>`<div style="background:var(--lgray);border-radius:8px;padding:12px">
-        <div style="font-size:16px;font-weight:800;color:var(--navy)">${k.v}</div>
-        <div style="font-size:11px;color:var(--gray)">${k.l}</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text)">${k.v}</div>
+        <div style="font-size:11px;color:var(--text3)">${k.l}</div>
       </div>`).join('')}
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button></div>`);

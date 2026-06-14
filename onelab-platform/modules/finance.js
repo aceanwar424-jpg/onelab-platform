@@ -18,19 +18,19 @@ async function renderFinance() {
     <!-- KPI Cards -->
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px">
       <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Total Tagihan</div>
-        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-top:4px" id="fin-total-inv">—</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Total Tagihan</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:4px" id="fin-total-inv">—</div>
       </div>
       <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Sudah Dibayar</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Sudah Dibayar</div>
         <div style="font-size:20px;font-weight:800;color:#22C55E;margin-top:4px" id="fin-paid">—</div>
       </div>
       <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Belum Dibayar</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Belum Dibayar</div>
         <div style="font-size:20px;font-weight:800;color:#F59E0B;margin-top:4px" id="fin-unpaid">—</div>
       </div>
       <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Overdue</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Overdue</div>
         <div style="font-size:20px;font-weight:800;color:#EF4444;margin-top:4px" id="fin-overdue">—</div>
       </div>
     </div>
@@ -68,12 +68,12 @@ async function renderFinance() {
         <div class="card">
           <div class="card-title" style="margin-bottom:12px">📈 Revenue Bulanan</div>
           <div id="fin-chart-monthly" style="height:180px;display:flex;align-items:flex-end;gap:4px;padding:10px 0">
-            <div style="color:var(--gray);font-size:12px">Data akan tampil setelah ada invoice</div>
+            <div style="color:var(--text3);font-size:12px">Data akan tampil setelah ada invoice</div>
           </div>
         </div>
         <div class="card">
           <div class="card-title" style="margin-bottom:12px">🥧 Revenue per Tipe Layanan</div>
-          <div id="fin-chart-type" style="font-size:12px;color:var(--gray)">Data akan tampil setelah ada invoice</div>
+          <div id="fin-chart-type" style="font-size:12px;color:var(--text3)">Data akan tampil setelah ada invoice</div>
         </div>
       </div>
     </div>
@@ -133,10 +133,10 @@ function renderInvoiceTable(data) {
     const sc = stColors[i.status]||'#94A3B8';
     const overdue = i.due_date && new Date(i.due_date)<new Date() && i.status!=='Dibayar';
     return `<tr>
-      <td style="font-family:monospace;font-size:12px;font-weight:700;color:var(--navy)">${i.invoice_number||'—'}</td>
+      <td style="font-family:monospace;font-size:12px;font-weight:700;color:var(--text)">${i.invoice_number||'—'}</td>
       <td>${i.partners?.partner_name||i.partner_name||'—'}</td>
-      <td style="font-size:12px;color:var(--gray)">${i.service_type||'—'}</td>
-      <td style="font-weight:700;color:var(--navy)">${formatCurrency(i.total_amount||0)}</td>
+      <td style="font-size:12px;color:var(--text3)">${i.service_type||'—'}</td>
+      <td style="font-weight:700;color:var(--text)">${formatCurrency(i.total_amount||0)}</td>
       <td style="font-size:12px;color:${overdue?'#EF4444':'var(--gray)'}">${i.due_date?formatDateShort(i.due_date):'—'}</td>
       <td><span class="badge" style="background:${sc}20;color:${sc}">${i.status||'Draft'}</span></td>
       <td><div class="act-row">
@@ -222,7 +222,7 @@ async function openInvoiceForm(id=null) {
       </div>
     </div>
     <div style="background:var(--mint);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:13px;font-weight:700;color:var(--navy)">Total Invoice:</span>
+      <span style="font-size:13px;font-weight:700;color:var(--text)">Total Invoice:</span>
       <span style="font-size:18px;font-weight:800;color:var(--teal)" id="if-total-display">Rp 0</span>
     </div>
     <div class="form-group">
@@ -312,7 +312,7 @@ async function loadPayments() {
       <td style="font-family:monospace;font-size:12px">${i.invoice_number}</td>
       <td>${i.partner_name||'—'}</td>
       <td style="font-weight:700;color:#22C55E">${formatCurrency(i.total_amount||0)}</td>
-      <td style="font-size:12px;color:var(--gray)">${i.paid_at?new Date(i.paid_at).toLocaleDateString('id-ID'):'—'}</td>
+      <td style="font-size:12px;color:var(--text3)">${i.paid_at?new Date(i.paid_at).toLocaleDateString('id-ID'):'—'}</td>
     </tr>`).join('')}</tbody></table>`;
   } catch(e){ el.innerHTML=`<div class="status-box status-err">${e.message}</div>`; }
 }
@@ -351,9 +351,9 @@ async function renderFinReport() {
     el.innerHTML=months.map(m=>{
       const h=Math.round((byMonth[m]/max)*140);
       return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div style="font-size:10px;color:var(--navy);font-weight:700">${formatCurrency(byMonth[m]).replace('Rp ','')}</div>
+        <div style="font-size:10px;color:var(--text);font-weight:700">${formatCurrency(byMonth[m]).replace('Rp ','')}</div>
         <div style="width:100%;height:${h}px;background:var(--teal);border-radius:4px 4px 0 0;min-height:4px"></div>
-        <div style="font-size:10px;color:var(--gray)">${m.substring(5)}</div>
+        <div style="font-size:10px;color:var(--text3)">${m.substring(5)}</div>
       </div>`;
     }).join('');
   } catch(e){}

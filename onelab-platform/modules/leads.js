@@ -63,7 +63,7 @@ async function renderLeads() {
           <option value="">Semua Sumber</option>
           ${LEAD_SOURCES.map(s=>`<option>${s}</option>`).join('')}
         </select>
-        <span id="ld-count" style="font-size:12px;color:var(--gray);white-space:nowrap"></span>
+        <span id="ld-count" style="font-size:12px;color:var(--text3);white-space:nowrap"></span>
       </div>
       <div id="leads-tbody">
         <div class="loading-row"><div class="spinner"></div></div>
@@ -99,7 +99,7 @@ function renderLeadsFunnel() {
         border:2px solid ${leadsFilter.status===s.key?s.color:'var(--border)'};
         border-top:4px solid ${s.color};transition:all .15s;text-align:center">
       <div style="font-size:20px;font-weight:800;color:${s.color}">${counts[s.key]}</div>
-      <div style="font-size:10px;color:var(--gray);margin-top:2px;font-weight:600">${s.label}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px;font-weight:600">${s.label}</div>
     </div>`).join('');
 }
 
@@ -180,15 +180,15 @@ function renderLeadsTable(data) {
           const isSoon    = l.followup_date && l.followup_date === today;
           return `<tr>
             <td>
-              <div style="font-weight:700;color:var(--navy)">${l.lead_name||l.company||'—'}</div>
-              ${l.company&&l.lead_name?`<div style="font-size:11px;color:var(--gray)">${l.company}</div>`:''}
+              <div style="font-weight:700;color:var(--text)">${l.lead_name||l.company||'—'}</div>
+              ${l.company&&l.lead_name?`<div style="font-size:11px;color:var(--text3)">${l.company}</div>`:''}
               ${l.category?`<span class="badge badge-gray" style="font-size:10px;margin-top:2px">${l.category}</span>`:''}
             </td>
             <td>
               <div style="font-size:13px">${l.contact_name||l.pic_name||'—'}</div>
               ${l.phone?`<div style="font-size:11px;color:var(--teal)">${l.phone}</div>`:''}
             </td>
-            <td style="font-size:12px;color:var(--gray)">${l.source||'—'}</td>
+            <td style="font-size:12px;color:var(--text3)">${l.source||'—'}</td>
             <td>
               <span style="background:${st.color}20;color:${st.color};padding:3px 10px;
                 border-radius:10px;font-size:11px;font-weight:700;cursor:pointer"
@@ -201,13 +201,13 @@ function renderLeadsTable(data) {
                 <div style="font-size:12px;font-weight:600;color:${isOverdue?'#EF4444':isSoon?'#F59E0B':'var(--text)'}">
                   ${isOverdue?'⚠️ ':''}${isSoon?'📅 Today ':''}${formatDateShort(l.followup_date)}
                 </div>
-                ${l.followup_note?`<div style="font-size:10px;color:var(--gray)">${l.followup_note.substring(0,30)}...</div>`:''}
+                ${l.followup_note?`<div style="font-size:10px;color:var(--text3)">${l.followup_note.substring(0,30)}...</div>`:''}
               ` : '<span style="color:#ccc;font-size:12px">Belum diset</span>'}
             </td>
-            <td style="font-weight:600;color:var(--navy);font-size:13px">
+            <td style="font-weight:600;color:var(--text);font-size:13px">
               ${l.estimated_value ? formatCurrency(l.estimated_value) : '—'}
             </td>
-            <td style="font-size:12px;color:var(--gray)">${l.assigned_name||'—'}</td>
+            <td style="font-size:12px;color:var(--text3)">${l.assigned_name||'—'}</td>
             <td>
               <div class="act-row">
                 <button class="act-btn" onclick="openLeadDetail(${l.id})" title="Detail & Aktivitas">📋</button>
@@ -248,31 +248,31 @@ async function openLeadDetail(id) {
     <!-- Info Grid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:var(--lgray);border-radius:8px;padding:10px 12px">
-        <div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Kontak</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Kontak</div>
         <div style="font-size:13px;font-weight:600">${lead.contact_name||lead.pic_name||'—'}</div>
         ${lead.phone?`<div style="font-size:12px;color:var(--teal)">${lead.phone}</div>`:''}
-        ${lead.email?`<div style="font-size:12px;color:var(--gray)">${lead.email}</div>`:''}
+        ${lead.email?`<div style="font-size:12px;color:var(--text3)">${lead.email}</div>`:''}
       </div>
       <div style="background:var(--lgray);border-radius:8px;padding:10px 12px">
-        <div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Deal Info</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Deal Info</div>
         <div style="font-size:13px;font-weight:700;color:var(--teal)">${lead.estimated_value?formatCurrency(lead.estimated_value):'Belum diestimasi'}</div>
-        <div style="font-size:11px;color:var(--gray)">Assigned: ${lead.assigned_name||'—'}</div>
+        <div style="font-size:11px;color:var(--text3)">Assigned: ${lead.assigned_name||'—'}</div>
       </div>
       ${lead.followup_date?`
         <div style="background:#FFF8E1;border-radius:8px;padding:10px 12px">
-          <div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Next Follow-up</div>
+          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Next Follow-up</div>
           <div style="font-size:13px;font-weight:600;color:#92400E">${formatDateShort(lead.followup_date)}</div>
           ${lead.followup_note?`<div style="font-size:11px;color:#92400E">${lead.followup_note}</div>`:''}
         </div>`:''}
       ${lead.address?`
         <div style="background:var(--lgray);border-radius:8px;padding:10px 12px">
-          <div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Alamat</div>
+          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Alamat</div>
           <div style="font-size:12px">${lead.address}</div>
         </div>`:''}
     </div>
 
     <!-- Activity Tracker -->
-    <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
       <span>📋 Riwayat Aktivitas</span>
       <button class="btn btn-teal btn-xs" onclick="openAddActivity(${id})">+ Catat Aktivitas</button>
     </div>
@@ -282,7 +282,7 @@ async function openLeadDetail(id) {
 
     <!-- Quick Status Change -->
     <div style="border-top:1px solid var(--border);padding-top:12px">
-      <div style="font-size:11px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Update Status</div>
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Update Status</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${LEAD_STATUSES.map(s=>`
           <button onclick="updateLeadStatusFromDetail(${id},'${s.key}')"
@@ -312,7 +312,7 @@ async function loadLeadActivities(leadId) {
 
 function renderActivitiesList(activities) {
   if (!activities.length) return `
-    <div style="text-align:center;padding:20px;color:var(--gray);font-size:13px">
+    <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">
       Belum ada aktivitas tercatat. Klik "+ Catat Aktivitas" untuk mulai.
     </div>`;
 
@@ -328,8 +328,8 @@ function renderActivitiesList(activities) {
         ${icons[a.action]||'📌'}
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--navy)">${a.description||a.action||'—'}</div>
-        <div style="font-size:10px;color:var(--gray);margin-top:2px">
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${a.description||a.action||'—'}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">
           ${a.user_name||'—'} · ${timeAgo(a.created_at)}
         </div>
       </div>
@@ -666,10 +666,10 @@ async function convertLeadToPartner(id) {
       </div>
       <div style="text-align:center;padding:20px 0">
         <div style="font-size:48px;margin-bottom:12px">🎉</div>
-        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">
           ${lead.lead_name||lead.company} sekarang jadi Partner aktif!
         </div>
-        <div style="font-size:13px;color:var(--gray);margin-bottom:20px">Apa langkah selanjutnya?</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Apa langkah selanjutnya?</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <button onclick="closeModalForce();navigate('partners')"
@@ -677,32 +677,32 @@ async function convertLeadToPartner(id) {
             cursor:pointer;text-align:center;transition:all .2s"
           onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
           <div style="font-size:24px">🤝</div>
-          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Partner Database</div>
-          <div style="font-size:11px;color:var(--gray)">Kelola output kerjasama</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:6px">Partner Database</div>
+          <div style="font-size:11px;color:var(--text3)">Kelola output kerjasama</div>
         </button>
         <button onclick="closeModalForce();createMOUFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
           style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
             cursor:pointer;text-align:center;transition:all .2s"
           onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
           <div style="font-size:24px">📜</div>
-          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Buat MOU</div>
-          <div style="font-size:11px;color:var(--gray)">Langsung buat perjanjian</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:6px">Buat MOU</div>
+          <div style="font-size:11px;color:var(--text3)">Langsung buat perjanjian</div>
         </button>
         <button onclick="closeModalForce();createMCUFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
           style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
             cursor:pointer;text-align:center;transition:all .2s"
           onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
           <div style="font-size:24px">🏥</div>
-          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Buat Project MCU</div>
-          <div style="font-size:11px;color:var(--gray)">Setup project & RAB</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:6px">Buat Project MCU</div>
+          <div style="font-size:11px;color:var(--text3)">Setup project & RAB</div>
         </button>
         <button onclick="closeModalForce();createCorporateFromLead(${partner?.[0]?.id||'null'},'${(lead.lead_name||lead.company||'').replace(/'/g,"\\'")}')"
           style="padding:14px;border-radius:10px;border:2px solid var(--border);background:#fff;
             cursor:pointer;text-align:center;transition:all .2s"
           onmouseover="this.style.borderColor='#8B5CF6'" onmouseout="this.style.borderColor='var(--border)'">
           <div style="font-size:24px">🏢</div>
-          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-top:6px">Daftarkan Corporate</div>
-          <div style="font-size:11px;color:var(--gray)">Jika klien korporat dengan kontrak</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:6px">Daftarkan Corporate</div>
+          <div style="font-size:11px;color:var(--text3)">Jika klien korporat dengan kontrak</div>
         </button>
       </div>
       <div class="modal-footer">
@@ -753,7 +753,7 @@ async function renderOKR() {
       <select id="okr-assignee" class="table-filter" onchange="loadOKR()">
         <option value="">Semua Sales</option>
       </select>
-      <span id="okr-count" style="font-size:12px;color:var(--gray)"></span>
+      <span id="okr-count" style="font-size:12px;color:var(--text3)"></span>
     </div>
 
     <div id="okr-list">
@@ -814,7 +814,7 @@ async function loadOKRRealKPI() {
         ].map(k=>`
           <div style="background:#fff;border-radius:10px;padding:12px 14px;border:1px solid var(--border);border-left:4px solid ${k.color}">
             <div style="font-size:18px;font-weight:800;color:${k.color}">${k.val}</div>
-            <div style="font-size:11px;color:var(--gray);margin-top:2px">${k.label}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${k.label}</div>
           </div>`).join('')}
       </div>`;
   } catch(e) {
@@ -879,7 +879,7 @@ function renderOKRList() {
 
   el.innerHTML = Object.entries(byObj).map(([obj, items]) => `
     <div class="card" style="margin-bottom:14px">
-      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px;
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;
         padding-bottom:10px;border-bottom:1px solid var(--border)">
         🎯 ${obj}
       </div>
@@ -891,7 +891,7 @@ function renderOKRList() {
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
               <div>
                 <span style="font-size:13px;font-weight:600;color:var(--text)">${o.metric_type||o.metric||'—'}</span>
-                <span style="font-size:11px;color:var(--gray);margin-left:8px">${o.period||''} · ${o.assigned_name||'Tim'}</span>
+                <span style="font-size:11px;color:var(--text3);margin-left:8px">${o.period||''} · ${o.assigned_name||'Tim'}</span>
               </div>
               <div style="display:flex;gap:6px;align-items:center">
                 <span style="font-size:13px;font-weight:700;color:${color}">${pct}%</span>
@@ -902,9 +902,9 @@ function renderOKRList() {
             <div style="background:var(--lgray);border-radius:4px;height:8px;overflow:hidden;margin-bottom:6px">
               <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .5s"></div>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray)">
-              <span>Realisasi: <strong style="color:var(--navy)">${o.actual||0} ${o.unit||''}</strong></span>
-              <span>Target: <strong style="color:var(--navy)">${o.target||0} ${o.unit||''}</strong></span>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3)">
+              <span>Realisasi: <strong style="color:var(--text)">${o.actual||0} ${o.unit||''}</strong></span>
+              <span>Target: <strong style="color:var(--text)">${o.target||0} ${o.unit||''}</strong></span>
             </div>
           </div>`;
       }).join('')}
@@ -994,8 +994,8 @@ async function openUpdateOKR(id) {
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
     <div style="background:var(--lgray);border-radius:8px;padding:12px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;color:var(--navy)">${o.objective||'—'}</div>
-      <div style="font-size:12px;color:var(--gray);margin-top:4px">${o.metric_type||''} · Target: ${o.target} ${o.unit||''}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text)">${o.objective||'—'}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">${o.metric_type||''} · Target: ${o.target} ${o.unit||''}</div>
     </div>
     <div class="form-group">
       <label>Realisasi Terkini *</label>
