@@ -345,15 +345,19 @@ async function deleteDeal(dealId, partnerId) {
 function openMOUFromDeal(dealId, partnerId, dealName) {
   document.getElementById('deal-overlay')?.remove();
   closeModalForce();
-  navigate('surat');
+  navigate('mou');
   setTimeout(() => {
-    toast('📜 Buat MOU untuk: '+dealName,'info',3000);
-  }, 500);
+    if (typeof openMOUForm === 'function') openMOUForm(null, partnerId, dealId, dealName);
+  }, 400);
 }
 
 // ── Next Step: Project ────────────────────────────
 function openProjectFromDeal(dealId, partnerId, dealName) {
   document.getElementById('deal-overlay')?.remove();
   closeModalForce();
-  toast('📋 Fitur Project Management akan segera hadir!','info',3000);
+  // Pre-fill MCU form with deal data
+  setTimeout(async () => {
+    navigate('mcu');
+    setTimeout(() => openMCUForm(null, partnerId, dealId), 400);
+  }, 200);
 }

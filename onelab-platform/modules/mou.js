@@ -250,3 +250,15 @@ function exportMOUCSV() {
   a.download = `MOU_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.csv`;
   a.click();
 }
+
+async function checkMOURenewals() {
+  try {
+    const today = new Date();
+    const in30  = new Date(today.getTime() + 30*86400000).toISOString().split('T')[0];
+    const data  = await sbGet('mous',
+      `select=mou_number,title,partner_name,end_date&status=eq.Active&end_date=lte.${in30}&end_date=gte.${today.toISOString().split('T')[0]}`);
+    if (data?.length) {
+      toast(`⚠️ ${data.length} MOU akan berakhir dalam 30 hari!`,'warn', 5000);
+    }
+  } catch(e) {}
+}

@@ -701,7 +701,5 @@ function bulkShareWA(){
   });
 }
 
-// ── Utils ─────────────────────────────────────────
-function tryParseJSON(str){
-  try { return JSON.parse(str); } catch(e){ return null; }
+// ── Utils ───────────────────────────────────────── catch(e){ return null; }
 }

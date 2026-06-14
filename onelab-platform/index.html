@@ -54,9 +54,8 @@
       <button class="nav-item" onclick="navigate('okr')" data-page="okr" data-tooltip="OKR & Target Sales">
         <span class="nav-icon">📈</span><span class="nav-label">OKR &amp; Target Sales</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Project MCU — 25 Tahapan + RAB">
+      <button class="nav-item" onclick="navigate('mcu')" data-page="mcu" data-tooltip="Project MCU — 25 Tahapan + RAB">
         <span class="nav-icon">🏥</span><span class="nav-label">Project MCU</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item" onclick="navigate('surat')" data-page="surat" data-tooltip="Surat Keluar">
         <span class="nav-icon">📄</span><span class="nav-label">Surat Keluar</span>
@@ -283,6 +282,7 @@
 <script src="modules/inventory.js"></script>
 <script src="modules/hrd.js"></script>
 <script src="modules/homecare.js"></script>
+<script src="modules/mcu.js"></script>
 <script src="modules/settings.js"></script>
 <script src="modules/settings_users.js"></script>
 
@@ -351,6 +351,8 @@ window.addEventListener('DOMContentLoaded', async () => {
           applyRoleMenu();
           checkConnection();
           navigate('dashboard');
+          // Check renewals after load
+          setTimeout(()=>{ if(typeof checkMOURenewals==='function') checkMOURenewals(); }, 2000);
           return;
         }
       }

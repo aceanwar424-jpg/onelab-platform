@@ -6,6 +6,7 @@
 const PAGE_TITLES = {
   dashboard:'Dashboard', partners:'Partner Database', maps:'Maps Prospecting',
   marketing:'Marketing Kit', voucher:'Voucher Builder', surat:'Surat Keluar',
+  mcu:'Project MCU',
   mou:'MOU / Perjanjian', leads:'Leads Management', okr:'OKR & Target Sales',
   finance:'Finance & Billing', inventory:'Inventory & Logistik',
   hrd:'HRD & SDM', homecare:'Home Care',
@@ -35,6 +36,7 @@ function navigate(page, params={}) {
     case 'marketing':  renderMarketing();      break;
     case 'voucher':    renderVoucher();        break;
     case 'surat':      renderSurat();          break;
+    case 'mcu':        renderMCU(params);      break;
     case 'mou':        renderMOU();            break;
     case 'leads':      renderLeads();          break;
     case 'okr':        renderOKR();            break;
