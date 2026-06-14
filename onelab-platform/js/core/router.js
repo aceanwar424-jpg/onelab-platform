@@ -10,6 +10,9 @@ const PAGE_TITLES = {
   inventory:'Inventory & Logistik', hrd:'HRD & SDM', homecare:'Home Care',
   admission:'Admission / Registrasi', lab:'Operasional Lab',
   product:'Master Produk & Tes', corporate:'Corporate Management',
+  radiology:'Radiology', supportive:'Supportive Examination',
+  medrecord:'Rekam Medis', cashier:'Kasir',
+  package:'Package Service',
   settings:'Pengaturan', users:'User Management',
 };
 
@@ -52,6 +55,13 @@ function navigate(page, params={}) {
     case 'lab':         renderLab(params.tab||'checkin'); break;
     case 'product':     renderConfigProduct();          break;
     case 'corporate':   renderConfigCorporate();        break;
+    case 'radiology':   renderRadiology();              break;
+    case 'supportive':  renderSupportive();             break;
+    case 'spirometry':  renderSupportive();             break;
+    case 'medrecord':   renderMedRecord();              break;
+    case 'cashier':     renderCashier();                break;
+    case 'package':     renderConfigPackage();          break;
+    case 'anamnesa':    renderAdmission();              break;
     case 'settings':    renderSettings();               break;
     case 'users':       renderUsers();                  break;
     default:

@@ -91,29 +91,23 @@
       <button class="nav-item nav-item" onclick="navigate('admission')" data-page="admission" data-tooltip="Admission — FO, BO, Registrasi, Report">
         <span class="nav-icon">🏨</span><span class="nav-label">Admission</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Anamnesa Pasien">
+      <button class="nav-item nav-item" onclick="navigate('admission')" data-page="anamnesa" data-tooltip="Anamnesa Pasien">
         <span class="nav-icon">📋</span><span class="nav-label">Anamnesa</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Radiology">
+      <button class="nav-item nav-item" onclick="navigate('radiology')" data-page="radiology" data-tooltip="Radiology">
         <span class="nav-icon">🫁</span><span class="nav-label">Radiology</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Spirometry">
+      <button class="nav-item nav-item" onclick="navigate('supportive')" data-page="spirometry" data-tooltip="Spirometry">
         <span class="nav-icon">💨</span><span class="nav-label">Spirometry</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Supportive — EKG, dll">
+      <button class="nav-item nav-item" onclick="navigate('supportive')" data-page="supportive" data-tooltip="Supportive — EKG, dll">
         <span class="nav-icon">❤️</span><span class="nav-label">Supportive</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Medical Record Klinik">
+      <button class="nav-item nav-item" onclick="navigate('medrecord')" data-page="medrecord" data-tooltip="Medical Record Klinik">
         <span class="nav-icon">🩺</span><span class="nav-label">Medical Record</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Package Service / Paket MCU">
+      <button class="nav-item nav-item" onclick="navigate('package')" data-page="package" data-tooltip="Package Service / Paket MCU">
         <span class="nav-icon">🗂</span><span class="nav-label">Package Service</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item nav-item-soon" data-tooltip="Satu Sehat — Integrasi BPJS">
         <span class="nav-icon">🏛</span><span class="nav-label">Satu Sehat</span>
@@ -127,37 +121,31 @@
       <button class="nav-item" onclick="navigate('homecare')" data-page="homecare" data-tooltip="Order Home Care">
         <span class="nav-icon">🏠</span><span class="nav-label">Order Home Care</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Jadwal Kunjungan">
+      <button class="nav-item nav-item" onclick="renderHCSchedule()" data-page="hc-schedule" data-tooltip="Jadwal Kunjungan">
         <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kunjungan</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Billing Fee Nakes">
+      <button class="nav-item nav-item" onclick="renderHCBilling()" data-page="hc-billing" data-tooltip="Billing Fee Nakes">
         <span class="nav-icon">💵</span><span class="nav-label">Billing Fee Nakes</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Management Result">
+      <button class="nav-item nav-item" onclick="navigate('medrecord')" data-page="hc-result" data-tooltip="Management Result">
         <span class="nav-icon">📊</span><span class="nav-label">Management Result</span>
-        <span class="nav-soon">soon</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Report Home Care">
+      <button class="nav-item nav-item" onclick="renderHCFullReport()" data-page="hc-report" data-tooltip="Report Home Care">
         <span class="nav-icon">📈</span><span class="nav-label">Report</span>
-        <span class="nav-soon">soon</span>
       </button>
     </div>
 
     <!-- ── FINANCE & BILLING ── -->
     <div class="nav-group">
       <div class="nav-group-label">Finance &amp; Billing</div>
-      <button class="nav-item nav-item-soon" data-tooltip="Cashier — Transaksi, Refund, Cancel, Kontrak">
+      <button class="nav-item nav-item" onclick="navigate('cashier')" data-page="cashier" data-tooltip="Cashier — Transaksi, Refund, Cancel, Kontrak">
         <span class="nav-icon">🏧</span><span class="nav-label">Cashier</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item" onclick="navigate('finance')" data-page="finance" data-tooltip="Invoice & Tagihan">
         <span class="nav-icon">💰</span><span class="nav-label">Invoice &amp; Tagihan</span>
       </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Tagihan Piutang AR">
+      <button class="nav-item nav-item" onclick="navigate('finance')" data-page="finance-ar" data-tooltip="Tagihan Piutang AR">
         <span class="nav-icon">📑</span><span class="nav-label">Tagihan Piutang AR</span>
-        <span class="nav-soon">soon</span>
       </button>
       <button class="nav-item" onclick="navigate('finance')" data-page="finance-comm" data-tooltip="Komisi Sales">
         <span class="nav-icon">🏆</span><span class="nav-label">Komisi Sales</span>
@@ -277,6 +265,10 @@
 <script src="modules/mcu.js"></script>
 <script src="modules/admission.js"></script>
 <script src="modules/lab.js"></script>
+<script src="modules/radiology.js"></script>
+<script src="modules/supportive.js"></script>
+<script src="modules/medrecord.js"></script>
+<script src="modules/cashier.js"></script>
 <script src="modules/config_product.js"></script>
 <script src="modules/config_package.js"></script>
 <script src="modules/settings.js"></script>

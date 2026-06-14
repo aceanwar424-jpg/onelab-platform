@@ -342,3 +342,275 @@ function renderHCReport() {
       <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
     </div>`);
 }
+
+// ══════════════════════════════════════════
+// HOME CARE: Jadwal Kunjungan + Billing + Report
+// ══════════════════════════════════════════
+
+async function renderHCSchedule() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><h1>Jadwal Kunjungan Home Care</h1>
+        <p>Kalender harian nakes & assign tugas</p></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="renderHomeCare()">← Orders</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderHCBilling()">💵 Billing Nakes</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderHCFullReport()">📊 Report</button>
+      </div>
+    </div>
+
+    <!-- Date Picker -->
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+      <button class="btn btn-ghost btn-sm" onclick="changeHCDate(-1)">← Kemarin</button>
+      <input type="date" id="hc-sched-date" class="table-filter" style="font-size:14px;font-weight:700"
+        value="${new Date().toISOString().split('T')[0]}" onchange="loadHCSchedule()">
+      <button class="btn btn-ghost btn-sm" onclick="changeHCDate(1)">Besok →</button>
+      <button class="btn btn-teal btn-sm" onclick="document.getElementById('hc-sched-date').value='${new Date().toISOString().split('T')[0]}';loadHCSchedule()">Hari Ini</button>
+    </div>
+
+    <div id="hc-schedule-content">
+      <div class="loading-row"><div class="spinner"></div></div>
+    </div>`;
+
+  await loadHCSchedule();
+}
+
+function changeHCDate(delta) {
+  const el = document.getElementById('hc-sched-date');
+  if (!el) return;
+  const d  = new Date(el.value);
+  d.setDate(d.getDate()+delta);
+  el.value = d.toISOString().split('T')[0];
+  loadHCSchedule();
+}
+
+async function loadHCSchedule() {
+  const el   = document.getElementById('hc-schedule-content'); if (!el) return;
+  const date = document.getElementById('hc-sched-date')?.value||new Date().toISOString().split('T')[0];
+  el.innerHTML = `<div class="loading-row"><div class="spinner"></div></div>`;
+
+  try {
+    const data = await sbGet('homecare_orders',
+      `select=*&scheduled_date=eq.${date}&order=scheduled_time.asc`);
+    const orders = Array.isArray(data)?data:[];
+
+    if (!orders.length) {
+      el.innerHTML=`<div class="empty-state"><div class="ico">📅</div>
+        <h3>Tidak ada jadwal untuk ${formatDateShort(date)}</h3>
+      </div>`; return;
+    }
+
+    // Group by nakes
+    const byNakes = {};
+    orders.forEach(o=>{
+      const key=o.assigned_staff||'Belum Ditugaskan';
+      if (!byNakes[key]) byNakes[key]=[];
+      byNakes[key].push(o);
+    });
+
+    const nakesColors=['#0EA5E9','#22C55E','#8B5CF6','#F59E0B','#EF4444','#00897B'];
+
+    el.innerHTML=`
+      <!-- Summary -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px">
+        ${[
+          {l:'Total Order', v:orders.length,                                          c:'#0A2342'},
+          {l:'Nakes Bertugas',v:Object.keys(byNakes).filter(n=>n!=='Belum Ditugaskan').length, c:'#22C55E'},
+          {l:'Belum Assign', v:byNakes['Belum Ditugaskan']?.length||0,               c:'#EF4444'},
+          {l:'Selesai',      v:orders.filter(o=>o.status==='Selesai').length,         c:'#8B5CF6'},
+        ].map(k=>`<div style="background:#fff;border-radius:10px;padding:10px;border:1px solid var(--border);border-left:4px solid ${k.c};text-align:center">
+          <div style="font-size:18px;font-weight:800;color:${k.c}">${k.v}</div>
+          <div style="font-size:10px;color:var(--gray)">${k.l}</div>
+        </div>`).join('')}
+      </div>
+
+      <!-- Schedule by Nakes -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
+        ${Object.entries(byNakes).map(([nakes,orders],idx)=>`
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+              <div style="width:36px;height:36px;border-radius:50%;background:${nakesColors[idx%nakesColors.length]};
+                color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">
+                ${nakes.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--navy)">${nakes}</div>
+                <div style="font-size:11px;color:var(--gray)">${orders.length} kunjungan</div>
+              </div>
+            </div>
+            ${orders.map(o=>{
+              const stColors={'Baru':'#94A3B8','Dikonfirmasi':'#0EA5E9','Dijadwalkan':'#8B5CF6','Dalam Perjalanan':'#F97316','Sedang Dilayani':'#22C55E','Selesai':'#00897B','Dibatalkan':'#EF4444'};
+              const sc=stColors[o.status]||'#94A3B8';
+              const mapsUrl=o.patient_address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.patient_address)}`:'';
+              const waUrl=o.patient_phone?`https://wa.me/${(o.patient_phone||'').replace(/\D/g,'').replace(/^0/,'62')}?text=${encodeURIComponent(`Halo ${o.patient_name}, kami dari OneLab Diagnostics. Nakes akan mengunjungi Anda pukul ${o.scheduled_time||'sesuai jadwal'} untuk layanan ${o.service_type||'Home Care'}. Terima kasih.`)}`:'';
+              return `
+              <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:var(--teal)">${o.scheduled_time||'—'}</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--navy)">${o.patient_name}</div>
+                    <div style="font-size:11px;color:var(--gray)">${o.service_type||'—'}</div>
+                    <div style="font-size:10px;color:var(--gray);margin-top:2px">${(o.patient_address||'').substring(0,40)}${(o.patient_address||'').length>40?'...':''}</div>
+                  </div>
+                  <span style="background:${sc}20;color:${sc};padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap">${o.status}</span>
+                </div>
+                <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+                  ${mapsUrl?`<a href="${mapsUrl}" target="_blank" class="btn btn-ghost btn-xs">📍 Maps</a>`:''}
+                  ${waUrl?`<a href="${waUrl}" target="_blank" class="btn btn-ghost btn-xs" style="color:#25D366">💬 WA Pasien</a>`:''}
+                  ${o.status!=='Selesai'?`<button class="btn btn-teal btn-xs" onclick="quickStatusHC(${o.id},'${o.status}')">Update</button>`:''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    el.innerHTML=`<div class="status-box status-err">${e.message}</div>`;
+  }
+}
+
+async function quickStatusHC(id, currentStatus) {
+  const flow = ['Baru','Dikonfirmasi','Dijadwalkan','Dalam Perjalanan','Sedang Dilayani','Selesai'];
+  const idx  = flow.indexOf(currentStatus);
+  const next = flow[idx+1];
+  if (!next) return;
+  await updateHCStatus(id, next);
+  await loadHCSchedule();
+}
+
+// ── Billing Nakes ─────────────────────────
+async function renderHCBilling() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><h1>Billing Fee Nakes</h1>
+        <p>Rekap fee per nakes berdasarkan order yang selesai</p></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="renderHCSchedule()">← Jadwal</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <select class="table-filter" id="hcb-month" onchange="loadHCBilling()">
+        ${Array.from({length:12},(_,i)=>{
+          const d=new Date(); d.setMonth(i);
+          return `<option value="${i}" ${i===new Date().getMonth()?'selected':''}>${d.toLocaleDateString('id-ID',{month:'long'})}</option>`;
+        }).join('')}
+      </select>
+      <select class="table-filter" id="hcb-year" onchange="loadHCBilling()">
+        ${[2024,2025,2026].map(y=>`<option${y===new Date().getFullYear()?' selected':''}>${y}</option>`).join('')}
+      </select>
+      <span id="hcb-summary" style="font-size:13px;color:var(--gray)"></span>
+    </div>
+
+    <div id="hcb-content"><div class="loading-row"><div class="spinner"></div></div></div>`;
+
+  await loadHCBilling();
+}
+
+async function loadHCBilling() {
+  const el    = document.getElementById('hcb-content'); if (!el) return;
+  const month = document.getElementById('hcb-month')?.value;
+  const year  = document.getElementById('hcb-year')?.value||new Date().getFullYear();
+  const m     = String(parseInt(month)+1).padStart(2,'0');
+  const from  = `${year}-${m}-01`;
+  const to    = `${year}-${m}-31`;
+
+  try {
+    const data = await sbGet('homecare_orders',
+      `select=*&status=eq.Selesai&scheduled_date=gte.${from}&scheduled_date=lte.${to}&order=assigned_staff.asc`);
+    const orders = Array.isArray(data)?data:[];
+
+    const byNakes={};
+    orders.forEach(o=>{
+      const n=o.assigned_staff||'Tidak Diketahui';
+      if (!byNakes[n]) byNakes[n]={name:n,orders:[],total:0,fee:0};
+      byNakes[n].orders.push(o);
+      byNakes[n].total+=(o.total_amount||0);
+      byNakes[n].fee  +=(o.total_amount||0)*0.15; // 15% fee default
+    });
+
+    const sumEl=document.getElementById('hcb-summary');
+    if (sumEl) sumEl.textContent=`${orders.length} order selesai · ${Object.keys(byNakes).length} nakes`;
+
+    if (!Object.keys(byNakes).length) {
+      el.innerHTML=`<div class="empty-state"><div class="ico">💵</div><h3>Belum ada order selesai bulan ini</h3></div>`; return;
+    }
+
+    el.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>
+        <th>Nakes</th><th>Jumlah Order</th><th>Total Revenue</th><th>Fee 15%</th><th>Detail</th>
+      </tr></thead><tbody>
+      ${Object.values(byNakes).map(n=>`<tr>
+        <td style="font-weight:700;color:var(--navy)">${n.name}</td>
+        <td style="text-align:center;font-weight:600">${n.orders.length}</td>
+        <td style="font-weight:700">${formatCurrency(n.total)}</td>
+        <td style="font-weight:800;color:#22C55E">${formatCurrency(n.fee)}</td>
+        <td>
+          <button class="btn btn-ghost btn-xs" onclick="showNakesDetail('${n.name.replace(/'/g,"\\'")}',${JSON.stringify(n.orders.map(o=>o.id)).replace(/"/g,'&quot;')})">
+            Detail
+          </button>
+        </td>
+      </tr>`).join('')}
+      <tr style="background:var(--lgray);font-weight:800">
+        <td>TOTAL</td>
+        <td style="text-align:center">${orders.length}</td>
+        <td>${formatCurrency(Object.values(byNakes).reduce((s,n)=>s+n.total,0))}</td>
+        <td style="color:#22C55E">${formatCurrency(Object.values(byNakes).reduce((s,n)=>s+n.fee,0))}</td>
+        <td></td>
+      </tr>
+      </tbody></table></div>`;
+  } catch(e) { el.innerHTML=`<div class="status-box status-err">${e.message}</div>`; }
+}
+
+async function renderHCFullReport() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><h1>Report Home Care</h1><p>Rekap kunjungan dan revenue per periode</p></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="renderHomeCare()">← Orders</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <input type="date" class="table-filter" id="hcr-from" value="${new Date(Date.now()-30*86400000).toISOString().split('T')[0]}">
+      <span style="align-self:center;color:var(--gray)">s/d</span>
+      <input type="date" class="table-filter" id="hcr-to" value="${new Date().toISOString().split('T')[0]}">
+      <button class="btn btn-teal btn-sm" onclick="loadHCReport()">🔍 Tampilkan</button>
+    </div>
+    <div id="hcr-content"><div class="loading-row"><div class="spinner"></div></div></div>`;
+  await loadHCReport();
+}
+
+async function loadHCReport() {
+  const el   = document.getElementById('hcr-content'); if (!el) return;
+  const from = document.getElementById('hcr-from')?.value;
+  const to   = document.getElementById('hcr-to')?.value;
+  el.innerHTML=`<div class="loading-row"><div class="spinner"></div></div>`;
+  try {
+    const data = await sbGet('homecare_orders',
+      `select=*&scheduled_date=gte.${from}&scheduled_date=lte.${to}&order=scheduled_date.desc`);
+    const orders = Array.isArray(data)?data:[];
+    const done   = orders.filter(o=>o.status==='Selesai');
+    const rev    = done.reduce((s,o)=>s+(o.total_amount||0),0);
+    const byService={};
+    done.forEach(o=>{ byService[o.service_type||'Lainnya']=(byService[o.service_type||'Lainnya']||0)+1; });
+
+    el.innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+        ${[
+          {l:'Total Order',v:orders.length,c:'#0A2342'},
+          {l:'Selesai',    v:done.length,  c:'#22C55E'},
+          {l:'Dibatalkan', v:orders.filter(o=>o.status==='Dibatalkan').length,c:'#EF4444'},
+          {l:'Revenue',    v:formatCurrency(rev),c:'#8B5CF6'},
+        ].map(k=>`<div style="background:#fff;border-radius:10px;padding:12px;border:1px solid var(--border);border-left:4px solid ${k.c}">
+          <div style="font-size:${String(k.v).length>8?'12px':'16px'};font-weight:800;color:${k.c}">${k.v}</div>
+          <div style="font-size:10px;color:var(--gray)">${k.l}</div>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px">Per Jenis Layanan</div>
+        ${Object.entries(byService).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span>${s}</span><strong>${c} order</strong>
+          </div>`).join('')||'<div style="color:var(--gray)">Belum ada data</div>'}
+      </div>`;
+  } catch(e) { el.innerHTML=`<div class="status-box status-err">${e.message}</div>`; }
+}
