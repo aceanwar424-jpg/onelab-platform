@@ -1121,27 +1121,20 @@ select { cursor: pointer; }
 }
 
 /* ══════════════════════════════════════
-   LEGACY COMPAT (old code references)
+   LEGACY COMPAT — old variable aliases
 ══════════════════════════════════════ */
---teal2: var(--teal2);
---lgray: var(--bg2);
---mint: var(--teal-light);
---border: var(--border);
---gray: var(--text3);
-
-.badge-teal { background: #ECFEFF; color: #0E7490; }
-
-/* ── BACKWARD COMPAT: old variable aliases ── */
 :root {
-  --lgray:   #F1F5F9;
-  --mint:    #E0F7FA;
-  --gray:    #64748B;
-  --radius:  10px;
+  --lgray:    #F1F5F9;
+  --mint:     #E0F7FA;
+  --gray:     #64748B;
+  --navy2:    #102848;
+  --radius:   10px;
   --radius-sm: 6px;
-  --shadow-md: 0 8px 32px rgba(0,0,0,.13);
 }
 
 /* Conn status dot colors */
+#conn-dot.ok     { background: var(--success) !important; }
+#conn-dot.error   { background: var(--danger) !important; }
 #conn-dot.online  { background: var(--success) !important; }
 #conn-dot.offline { background: var(--danger) !important; }
 
