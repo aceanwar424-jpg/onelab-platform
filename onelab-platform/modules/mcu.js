@@ -641,23 +641,64 @@ async function saveMCU(id) {
   };
   if (code) { payload.project_code = code; payload.current_step = 1; payload.created_by_name = user; }
 
-  try {
-    let projId = id;
-    if (id) {
-      await sbPatch('projects', id, payload);
-      toast('✅ Project diupdate','ok');
-      closeModalForce();
-      openMCUDetail(id);
-    } else {
-      const res = await sbPost('projects', payload);
-      projId = res[0]?.id;
-      toast('✅ Project dibuat! Lanjut ke RAB...','ok');
-      closeModalForce();
-      mcuProjects = [];
-      await loadMCUProjects();
-      if (projId) setTimeout(()=>openRABModal(projId), 400);
+  // If new columns not yet migrated, try without them
+  const tryPayload = async (pl) => {
+    try {
+      if (id) {
+        await sbPatch('projects', id, pl);
+        toast('✅ Project diupdate','ok');
+        closeModalForce();
+        openMCUDetail(id);
+      } else {
+        const res = await sbPost('projects', pl);
+        const projId = res[0]?.id;
+        toast('✅ Project dibuat! Lanjut ke RAB...','ok');
+        closeModalForce();
+        mcuProjects = [];
+        await loadMCUProjects();
+        if (projId) setTimeout(()=>openRABModal(projId), 400);
+      }
+    } catch(e) {
+      // Jika error kolom tidak ada, coba dengan kolom minimal saja
+      if (e.message && (e.message.includes('column') || e.message.includes('schema cache'))) {
+        toast('⚠️ Database perlu migration — menjalankan mode kompatibel...','warn', 3000);
+        const safePayload = {
+          project_name:       pl.project_name,
+          project_type:       pl.project_type,
+          partner_id:         pl.partner_id,
+          partner_name:       pl.partner_name,
+          corporate_id:       pl.corporate_id,
+          start_date:         pl.tanggal_pelaksanaan || null,
+          target_participants:pl.target_participants,
+          value:              pl.nilai_kontrak || 0,
+          location:           pl.location || null,
+          pic_onelab:         pl.pic_sales || null,
+          pic_partner:        pl.pic_spv || null,
+          status:             pl.status,
+          created_by_name:    pl.created_by_name,
+          updated_at:         pl.updated_at,
+          ...(pl.project_code ? { project_code: pl.project_code, current_step: 1 } : {}),
+        };
+        if (id) {
+          await sbPatch('projects', id, safePayload);
+          toast('✅ Disimpan (mode kompatibel). Jalankan migration SQL untuk fitur penuh.','warn', 5000);
+          closeModalForce();
+          openMCUDetail(id);
+        } else {
+          const res = await sbPost('projects', safePayload);
+          const projId = res[0]?.id;
+          toast('✅ Project dibuat (mode kompatibel). Jalankan supabase_mcu_v5_migration.sql!','warn', 6000);
+          closeModalForce();
+          mcuProjects = [];
+          await loadMCUProjects();
+          if (projId) setTimeout(()=>openRABModal(projId), 400);
+        }
+      } else {
+        toast('❌ '+e.message,'err');
+      }
     }
-  } catch(e) { toast('❌ '+e.message,'err'); }
+  };
+  await tryPayload(payload);
 }
 
 // ══════════════════════════════════════════════════════════════
