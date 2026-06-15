@@ -36,6 +36,7 @@ async function renderPartners(params={}) {
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" id="btn-view-toggle" onclick="togglePView()">📊 Kanban</button>
         <button class="btn btn-ghost btn-sm" onclick="exportPartnerCSV()">📥 Export</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('import')">📥 Import Excel</button>
         <button class="btn btn-teal" onclick="openPartnerForm()">+ Tambah Partner</button>
       </div>
     </div>

@@ -62,6 +62,7 @@ function navigate(page, params={}) {
     case 'cashier':     renderCashier();                break;
     case 'package':     renderConfigPackage();          break;
     case 'anamnesa':    renderAdmission();              break;
+    case 'import':      renderImportExcel();            break;
     case 'settings':    renderSettings();               break;
     case 'users':       renderUsers();                  break;
     default:

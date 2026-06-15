@@ -13,6 +13,8 @@ async function renderConfigPackage() {
       <div><h1>Paket Layanan</h1>
         <p>Master paket pemeriksaan — MCU, Screening, Gut Health, dll</p></div>
       <div class="btn-row">
+        <button class="btn btn-teal" onclick="navigate('import')">📥 Import Excel</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportPackagesCSV()">📤 Export</button>
         <button class="btn btn-teal" onclick="openPackageForm()">+ Buat Paket</button>
       </div>
     </div>
@@ -336,6 +338,8 @@ async function renderConfigCorporate() {
         <p>Manajemen klien korporat — kontrak, billing, limit kredit</p></div>
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" onclick="renderConfigHealthFacility()">🏥 Health Facility</button>
+        <button class="btn btn-teal" onclick="navigate('import')">📥 Import</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportCorporatesCSV()">📤 Export</button>
         <button class="btn btn-teal" onclick="openCorpForm()">+ Tambah Corporate</button>
       </div>
     </div>
@@ -1196,4 +1200,25 @@ async function deleteFacility(id) {
   if (!confirm('Hapus fasilitas ini?')) return;
   try { await sbDelete('health_facilities',id); toast('🗑 Dihapus','info'); await loadFacilities(); }
   catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ── Export CSV helpers ─────────────────────────────
+function exportPackagesCSV() {
+  if (!pkgAll?.length) { toast('Tidak ada data','warn'); return; }
+  const h = ['Kode Paket','Nama Paket','Kategori','Segment','Harga Normal','Harga Korporat','HPP','TAT','Aktif'];
+  const r = pkgAll.map(p=>[p.kode_paket,p.nama_paket,p.kategori_paket||'',p.target_segment||'',
+    p.harga_normal||0,p.harga_korporat||0,p.hpp_total||0,p.tat_jam||4,p.is_active?'true':'false']);
+  const csv=[h,...r].map(row=>row.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='packages_export.csv';a.click();toast('📥 Export berhasil','ok');
+}
+
+function exportCorporatesCSV() {
+  if (!corpAll?.length) { toast('Tidak ada data','warn'); return; }
+  const h=['Kode','Nama Corporate','Industri','PIC','HP PIC','Email PIC','Billing','Tenor','Status'];
+  const r=corpAll.map(c=>[c.kode_corp,c.corporate_name,c.industry||'',c.pic_name||'',
+    c.pic_phone||'',c.pic_email||'',c.billing_type||'',c.payment_terms||30,c.status]);
+  const csv=[h,...r].map(row=>row.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='corporates_export.csv';a.click();toast('📥 Export berhasil','ok');
 }

@@ -109,8 +109,8 @@ function renderStockTable(data) {
       return `<tr>
         <td style="font-size:11px;font-family:monospace;color:var(--teal)">${i.item_code||'—'}</td>
         <td>
-          <div style="font-weight:600;color:var(--text)">${i.item_name}</div>
-          <div style="font-size:11px;color:var(--text3)">${i.description||''}</div>
+          <div style="font-weight:600;color:var(--navy)">${i.item_name}</div>
+          <div style="font-size:11px;color:var(--gray)">${i.description||''}</div>
         </td>
         <td><span class="badge badge-gray" style="font-size:10px">${i.category||'—'}</span></td>
         <td style="font-size:12px">${i.unit||'—'}</td>
@@ -120,9 +120,9 @@ function renderStockTable(data) {
             <div style="background:${stockCol};height:4px;width:${stockPct}%;border-radius:2px"></div>
           </div>
         </td>
-        <td style="font-size:12px;color:var(--text3)">${i.min_stock||5}</td>
+        <td style="font-size:12px;color:var(--gray)">${i.min_stock||5}</td>
         <td style="font-size:12px">${i.unit_price?formatCurrency(i.unit_price):'—'}</td>
-        <td style="font-size:11px;color:var(--text3)">${i.supplier_name||'—'}</td>
+        <td style="font-size:11px;color:var(--gray)">${i.supplier_name||'—'}</td>
         <td><div class="act-row">
           <button class="act-btn" onclick="adjustStock(${i.id},'${i.item_name}',${i.stock_qty||0})">📥 Adjust</button>
           <button class="act-btn edit" onclick="openItemForm(${i.id})">✏️</button>
@@ -165,7 +165,7 @@ function adjustStock(id, name, current) {
     <div class="form-group">
       <label>Jumlah</label>
       <input type="number" id="adj-qty" value="" placeholder="0" style="font-size:18px;font-weight:700;text-align:center">
-      <div style="font-size:12px;color:var(--text3);margin-top:4px">Stok saat ini: <strong>${current}</strong></div>
+      <div style="font-size:12px;color:var(--gray);margin-top:4px">Stok saat ini: <strong>${current}</strong></div>
     </div>
     <div class="form-group">
       <label>Keterangan</label>
@@ -300,7 +300,7 @@ function renderPRList() {
       return `<tr>
         <td style="font-family:monospace;font-size:11px;color:var(--teal)">${p.pr_number||'—'}</td>
         <td><div style="font-weight:600">${p.description||'—'}</div>
-          <div style="font-size:11px;color:var(--text3)">${formatDateShort(p.created_at)}</div></td>
+          <div style="font-size:11px;color:var(--gray)">${formatDateShort(p.created_at)}</div></td>
         <td style="font-size:12px;font-weight:600">${p.total_estimate?formatCurrency(p.total_estimate):'—'}</td>
         <td style="font-size:11px">${p.requested_by||'—'}</td>
         <td><span style="background:${col}20;color:${col};padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700">${p.status}</span></td>
@@ -397,8 +397,8 @@ function renderSupplierList() {
   el.innerHTML = `<table>
     <thead><tr><th>Nama Supplier</th><th>Kontak</th><th>Kategori Item</th><th>Rating</th><th>Aksi</th></tr></thead>
     <tbody>${invSuppliers.map(s=>`<tr>
-      <td><div style="font-weight:600;color:var(--text)">${s.supplier_name}</div><div style="font-size:11px;color:var(--text3)">${s.address||''}</div></td>
-      <td><div style="font-size:12px">${s.contact_name||'—'}</div><div style="font-size:11px;color:var(--text3)">${s.phone||''}</div></td>
+      <td><div style="font-weight:600;color:var(--navy)">${s.supplier_name}</div><div style="font-size:11px;color:var(--gray)">${s.address||''}</div></td>
+      <td><div style="font-size:12px">${s.contact_name||'—'}</div><div style="font-size:11px;color:var(--gray)">${s.phone||''}</div></td>
       <td style="font-size:12px">${s.item_categories||'—'}</td>
       <td>${'⭐'.repeat(Math.min(5,parseInt(s.rating)||0))||'—'}</td>
       <td><div class="act-row">

@@ -15,7 +15,7 @@ async function renderLab(tab='checkin') {
       <div><h1>Operasional Lab</h1>
         <p>Check in sampel, input hasil, validasi, approval, rekam medis</p></div>
       <div class="btn-row">
-        <span id="lab-date-badge" style="font-size:12px;color:var(--text3)"></span>
+        <span id="lab-date-badge" style="font-size:12px;color:var(--gray)"></span>
       </div>
     </div>
 
@@ -97,7 +97,7 @@ function renderLabKPI() {
     <div style="background:#fff;border-radius:10px;padding:10px 12px;border:1px solid var(--border);border-left:4px solid ${k.color};text-align:center;cursor:pointer">
       <div style="font-size:16px">${k.icon}</div>
       <div style="font-size:18px;font-weight:800;color:${k.color}">${k.val}</div>
-      <div style="font-size:9px;color:var(--text3)">${k.label}</div>
+      <div style="font-size:9px;color:var(--gray)">${k.label}</div>
     </div>`).join('');
 }
 
@@ -122,13 +122,13 @@ function renderCheckinTab() {
         <td style="font-family:monospace;font-size:12px;font-weight:700">${s.barcode||'—'}</td>
         <td>
           <div style="font-weight:600">${s.patient_name||s.admissions?.patient_name||'—'}</div>
-          <div style="font-size:10px;color:var(--text3)">${s.visit_number||s.admissions?.visit_number||'—'}</div>
+          <div style="font-size:10px;color:var(--gray)">${s.visit_number||s.admissions?.visit_number||'—'}</div>
         </td>
         <td style="font-size:12px">${s.product_name||'—'}</td>
-        <td style="font-size:11px;color:var(--text3)">${s.sampel_type||'—'}</td>
-        <td style="font-size:11px;color:var(--text3)">${s.received_at?new Date(s.received_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'—'}</td>
+        <td style="font-size:11px;color:var(--gray)">${s.sampel_type||'—'}</td>
+        <td style="font-size:11px;color:var(--gray)">${s.received_at?new Date(s.received_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'—'}</td>
         <td style="font-size:12px">${s.collected_by||'—'}</td>
-        <td style="font-size:11px;color:var(--text3)">${s.analyzer_name||'—'}</td>
+        <td style="font-size:11px;color:var(--gray)">${s.analyzer_name||'—'}</td>
         <td>
           <span style="background:${s.status==='Pending'?'#FFF8E1':'#FFEBEE'};
             color:${s.status==='Pending'?'#92400E':'#C62828'};
@@ -141,7 +141,7 @@ function renderCheckinTab() {
             <button class="act-btn del" onclick="rejectSample(${s.id})">Tolak</button>
           </div>
         </td>
-      </tr>`).join('') : `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">
+      </tr>`).join('') : `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--gray)">
         ✅ Tidak ada sampel pending</td></tr>`}
       </tbody></table>
     </div>`;
@@ -270,8 +270,8 @@ async function searchAdmForCheckin(q) {
         style="padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;
           hover:background:var(--lgray)">
         <div style="font-weight:600">${a.patient_name}</div>
-        <div style="font-size:11px;color:var(--text3)">${a.visit_number} · ${a.status}</div>
-      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--text3)">Tidak ditemukan</div>';
+        <div style="font-size:11px;color:var(--gray)">${a.visit_number} · ${a.status}</div>
+      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--gray)">Tidak ditemukan</div>';
   } catch(e){}
 }
 
@@ -362,7 +362,7 @@ function renderResultTab() {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div>
         <span class="badge badge-gray" style="margin-right:6px">${drafts.length} hasil belum diinput</span>
-        <span style="font-size:12px;color:var(--text3)">Hasil dari analyzer masuk otomatis jika terintegrasi</span>
+        <span style="font-size:12px;color:var(--gray)">Hasil dari analyzer masuk otomatis jika terintegrasi</span>
       </div>
       <button class="btn btn-teal btn-sm" onclick="openResultForm()">+ Input Manual</button>
     </div>
@@ -377,7 +377,7 @@ function renderResultTab() {
         return `<tr>
           <td>
             <div style="font-weight:600">${r.patient_name||'—'}</div>
-            <div style="font-size:10px;color:var(--text3)">${r.visit_number||'—'}</div>
+            <div style="font-size:10px;color:var(--gray)">${r.visit_number||'—'}</div>
           </td>
           <td style="font-size:12px">${r.product_name||r.products?.nama_tes||'—'}</td>
           <td>
@@ -385,7 +385,7 @@ function renderResultTab() {
               `<span style="font-size:14px;font-weight:800;color:${c}">${r.result_value}</span>` :
               `<button class="btn btn-teal btn-xs" onclick="openResultForm(${r.id})">Input</button>`}
           </td>
-          <td style="font-size:11px;color:var(--text3)">${r.unit||r.products?.satuan_hasil||'—'}</td>
+          <td style="font-size:11px;color:var(--gray)">${r.unit||r.products?.satuan_hasil||'—'}</td>
           <td>
             ${r.interpretation?`
               <span style="background:${c}20;color:${c};padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">
@@ -406,7 +406,7 @@ function renderResultTab() {
             </div>
           </td>
         </tr>`;
-      }).join('') : `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">
+      }).join('') : `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray)">
         ✅ Semua hasil sudah diinput</td></tr>`}
       </tbody></table>
     </div>`;
@@ -480,7 +480,7 @@ async function openResultForm(resultId=null) {
     <!-- Ref Ranges quick view -->
     <div id="rf-rr-view" style="margin-bottom:12px">
       ${rrData.length?`
-        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700">Rentang Rujukan:</div>
+        <div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:700">Rentang Rujukan:</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${rrData.map(rr=>{
             const c={green:'#22C55E',yellow:'#F59E0B',orange:'#F97316',red:'#EF4444'}[rr.color_code]||'#94A3B8';
@@ -518,7 +518,7 @@ async function loadRRForResult(productId) {
     if (!el||!rrs?.length) return;
     const c={green:'#22C55E',yellow:'#F59E0B',orange:'#F97316',red:'#EF4444'};
     el.innerHTML=`
-      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700">Rentang Rujukan:</div>
+      <div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:700">Rentang Rujukan:</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${rrs.map(rr=>`<div style="background:${(c[rr.color_code]||'#94A3B8')}15;border:1px solid ${(c[rr.color_code]||'#94A3B8')}40;border-radius:8px;padding:4px 10px;font-size:11px">
           <strong style="color:${c[rr.color_code]||'#94A3B8'}">${rr.condition_name}</strong>
@@ -551,7 +551,7 @@ function interpretResult(val) {
       <div style="width:12px;height:12px;border-radius:50%;background:${c};flex-shrink:0"></div>
       <div>
         <div style="font-size:13px;font-weight:700;color:${c}">${match.condition_name||match.interpretation||'—'}</div>
-        ${match.description?`<div style="font-size:11px;color:var(--text3)">${match.description}</div>`:''}
+        ${match.description?`<div style="font-size:11px;color:var(--gray)">${match.description}</div>`:''}
         ${match.recommendation?`<div style="font-size:11px;color:${c};margin-top:2px">💡 ${match.recommendation}</div>`:''}
       </div>
     </div>`;
@@ -658,7 +658,7 @@ function renderResultReviewTable(data, nextStatus) {
       return `<tr>
         <td>
           <div style="font-weight:600">${r.patient_name||'—'}</div>
-          <div style="font-size:10px;color:var(--text3)">${r.visit_number||'—'}</div>
+          <div style="font-size:10px;color:var(--gray)">${r.visit_number||'—'}</div>
         </td>
         <td style="font-size:12px">${r.product_name||r.products?.nama_tes||'—'}</td>
         <td style="font-size:14px;font-weight:800;color:${col}">${r.result_value||'—'} ${r.unit||''}</td>
@@ -746,8 +746,8 @@ function renderMedRecordTab() {
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
         <div>
-          <div style="font-size:15px;font-weight:700;color:var(--text)">${pt.name}</div>
-          <div style="font-size:11px;color:var(--text3)">${pt.visit} · ${pt.results.length} pemeriksaan</div>
+          <div style="font-size:15px;font-weight:700;color:var(--navy)">${pt.name}</div>
+          <div style="font-size:11px;color:var(--gray)">${pt.visit} · ${pt.results.length} pemeriksaan</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="printLabReport('${pt.name}')">🖨 Cetak Hasil</button>
       </div>
@@ -765,13 +765,13 @@ function renderMedRecordTab() {
           return `<tr style="border-bottom:1px solid #f1f5f9">
             <td style="padding:6px 10px;font-weight:600">${r.product_name||'—'}</td>
             <td style="padding:6px 10px;font-weight:800;color:${col}">${r.result_value||'—'}</td>
-            <td style="padding:6px 10px;color:var(--text3)">${r.unit||'—'}</td>
+            <td style="padding:6px 10px;color:var(--gray)">${r.unit||'—'}</td>
             <td style="padding:6px 10px">
               <span style="background:${col}20;color:${col};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">
                 ${r.interpretation||'—'}
               </span>
             </td>
-            <td style="padding:6px 10px;color:var(--text3)">
+            <td style="padding:6px 10px;color:var(--gray)">
               ${r.normal_min!==null&&r.normal_max!==null?`${r.normal_min}–${r.normal_max}`:'—'}
             </td>
           </tr>`;

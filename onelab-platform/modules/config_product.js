@@ -25,6 +25,8 @@ async function renderConfigProduct() {
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" onclick="renderConfigRefRange()">📊 Ref Range</button>
+        <button class="btn btn-teal" onclick="navigate('import')">📥 Import Excel</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportProductsCSV()">📤 Export CSV</button>
         <button class="btn btn-teal" onclick="openProductForm()">+ Tambah Tes</button>
       </div>
     </div>
@@ -643,4 +645,22 @@ async function deleteRR(id) {
   if (!confirm('Hapus reference range ini?')) return;
   try { await sbDelete('ref_ranges',id); toast('🗑 Dihapus','info'); await loadRefRanges(); }
   catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ── Export Products CSV ────────────────────────────
+function exportProductsCSV() {
+  if (!prodAll?.length) { toast('Tidak ada data','warn'); return; }
+  const headers = ['Kode Internal','Nama Tes','Kategori','Sub Kategori','Sampel','Volume',
+    'Satuan','Metode','TAT (Jam)','Harga Normal','Harga Korporat','HPP','Margin%','LOINC','Aktif'];
+  const rows = prodAll.map(p => [
+    p.kode_internal, p.nama_tes, p.kategori, p.sub_kategori||'',
+    p.sampel_type||'', p.volume_sampel||'', p.satuan_hasil||'', p.metode||'',
+    p.waktu_tat_jam||4, p.harga_normal||0, p.harga_korporat||0, p.hpp||0, p.margin_pct||0,
+    p.loinc_code||'', p.is_active?'true':'false'
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'products_export.csv'; a.click();
+  toast('📥 Export CSV berhasil','ok');
 }
