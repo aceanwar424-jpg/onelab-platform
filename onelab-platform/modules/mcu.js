@@ -930,18 +930,24 @@ function rabToggleMode() {
 function rabRecalc() {
   const peserta = parseInt(document.getElementById('rab-peserta')?.value||100);
   const margin  = parseFloat(document.getElementById('rab-margin')?.value||30);
+  const mg      = parseInt(document.getElementById('rab-mg')?.value||0);
 
-  // HPP dari parameter tes
+  // ── HPP dari parameter tes ─────────────────
   let hppTests = 0;
   rabParams.selectedTests.forEach(t=>{
     hppTests += (t.hpp||0) * (t.qty||1) * (t.perPeserta ? peserta : 1);
   });
 
-  // HPP dari operasional
+  // ── HPP dari operasional, breakdown by SCHEME & SOURCE ──
+  const byScheme  = {'PRA MCU':0, 'MCU':0, 'PASCA MCU':0};
+  const bySource  = {'KAS GANTUNG':0, 'XENDIT':0, 'PR / PO':0, 'VENDOR':0, 'STOCK INTERNAL':0};
   let hppOps = 0, hppOpsActual = 0;
+
   document.querySelectorAll('.rab-price').forEach(priceEl=>{
     const key     = priceEl.dataset.key;
     const price   = parseFloat(priceEl.value||0);
+    const scheme  = priceEl.dataset.scheme||'';
+    const source  = priceEl.dataset.source||'';
     const planEl  = document.querySelector(`.rab-qty-plan[data-key="${key}"]`);
     const actEl   = document.querySelector(`.rab-qty-actual[data-key="${key}"]`);
     const qtyP    = parseFloat(planEl?.value||0);
@@ -950,45 +956,142 @@ function rabRecalc() {
     const totalA  = price * qtyA;
     hppOps       += total;
     hppOpsActual += totalA;
-    const rowEl   = document.getElementById(`rab-row-total-${key}`);
-    const rowActEl= document.getElementById(`rab-row-act-${key}`);
-    if (rowEl)    rowEl.textContent   = formatCurrency(total);
+
+    // Accumulate breakdown
+    if (byScheme[scheme] !== undefined) byScheme[scheme] += total;
+    if (bySource[source] !== undefined) bySource[source] += total;
+
+    // Update row totals
+    const rowEl    = document.getElementById(`rab-row-total-${key}`);
+    const rowActEl = document.getElementById(`rab-row-act-${key}`);
+    if (rowEl)    rowEl.textContent    = formatCurrency(total);
     if (rowActEl) rowActEl.textContent = formatCurrency(totalA);
   });
 
-  const hppTotal    = hppTests + hppOps;
-  const hppPerPes   = peserta > 0 ? hppTotal / peserta : 0;
-  const hargaJual   = margin < 100 ? hppTotal / (1 - margin/100) : hppTotal;
-  const hargaPerPes = peserta > 0 ? hargaJual / peserta : 0;
-  const grossMargin = hargaJual - hppTotal;
+  // ── Totals ─────────────────────────────────
+  const hppTotal     = hppTests + hppOps;
+  const hppActual    = hppTests + hppOpsActual;
+  const hppPerPes    = peserta > 0 ? hppTotal / peserta : 0;
+  const hargaJual    = margin < 100 ? hppTotal / (1 - margin/100) : hppTotal;
+  const hargaPerPes  = peserta > 0 ? hargaJual / peserta : 0;
+  const grossMargin  = hargaJual - hppTotal;
+  const grossMarginPct = hargaJual > 0 ? (grossMargin/hargaJual*100).toFixed(1) : 0;
+  const mgValue      = mg > 0 ? mg * hargaPerPes : 0;
+  const isActual     = rabParams.mode === 'actual';
 
-  // Update test summary
+  // ── Update test summary ────────────────────
   const sumEl = document.getElementById('rab-test-summary');
   if (sumEl) sumEl.innerHTML = `
-    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px">
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:6px;
+      padding:8px 10px;background:rgba(8,145,178,.06);border-radius:6px">
       <span>🧬 HPP Tes: <strong style="color:var(--teal)">${formatCurrency(hppTests)}</strong></span>
-      <span>📦 HPP Ops: <strong>${formatCurrency(hppOps)}</strong></span>
-      <span>💰 HPP Total: <strong>${formatCurrency(hppTotal)}</strong></span>
-      <span>👤 HPP/Peserta: <strong>${formatCurrency(hppPerPes)}</strong></span>
+      <span>📦 HPP Ops: <strong style="color:var(--text)">${formatCurrency(hppOps)}</strong></span>
+      <span style="font-weight:700;color:var(--teal)">= HPP Total: ${formatCurrency(hppTotal)}</span>
+      <span>👤 Per Peserta: <strong>${formatCurrency(hppPerPes)}</strong></span>
     </div>`;
 
-  // Dashboard
+  // ── Main Dashboard ─────────────────────────
   const dash = document.getElementById('rab-dashboard');
-  if (dash) dash.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+  if (!dash) return;
+
+  dash.innerHTML = `
+    <!-- Row 1: Summary utama -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px">
       ${[
-        {label:'HPP Total',  val:formatCurrency(hppTotal),  color:'#EF4444', sub:'Plan'},
-        {label:'Harga Jual', val:formatCurrency(hargaJual),  color:'#0891B2', sub:'Per project'},
-        {label:'Per Peserta',val:formatCurrency(hargaPerPes),color:'#7C3AED', sub:'Harga jual'},
-        {label:'Gross Margin',val:formatCurrency(grossMargin), color:'#22C55E', sub:`${margin}%`},
-        {label:'MG Berlaku', val:`${document.getElementById('rab-mg')?.value||0} peserta`,color:'#F59E0B', sub:'Minimum Guarantee'},
-        {label:'Mode',       val:rabParams.mode==='actual'?'Realisasi':'Planning', color:'#6B7280', sub:'RAB mode'},
+        {label:'Total Pengeluaran (HPP)',val:formatCurrency(hppTotal), color:'#EF4444',sub:'Plan total cost',      icon:'📤'},
+        {label:'Total Pemasukan',        val:formatCurrency(hargaJual),color:'#0891B2',sub:'Harga jual project',   icon:'📥'},
+        {label:'Gross Margin',           val:formatCurrency(grossMargin),color:'#22C55E',sub:`${grossMarginPct}% dari revenue`,icon:'📈'},
+        {label:'Harga per Peserta',      val:formatCurrency(hargaPerPes),color:'#7C3AED',sub:'Harga jual/orang',  icon:'👤'},
+        {label:'Nilai MG (${mg} peserta)',val:formatCurrency(mgValue),  color:'#F59E0B',sub:'Minimum guarantee',  icon:'🔒'},
+        {label:isActual?'HPP Aktual':'HPP Plan',val:formatCurrency(isActual?hppActual:hppTotal),color:isActual&&hppActual>hargaJual?'#EF4444':'#6B7280',sub:isActual?'Realisasi biaya':'Estimasi biaya',icon:isActual?'🔄':'📋'},
       ].map(k=>`
-        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;border-top:3px solid ${k.color}">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">${k.label}</div>
-          <div style="font-size:14px;font-weight:800;color:${k.color}">${k.val}</div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;border-top:3px solid ${k.color}">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${k.icon} ${k.label}</div>
+          <div style="font-size:13px;font-weight:800;color:${k.color}">${k.val}</div>
           <div style="font-size:10px;color:var(--text3)">${k.sub}</div>
         </div>`).join('')}
+    </div>
+
+    <!-- Row 2: Breakdown by Scheme (Pra/MCU/Pasca) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+
+      <!-- Breakdown Scheme -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">
+          📅 Breakdown per Fase Biaya
+        </div>
+        ${Object.entries(byScheme).map(([scheme,val])=>{
+          const pct = hppOps > 0 ? Math.round(val/hppOps*100) : 0;
+          const colors = {'PRA MCU':'#7C3AED','MCU':'#0891B2','PASCA MCU':'#F59E0B'};
+          const c = colors[scheme]||'#94A3B8';
+          return `
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <span style="font-size:12px;font-weight:600;color:${c}">${scheme}</span>
+                <span style="font-size:12px;font-weight:700">${formatCurrency(val)}</span>
+              </div>
+              <div style="height:6px;background:var(--bg2);border-radius:6px;overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:${c};border-radius:6px;transition:width .4s"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:2px">${pct}% dari total ops</div>
+            </div>`;
+        }).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--text3)">Lab HPP (tes)</span>
+          <span style="font-weight:700;color:var(--teal)">${formatCurrency(hppTests)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px">
+          <span style="color:var(--text3)">Total Operasional</span>
+          <span style="font-weight:700">${formatCurrency(hppOps)}</span>
+        </div>
+      </div>
+
+      <!-- Breakdown Source (Sumber Dana) -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">
+          💳 Breakdown Sumber Dana
+        </div>
+        ${Object.entries(bySource).filter(([,v])=>v>0).map(([src,val])=>{
+          const pct = hppOps > 0 ? Math.round(val/hppOps*100) : 0;
+          const colors = {'KAS GANTUNG':'#F59E0B','XENDIT':'#8B5CF6','PR / PO':'#0EA5E9','VENDOR':'#EF4444','STOCK INTERNAL':'#22C55E'};
+          const c = colors[src]||'#94A3B8';
+          return `
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <div style="display:flex;align-items:center;gap:5px">
+                  <div style="width:8px;height:8px;border-radius:2px;background:${c};flex-shrink:0"></div>
+                  <span style="font-size:11.5px;font-weight:600;color:var(--text)">${src}</span>
+                </div>
+                <span style="font-size:11.5px;font-weight:700">${formatCurrency(val)}</span>
+              </div>
+              <div style="height:5px;background:var(--bg2);border-radius:5px;overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:${c};border-radius:5px;transition:width .4s"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px">${pct}% · diajukan ke Finance</div>
+            </div>`;
+        }).join('')}
+        ${Object.values(bySource).every(v=>v===0)?'<div style="font-size:12px;color:var(--text3);text-align:center;padding:20px 0">Isi qty pada tabel operasional</div>':''}
+      </div>
+    </div>
+
+    <!-- Row 3: Fee Margin -->
+    <div style="background:linear-gradient(135deg,#0891B2,#0E7490);border-radius:var(--r);padding:12px 16px;color:#fff">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;opacity:.8">
+        💰 Analisis Margin & Fee
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        ${[
+          {label:'Target Margin',   val:`${margin}%`,               sub:'Setting margin'},
+          {label:'Gross Margin Rp', val:formatCurrency(grossMargin),sub:`${grossMarginPct}% actual`},
+          {label:'Margin/Peserta',  val:formatCurrency(peserta>0?grossMargin/peserta:0), sub:'Kontribusi per orang'},
+          {label:'Fee vs HPP',      val:`${hppTotal>0?(grossMargin/hppTotal*100).toFixed(1):0}%`, sub:'Markup dari HPP'},
+        ].map(k=>`
+          <div>
+            <div style="font-size:10px;opacity:.7;margin-bottom:3px">${k.label}</div>
+            <div style="font-size:15px;font-weight:800">${k.val}</div>
+            <div style="font-size:10px;opacity:.6">${k.sub}</div>
+          </div>`).join('')}
+      </div>
     </div>`;
 }
 
