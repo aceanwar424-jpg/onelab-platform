@@ -149,22 +149,29 @@ RAISE NOTICE 'projects: semua kolom baru berhasil ditambahkan';
 
 END $$;
 
--- ── 2. Tabel project_steps (jika belum ada) ───────────────────
-CREATE TABLE IF NOT EXISTS public.project_steps (
-  id           bigint generated always as identity primary key,
-  project_id   bigint NOT NULL references public.projects(id) ON DELETE CASCADE,
-  step_id      text   NOT NULL,              -- S01, S02, ... S31
-  step_number  integer NOT NULL,             -- 1..31
-  step_name    text,
-  phase_id     text,                         -- F1..F6
-  status       text DEFAULT 'Pending',       -- Pending, In Progress, Done, Blocked
-  done_by      text,
-  done_date    timestamp,
-  form_data    text,                         -- JSON string semua field form
-  created_at   timestamp DEFAULT now(),
-  updated_at   timestamp DEFAULT now(),
-  UNIQUE(project_id, step_id)
-);
+-- ── 2. Tabel project_steps — tambah kolom baru (tabel sudah ada) ──
+-- Kolom lama: project_id, step_number, step_name, step_group, status,
+--             due_date, done_date, done_by, notes, attachments, updated_at
+-- Kolom BARU yang dibutuhkan MCU v5:
+
+ALTER TABLE public.project_steps
+  ADD COLUMN IF NOT EXISTS step_id    text,         -- S01..S31
+  ADD COLUMN IF NOT EXISTS phase_id   text,         -- F1..F6
+  ADD COLUMN IF NOT EXISTS form_data  text,         -- JSON semua field form per stage
+  ADD COLUMN IF NOT EXISTS done_date  timestamp;    -- override done_date dari date ke timestamp (aman, already date)
+
+-- Buat unique constraint step_id per project (jika belum ada)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'project_steps_project_id_step_id_key'
+  ) THEN
+    ALTER TABLE public.project_steps
+      ADD CONSTRAINT project_steps_project_id_step_id_key
+      UNIQUE (project_id, step_id);
+  END IF;
+END $$;
 
 -- ── 3. Tabel rab_items (jika belum ada) ───────────────────────
 CREATE TABLE IF NOT EXISTS public.rab_items (
@@ -201,4 +208,4 @@ UPDATE public.projects
 SET pic_sales = pic_onelab
 WHERE pic_sales IS NULL AND pic_onelab IS NOT NULL;
 
-RAISE NOTICE '✅ Migration MCU v5 selesai';
+-- ✅ Migration MCU v5 selesai

@@ -50,6 +50,8 @@ function navigate(page, params={}) {
     case 'finance':     renderFinance();                break;
     case 'inventory':   renderInventory();              break;
     case 'hrd':         renderHRD();                    break;
+    case 'work-schedule': renderWorkSchedule();          break;
+    case 'tasks':       renderTaskManagement();          break;
     case 'homecare':    renderHomeCare();               break;
     case 'admission':   renderAdmission();              break;
     case 'lab':         renderLab(params.tab||'checkin'); break;
