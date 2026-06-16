@@ -160,17 +160,31 @@
       <button class="nav-item" onclick="navigate('hrd')" data-page="hrd" data-tooltip="Data Karyawan">
         <span class="nav-icon">👥</span><span class="nav-label">Data Karyawan</span>
       </button>
-      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-absensi" data-tooltip="Absensi &amp; Cuti">
-        <span class="nav-icon">🕐</span><span class="nav-label">Absensi &amp; Cuti</span>
-      </button>
-      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-payroll" data-tooltip="Penggajian">
-        <span class="nav-icon">💵</span><span class="nav-label">Penggajian</span>
+      <button class="nav-item" onclick="navigate('org-structure')" data-page="org-structure" data-tooltip="Struktur Organisasi">
+        <span class="nav-icon">🏛️</span><span class="nav-label">Struktur Organisasi</span>
       </button>
       <button class="nav-item" onclick="navigate('work-schedule')" data-page="work-schedule" data-tooltip="Jadwal Kerja &amp; Shift">
         <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kerja</span>
       </button>
+      <button class="nav-item" onclick="navigate('attendance')" data-page="attendance" data-tooltip="Absensi &amp; Clock In/Out">
+        <span class="nav-icon">⏰</span><span class="nav-label">Absensi</span>
+      </button>
+      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-cuti" data-tooltip="Cuti &amp; Izin">
+        <span class="nav-icon">🕐</span><span class="nav-label">Cuti &amp; Izin</span>
+      </button>
+      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-payroll" data-tooltip="Penggajian">
+        <span class="nav-icon">💵</span><span class="nav-label">Penggajian</span>
+      </button>
+    </div>
+
+    <!-- ── TASK MANAGEMENT ── -->
+    <div class="nav-group">
+      <div class="nav-group-label">Produktivitas</div>
       <button class="nav-item" onclick="navigate('tasks')" data-page="tasks" data-tooltip="Task Management">
         <span class="nav-icon">📋</span><span class="nav-label">Task Management</span>
+      </button>
+      <button class="nav-item" onclick="navigate('regulatory')" data-page="regulatory" data-tooltip="Pelaporan &amp; Audit">
+        <span class="nav-icon">📊</span><span class="nav-label">Pelaporan &amp; Audit</span>
       </button>
     </div>
 
@@ -270,6 +284,10 @@
 <script src="modules/hrd.js"></script>
 <script src="modules/work_schedule.js"></script>
 <script src="modules/task_management.js"></script>
+<script src="modules/org_structure.js"></script>
+<script src="modules/attendance.js"></script>
+<script src="modules/regulatory_reports.js"></script>
+<script src="modules/executive_dashboard.js"></script>
 <script src="modules/homecare.js"></script>
 <script src="modules/mcu.js"></script>
 <script src="modules/admission.js"></script>
@@ -353,6 +371,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           } catch(e) {}
           setupAppUI();
           applyRoleMenu();
+          if (typeof injectExecToggle==='function') setTimeout(injectExecToggle,500);
           checkConnection();
           navigate('dashboard');
           // Check renewals after load

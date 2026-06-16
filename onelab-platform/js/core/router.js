@@ -52,6 +52,9 @@ function navigate(page, params={}) {
     case 'hrd':         renderHRD();                    break;
     case 'work-schedule': renderWorkSchedule();          break;
     case 'tasks':       renderTaskManagement();          break;
+    case 'attendance':   renderAttendance();               break;
+    case 'org-structure':renderOrgStructure();             break;
+    case 'regulatory':   renderRegulatoryReports();        break;
     case 'homecare':    renderHomeCare();               break;
     case 'admission':   renderAdmission();              break;
     case 'lab':         renderLab(params.tab||'checkin'); break;
