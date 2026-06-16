@@ -51,6 +51,7 @@ function navigate(page, params={}) {
     case 'inventory':   renderInventory();              break;
     case 'hrd':         renderHRD();                    break;
     case 'work-schedule': renderWorkSchedule();          break;
+    case 'shift-calendar': renderShiftCalendar();         break;
     case 'tasks':       renderTaskManagement();          break;
     case 'attendance':   renderAttendance();               break;
     case 'org-structure':renderOrgStructure();             break;

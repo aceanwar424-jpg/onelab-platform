@@ -16,7 +16,7 @@ const EXEC_ROLE = ['super_admin'];
 function isExecUser() {
   const role = getUserRole?getUserRole():'sales';
   const name = getUserName?getUserName():'';
-  return EXEC_ROLE.includes(role) || name.toLowerCase().includes('ace');
+  return isSpv() || name.toLowerCase().includes('ace');
 }
 
 // ── TOGGLE BUTTON (inject ke topbar) ─────────────────────────

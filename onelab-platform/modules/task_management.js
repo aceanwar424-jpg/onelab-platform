@@ -306,7 +306,7 @@ function renderTeamBoard() {
   const el = document.getElementById('task-main-area'); if (!el) return;
   const weekDates = getWeekDates(taskState.weekStart);
   const role = getUserRole?getUserRole():'sales';
-  const canSeeTeam = ['super_admin','admin','manager','spv'].includes(role);
+  const canSeeTeam = isSpv();
 
   if (!canSeeTeam) {
     el.innerHTML = `<div class="empty-state"><div class="ico">🔒</div>
@@ -419,7 +419,7 @@ async function renderLogbook() {
   const today  = taskState.logbookDate;
   const user   = getUserName?getUserName():'';
   const role   = getUserRole?getUserRole():'sales';
-  const isSpv  = ['super_admin','admin','manager','spv'].includes(role);
+  const isSpv  = isSpv();
 
   // Load today's log + tasks
   const [logs, dayTasks] = await Promise.all([
@@ -707,7 +707,7 @@ async function renderWeeklySummary() {
   const el = document.getElementById('task-main-area'); if (!el) return;
   const weekDates = getWeekDates(taskState.weekStart);
   const role = getUserRole?getUserRole():'sales';
-  const isManager = ['super_admin','admin','manager'].includes(role);
+  const isManager = isManager();
 
   if (!isManager) {
     el.innerHTML = `<div class="empty-state"><div class="ico">🔒</div>

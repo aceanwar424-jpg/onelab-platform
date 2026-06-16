@@ -51,6 +51,13 @@ const ROLES = {
     pages: ALL_PAGES.filter(p=>p!=='users'),
     canDelete:false, canBulkDelete:false, canExport:true, canManageUsers:false,
   },
+  spv: {
+    label:'SPV / Supervisor', color:'#0E7490',
+    desc:'Supervisi tim, approve logbook, assign task, lihat semua laporan',
+    pages: ALL_PAGES,
+    canDelete:false, canBulkDelete:false, canExport:true, canManageUsers:false,
+    canApproveLogbook:true, canAssignTask:true, canSeeTeamBoard:true,
+  },
   viewer: {
     label:'Viewer', color:'#546E7A',
     desc:'Hanya lihat dashboard & laporan',
@@ -64,25 +71,38 @@ const ROLES = {
 // Perbedaan role hanya pada permission aksi (delete, edit, export)
 function applyRoleMenu() {
   const role = getUserRole();
-  const rc   = ROLES[role] || ROLES.sales;
+  // super_admin = semua role gabungan (termasuk spv + manager)
+  const rc = ROLES[role] || ROLES.sales;
   window.roleConfig = rc;
+  // Inject helper methods ke roleConfig
+  window.roleConfig.isSpv     = ['super_admin','spv','manager','direktur'].includes(role);
+  window.roleConfig.isManager = ['super_admin','manager','direktur'].includes(role);
+  window.roleConfig.isSuperAdmin = role === 'super_admin';
 
-  // Tampilkan SEMUA nav item (kecuali soon)
+  // Tampilkan SEMUA nav item
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     if (btn.classList.contains('nav-item-soon')) return;
-    if (btn.id === 'nav-users') return; // handled separately
-    btn.style.display = ''; // show all
+    if (btn.id === 'nav-users') return;
+    btn.style.display = '';
   });
 
-  // User Management — hanya super_admin
+  // User Management — super_admin + manager
   const navUsers = document.getElementById('nav-users');
   if (navUsers) {
-    navUsers.style.display = (role === 'super_admin') ? '' : 'none';
+    navUsers.style.display = ['super_admin','manager','direktur'].includes(role) ? '' : 'none';
   }
 
-  // Update role badge di sidebar
+  // Update role badge
   const roleEl = document.getElementById('user-role-sidebar');
   if (roleEl) roleEl.textContent = rc.label;
+}
+
+// ── Helper: isSpv() shortcut ──────────────
+function isSpv() {
+  return ['super_admin','spv','manager','direktur'].includes(getUserRole ? getUserRole() : '');
+}
+function isManager() {
+  return ['super_admin','manager','direktur'].includes(getUserRole ? getUserRole() : '');
 }
 
 // ── Render User Management ────────────────

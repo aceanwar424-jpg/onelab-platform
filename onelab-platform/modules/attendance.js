@@ -504,7 +504,7 @@ async function renderAttHistory() {
 async function renderTeamAttendance() {
   const el   = document.getElementById('att-main'); if (!el) return;
   const role = getUserRole?getUserRole():'sales';
-  if (!['super_admin','admin','manager','spv'].includes(role)) {
+  if (!isSpv()) {
     el.innerHTML = `<div class="empty-state"><div class="ico">🔒</div>
       <h3>Akses SPV Only</h3></div>`;
     return;
