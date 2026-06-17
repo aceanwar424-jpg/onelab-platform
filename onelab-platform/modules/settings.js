@@ -479,18 +479,17 @@ async function loadDocSequences() {
 // ═══════════════════════════════════════════════════════════════
 
 function renderRoleMenuConfig() {
-  const roles = ['super_admin','direktur','manager','spv','sales','operasional','hrd_staff','finance_staff','viewer'];
+  // super_admin excluded — always has full access, no need to config
+  const roles = ['direktur','manager','spv','sales','operasional','hrd_staff','finance_staff','viewer'];
   const el = document.getElementById('set-rolemenu-content');
   if (!el) return;
 
-  // Show/hide tab content
   ['general','users','activity','data','masterdata','admin'].forEach(t => {
     const d = document.getElementById(`set-${t}`);
     if (d) d.style.display = 'none';
   });
   document.getElementById('set-rolemenu').style.display = '';
 
-  // Group pages
   const groups = {};
   Object.entries(ALL_PAGES).forEach(([key, [group, label, icon]]) => {
     if (!groups[group]) groups[group] = [];
@@ -499,52 +498,96 @@ function renderRoleMenuConfig() {
 
   el.innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-      <div style="font-weight:800;font-size:14px">🔐 Konfigurasi Akses Menu per Role</div>
-      <div style="font-size:12px;color:var(--text3)">Super Admin selalu punya akses penuh</div>
-      <button class="btn btn-ghost btn-sm" onclick="resetAllRolePages()">↩ Reset Default</button>
-      <button class="btn btn-teal btn-sm" onclick="saveAllRolePages()">💾 Simpan Semua</button>
+      <div>
+        <div style="font-weight:800;font-size:15px">🔐 Konfigurasi Akses Menu per Role</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">
+          ✅ Centang = role bisa akses menu tersebut · Super Admin selalu punya akses penuh (tidak perlu diatur)
+        </div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="resetAllRolePages()">↩ Reset Default</button>
+        <button class="btn btn-teal btn-sm" onclick="saveAllRolePages()">💾 Simpan Semua</button>
+      </div>
     </div>
 
-    <div style="overflow-x:auto">
-      <table style="border-collapse:collapse;min-width:900px;font-size:12.5px">
+    <div style="overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)">
+      <table style="border-collapse:collapse;min-width:900px;font-size:12.5px;width:100%">
         <thead>
           <tr style="background:var(--navy)">
-            <th style="padding:10px 14px;color:#fff;text-align:left;min-width:180px;position:sticky;left:0;background:var(--navy)">Menu / Halaman</th>
+            <th style="padding:12px 16px;color:#fff;text-align:left;min-width:200px;
+              position:sticky;left:0;background:var(--navy);z-index:2;border-right:2px solid rgba(255,255,255,.1)">
+              <div style="font-size:12px;font-weight:700">Menu / Halaman</div>
+            </th>
             ${roles.map(r => {
               const rc = ROLES[r] || {};
-              return `<th style="padding:10px 8px;color:#fff;text-align:center;min-width:90px">
-                <div style="font-size:11px;font-weight:700">${rc.label||r}</div>
-                <div style="width:8px;height:8px;border-radius:50%;background:${rc.color||'#94A3B8'};margin:4px auto 0"></div>
+              const count = getRolePages(r).length;
+              return `<th style="padding:10px 8px;color:#fff;text-align:center;min-width:100px;
+                border-right:1px solid rgba(255,255,255,.08)">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                  <div style="width:10px;height:10px;border-radius:50%;background:${rc.color||'#94A3B8'}"></div>
+                  <div style="font-size:11px;font-weight:800;color:#fff;line-height:1.2">${rc.label||r}</div>
+                  <div style="font-size:9px;color:rgba(255,255,255,.5)">${count} menu</div>
+                </div>
               </th>`;
+            }).join('')}
+          </tr>
+          <!-- Select All row -->
+          <tr style="background:var(--bg2);border-bottom:2px solid var(--border)">
+            <td style="padding:6px 16px;font-size:11px;font-weight:700;color:var(--text3);
+              position:sticky;left:0;background:var(--bg2);border-right:2px solid var(--border)">
+              Pilih / Hapus Semua ↓
+            </td>
+            ${roles.map(r => {
+              const rc = ROLES[r]||{};
+              return `<td style="padding:6px 8px;text-align:center;border-right:1px solid var(--border)">
+                <div style="display:flex;gap:4px;justify-content:center">
+                  <button onclick="selectRoleAll('${r}',true)"
+                    style="font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid ${rc.color||'var(--teal)'};
+                      background:${rc.color||'var(--teal)'}20;color:${rc.color||'var(--teal)'};cursor:pointer">✓ All</button>
+                  <button onclick="selectRoleAll('${r}',false)"
+                    style="font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);
+                      background:transparent;color:var(--text3);cursor:pointer">✗</button>
+                </div>
+              </td>`;
             }).join('')}
           </tr>
         </thead>
         <tbody>
           ${Object.entries(groups).map(([group, pages]) => `
             <tr>
-              <td colspan="${roles.length + 1}" style="padding:8px 14px;background:var(--bg2);
-                font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;
-                border-bottom:1px solid var(--border)">
+              <td colspan="${roles.length + 1}" style="padding:7px 16px;background:var(--navy)22;
+                font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;
+                letter-spacing:.08em;border-bottom:1px solid var(--border);
+                border-top:2px solid var(--border);position:sticky;left:0">
                 ${group}
               </td>
             </tr>
             ${pages.map((p, pi) => `
-              <tr style="background:${pi%2===0?'#fff':'var(--bg2)'};border-bottom:1px solid var(--border)">
-                <td style="padding:8px 14px;font-weight:600;position:sticky;left:0;background:inherit">
-                  <span style="margin-right:6px">${p.icon}</span>${p.label}
-                  <div style="font-size:10px;color:var(--text3);font-family:monospace">${p.key}</div>
+              <tr style="background:${pi%2===0?'#fff':'var(--bg2)'};border-bottom:1px solid var(--border);
+                transition:background .1s"
+                onmouseover="this.style.background='#EFF9FC'"
+                onmouseout="this.style.background='${pi%2===0?'#fff':'var(--bg2)'}'">
+                <td style="padding:9px 16px;position:sticky;left:0;background:inherit;
+                  border-right:2px solid var(--border)">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-size:15px">${p.icon}</span>
+                    <div>
+                      <div style="font-weight:600;font-size:12.5px;color:var(--text)">${p.label}</div>
+                      <div style="font-size:10px;color:var(--text3);font-family:monospace">${p.key}</div>
+                    </div>
+                  </div>
                 </td>
                 ${roles.map(r => {
                   const currentPages = getRolePages(r);
-                  const checked = r === 'super_admin' || currentPages.includes(p.key);
-                  const disabled = r === 'super_admin';
-                  return `<td style="padding:8px;text-align:center">
-                    <input type="checkbox" 
+                  const checked = currentPages.includes(p.key);
+                  const rc = ROLES[r]||{};
+                  return `<td style="padding:9px 8px;text-align:center;border-right:1px solid var(--border)">
+                    <input type="checkbox"
                       id="rp-${r}-${p.key.replace(/[^a-z0-9]/g,'_')}"
                       data-role="${r}" data-page="${p.key}"
                       ${checked ? 'checked' : ''}
-                      ${disabled ? 'disabled' : ''}
-                      style="width:16px;height:16px;cursor:${disabled?'not-allowed':'pointer'};accent-color:${ROLES[r]?.color||'var(--teal)'}">
+                      onchange="updateRoleCount('${r}')"
+                      style="width:16px;height:16px;cursor:pointer;accent-color:${rc.color||'var(--teal)'}">
                   </td>`;
                 }).join('')}
               </tr>`).join('')}
@@ -553,24 +596,40 @@ function renderRoleMenuConfig() {
       </table>
     </div>
 
-    <!-- Role descriptions -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:20px">
+    <!-- Role summary cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:16px">
       ${roles.map(r => {
         const rc = ROLES[r]||{};
         const pages = getRolePages(r);
         return `
-          <div style="border-left:4px solid ${rc.color||'#94A3B8'};padding:10px 12px;background:#fff;
-            border-radius:0 var(--r) var(--r) 0;border:1px solid var(--border)">
+          <div style="border-left:4px solid ${rc.color||'#94A3B8'};padding:10px 12px;
+            background:#fff;border-radius:0 var(--r) var(--r) 0;
+            border:1px solid var(--border);border-left-width:4px">
             <div style="font-weight:700;font-size:12.5px;color:${rc.color||'var(--text)'}">${rc.label||r}</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">${rc.desc||''}</div>
-            <div style="margin-top:6px;font-size:11px">
-              <span style="background:${rc.color||'#94A3B8'}20;color:${rc.color||'#94A3B8'};
-                padding:2px 8px;border-radius:10px;font-weight:700">${pages.length} halaman</span>
+            <div style="font-size:10.5px;color:var(--text3);margin-top:2px;line-height:1.4">${rc.desc||''}</div>
+            <div style="margin-top:6px">
+              <span id="role-count-${r}" style="background:${rc.color||'#94A3B8'}20;color:${rc.color||'#94A3B8'};
+                padding:2px 8px;border-radius:10px;font-weight:700;font-size:11px">
+                ${pages.length} menu
+              </span>
             </div>
           </div>`;
       }).join('')}
     </div>`;
 }
+
+// Update count badge when checkbox changes
+function updateRoleCount(role) {
+  const checked = document.querySelectorAll(`[data-role="${role}"]:checked`).length;
+  const el = document.getElementById(`role-count-${role}`);
+  if (el) el.textContent = checked + ' menu';
+}
+
+function selectRoleAll(role, val) {
+  document.querySelectorAll(`[data-role="${role}"]`).forEach(cb => { cb.checked = val; });
+  updateRoleCount(role);
+}
+
 
 function saveAllRolePages() {
   const roles = ['direktur','manager','spv','sales','operasional','hrd_staff','finance_staff','viewer'];
@@ -580,14 +639,15 @@ function saveAllRolePages() {
     document.querySelectorAll(`[data-role="${role}"]`).forEach(cb => {
       if (cb.checked) pages.push(cb.getAttribute('data-page'));
     });
-    // Always include dashboard
     if (!pages.includes('dashboard')) pages.unshift('dashboard');
     saveRolePages(role, pages);
     saved++;
   });
-  toast(`✅ Akses menu ${saved} role disimpan`, 'ok');
-  // Re-apply for current user
-  applyRoleMenu();
+  // Re-render count badges
+  roles.forEach(r => updateRoleCount(r));
+  toast(`✅ Akses menu ${saved} role disimpan`, 'ok', 3000);
+  // Re-apply for current user so sidebar updates instantly
+  if (typeof applyRoleMenu === 'function') applyRoleMenu();
 }
 
 function resetAllRolePages() {
