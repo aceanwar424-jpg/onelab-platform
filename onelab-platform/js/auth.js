@@ -235,7 +235,12 @@ function getUserName(){
 }
 
 function getUserRole(){
-  return currentUser?.profile?.role || currentUser?.user_metadata?.role || 'sales';
+  const role = currentUser?.profile?.role 
+      || currentUser?.user_metadata?.role
+      || currentUser?.role
+      || 'sales';
+  const map = { admin:'super_admin', direktur:'direktur', head:'super_admin' };
+  return map[role] || role;
 }
 
 function isAdmin(){

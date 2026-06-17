@@ -122,9 +122,13 @@ function getUserName() {
       || 'User';
 }
 function getUserRole() {
-  return window.currentUser?.profile?.role 
-      || window.currentUser?.user_metadata?.role 
+  const role = window.currentUser?.profile?.role 
+      || window.currentUser?.user_metadata?.role
+      || window.currentUser?.role
       || 'sales';
+  // Normalize: map old role names to new
+  const map = { admin:'super_admin', direktur:'direktur', head:'super_admin' };
+  return map[role] || role;
 }
 function getRoleLabel(role) {
   if (typeof ROLES !== 'undefined' && ROLES[role]) return ROLES[role].label;

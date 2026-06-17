@@ -10,6 +10,7 @@ async function renderSettings() {
     <div class="tabs" id="set-tabs">
       <button class="tab-btn active" onclick="switchSetTab('general',this)">⚙️ Umum</button>
       <button class="tab-btn" onclick="switchSetTab('users',this)">👥 Pengguna</button>
+      <button class="tab-btn" onclick="switchSetTab('rolemenu',this)">🔐 Akses Menu</button>
       <button class="tab-btn" onclick="switchSetTab('activity',this)">📋 Log Aktivitas</button>
       <button class="tab-btn" onclick="switchSetTab('data',this)">🗄 Data</button>
       <button class="tab-btn" onclick="switchSetTab('masterdata',this)">📋 Master Data</button>
@@ -52,6 +53,10 @@ async function renderSettings() {
         </div>
         <div id="set-users-list" class="loading-row"><div class="spinner"></div></div>
       </div>
+    </div>
+
+    <div id="set-rolemenu" style="display:none">
+      <div id="set-rolemenu-content"></div>
     </div>
 
     <div id="set-activity" style="display:none">
@@ -131,6 +136,7 @@ async function renderSettings() {
 function switchSetTab(tab, btn) {
   document.querySelectorAll('#set-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  if (tab === 'rolemenu') { ['general','users','activity','data','masterdata','admin'].forEach(t=>{const d=document.getElementById('set-'+t);if(d)d.style.display='none';}); document.getElementById('set-rolemenu').style.display=''; renderRoleMenuConfig(); return; }
   ['general','users','activity','data','admin','masterdata'].forEach(t=>{
     const el = document.getElementById(`set-${t}`);
     if (el) el.style.display = t===tab?'block':'none';
@@ -466,4 +472,129 @@ async function loadDocSequences() {
         <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
       </div>`);
   } catch(e){ toast('❌ '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROLE MENU ACCESS CONFIGURATOR
+// ═══════════════════════════════════════════════════════════════
+
+function renderRoleMenuConfig() {
+  const roles = ['super_admin','direktur','manager','spv','sales','operasional','hrd_staff','finance_staff','viewer'];
+  const el = document.getElementById('set-rolemenu-content');
+  if (!el) return;
+
+  // Show/hide tab content
+  ['general','users','activity','data','masterdata','admin'].forEach(t => {
+    const d = document.getElementById(`set-${t}`);
+    if (d) d.style.display = 'none';
+  });
+  document.getElementById('set-rolemenu').style.display = '';
+
+  // Group pages
+  const groups = {};
+  Object.entries(ALL_PAGES).forEach(([key, [group, label, icon]]) => {
+    if (!groups[group]) groups[group] = [];
+    groups[group].push({key, label, icon});
+  });
+
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <div style="font-weight:800;font-size:14px">🔐 Konfigurasi Akses Menu per Role</div>
+      <div style="font-size:12px;color:var(--text3)">Super Admin selalu punya akses penuh</div>
+      <button class="btn btn-ghost btn-sm" onclick="resetAllRolePages()">↩ Reset Default</button>
+      <button class="btn btn-teal btn-sm" onclick="saveAllRolePages()">💾 Simpan Semua</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="border-collapse:collapse;min-width:900px;font-size:12.5px">
+        <thead>
+          <tr style="background:var(--navy)">
+            <th style="padding:10px 14px;color:#fff;text-align:left;min-width:180px;position:sticky;left:0;background:var(--navy)">Menu / Halaman</th>
+            ${roles.map(r => {
+              const rc = ROLES[r] || {};
+              return `<th style="padding:10px 8px;color:#fff;text-align:center;min-width:90px">
+                <div style="font-size:11px;font-weight:700">${rc.label||r}</div>
+                <div style="width:8px;height:8px;border-radius:50%;background:${rc.color||'#94A3B8'};margin:4px auto 0"></div>
+              </th>`;
+            }).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.entries(groups).map(([group, pages]) => `
+            <tr>
+              <td colspan="${roles.length + 1}" style="padding:8px 14px;background:var(--bg2);
+                font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;
+                border-bottom:1px solid var(--border)">
+                ${group}
+              </td>
+            </tr>
+            ${pages.map((p, pi) => `
+              <tr style="background:${pi%2===0?'#fff':'var(--bg2)'};border-bottom:1px solid var(--border)">
+                <td style="padding:8px 14px;font-weight:600;position:sticky;left:0;background:inherit">
+                  <span style="margin-right:6px">${p.icon}</span>${p.label}
+                  <div style="font-size:10px;color:var(--text3);font-family:monospace">${p.key}</div>
+                </td>
+                ${roles.map(r => {
+                  const currentPages = getRolePages(r);
+                  const checked = r === 'super_admin' || currentPages.includes(p.key);
+                  const disabled = r === 'super_admin';
+                  return `<td style="padding:8px;text-align:center">
+                    <input type="checkbox" 
+                      id="rp-${r}-${p.key.replace(/[^a-z0-9]/g,'_')}"
+                      data-role="${r}" data-page="${p.key}"
+                      ${checked ? 'checked' : ''}
+                      ${disabled ? 'disabled' : ''}
+                      style="width:16px;height:16px;cursor:${disabled?'not-allowed':'pointer'};accent-color:${ROLES[r]?.color||'var(--teal)'}">
+                  </td>`;
+                }).join('')}
+              </tr>`).join('')}
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Role descriptions -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:20px">
+      ${roles.map(r => {
+        const rc = ROLES[r]||{};
+        const pages = getRolePages(r);
+        return `
+          <div style="border-left:4px solid ${rc.color||'#94A3B8'};padding:10px 12px;background:#fff;
+            border-radius:0 var(--r) var(--r) 0;border:1px solid var(--border)">
+            <div style="font-weight:700;font-size:12.5px;color:${rc.color||'var(--text)'}">${rc.label||r}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${rc.desc||''}</div>
+            <div style="margin-top:6px;font-size:11px">
+              <span style="background:${rc.color||'#94A3B8'}20;color:${rc.color||'#94A3B8'};
+                padding:2px 8px;border-radius:10px;font-weight:700">${pages.length} halaman</span>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function saveAllRolePages() {
+  const roles = ['direktur','manager','spv','sales','operasional','hrd_staff','finance_staff','viewer'];
+  let saved = 0;
+  roles.forEach(role => {
+    const pages = [];
+    document.querySelectorAll(`[data-role="${role}"]`).forEach(cb => {
+      if (cb.checked) pages.push(cb.getAttribute('data-page'));
+    });
+    // Always include dashboard
+    if (!pages.includes('dashboard')) pages.unshift('dashboard');
+    saveRolePages(role, pages);
+    saved++;
+  });
+  toast(`✅ Akses menu ${saved} role disimpan`, 'ok');
+  // Re-apply for current user
+  applyRoleMenu();
+}
+
+function resetAllRolePages() {
+  if (!confirm('Reset semua konfigurasi akses menu ke default?')) return;
+  const roles = Object.keys(ROLES);
+  roles.forEach(r => localStorage.removeItem('ol_role_pages_' + r));
+  toast('↩ Semua role direset ke default', 'info');
+  renderRoleMenuConfig();
+  applyRoleMenu();
 }
