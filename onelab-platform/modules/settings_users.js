@@ -264,7 +264,7 @@ function renderUsersTable(users) {
   }
   el.innerHTML = `
     <table><thead><tr>
-      <th>User</th><th>Role</th><th>Akses Menu</th><th>No. HP</th><th>Terdaftar</th><th>Aksi</th>
+      <th>User</th><th>Jabatan / Divisi</th><th>Role</th><th>Akses Menu</th><th>No. HP</th><th>Terdaftar</th><th>Aksi</th>
     </tr></thead><tbody>
     ${users.map(u => {
       const role = u.role||'sales';
@@ -282,8 +282,13 @@ function renderUsersTable(users) {
                 ${u.full_name||'—'}
                 ${isMe?'<span style="font-size:10px;color:var(--teal);margin-left:4px">(Saya)</span>':''}
               </div>
+              <div style="font-size:10.5px;color:var(--text3)">${u.email||''}</div>
             </div>
           </div>
+        </td>
+        <td>
+          <div style="font-size:12px;font-weight:600">${u.jabatan||'—'}</div>
+          <div style="font-size:10.5px;color:var(--text3)">${u.division||''}</div>
         </td>
         <td>
           <span style="background:${rc.color}20;color:${rc.color};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">

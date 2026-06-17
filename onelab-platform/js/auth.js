@@ -235,11 +235,12 @@ function getUserName(){
 }
 
 function getUserRole(){
-  const role = currentUser?.profile?.role 
+  let role = currentUser?.profile?.role 
       || currentUser?.user_metadata?.role
       || currentUser?.role
       || 'sales';
-  const map = { admin:'super_admin', direktur:'direktur', head:'super_admin' };
+  role = String(role).trim().toLowerCase();
+  const map = { admin:'super_admin', head:'super_admin', superadmin:'super_admin' };
   return map[role] || role;
 }
 

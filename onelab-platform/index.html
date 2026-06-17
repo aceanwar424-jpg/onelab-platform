@@ -573,47 +573,98 @@ async function doResetPassword() {
 }
 
 function openEditProfile() {
-  const name  = getUserName ? getUserName() : '';
-  const phone = window.currentUser?.profile?.phone || '';
+  const p      = window.currentUser?.profile || {};
+  const name   = getUserName ? getUserName() : '';
+  const email  = window.currentUser?.email || '';
+  const role   = getUserRole ? getUserRole() : 'sales';
+  const rc     = (typeof ROLES !== 'undefined' ? ROLES[role] : null) || {};
+
+  const DEPT_OPTIONS = ['Management','Medis','Lab & Analis','Finance','CS & Ops','Support','Marketing & Sales'];
+
   openModal(`
     <div class="modal-header">
       <div class="modal-title">👤 Edit Profil</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
+
+    <div class="status-box" style="background:var(--bg2);font-size:12px;margin-bottom:14px">
+      📧 ${email} &nbsp;·&nbsp;
+      <span style="color:${rc.color||'var(--teal)'};font-weight:700">● ${rc.label||role}</span>
+      &nbsp;(role diatur oleh Super Admin di User Management)
+    </div>
+
     <div class="form-group">
-      <label>Nama Lengkap</label>
+      <label>Nama Lengkap *</label>
       <input type="text" id="ep-name" value="${name}">
     </div>
-    <div class="form-group">
-      <label>No. HP / WA</label>
-      <input type="text" id="ep-phone" value="${phone}" placeholder="08xxxxxxxxxx">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Jabatan</label>
+        <input type="text" id="ep-jabatan" value="${p.jabatan||''}" placeholder="Contoh: Head of Operations">
+      </div>
+      <div class="form-group">
+        <label>Divisi / Departemen</label>
+        <select id="ep-division">
+          <option value="">-- Pilih --</option>
+          ${DEPT_OPTIONS.map(d=>`<option value="${d}" ${p.division===d?'selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>No. HP / WA</label>
+        <input type="text" id="ep-phone" value="${p.phone||''}" placeholder="08xxxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>NIP / Employee ID</label>
+        <input type="text" id="ep-nip" value="${p.nip||''}" placeholder="Opsional">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Bio Singkat</label>
+      <textarea id="ep-bio" rows="2" placeholder="Deskripsi singkat peran...">${p.bio||''}</textarea>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-teal" onclick="doSaveProfile()">💾 Simpan</button>
+      <button class="btn btn-teal" onclick="doSaveProfile()">💾 Simpan Profil</button>
     </div>`, 'narrow');
 }
 
 async function doSaveProfile() {
-  const name  = document.getElementById('ep-name')?.value.trim();
-  const phone = document.getElementById('ep-phone')?.value.trim();
+  const name     = document.getElementById('ep-name')?.value.trim();
+  const phone    = document.getElementById('ep-phone')?.value.trim();
+  const jabatan  = document.getElementById('ep-jabatan')?.value.trim();
+  const division = document.getElementById('ep-division')?.value;
+  const nip      = document.getElementById('ep-nip')?.value.trim();
+  const bio      = document.getElementById('ep-bio')?.value.trim();
   if (!name) { toast('Nama tidak boleh kosong','err'); return; }
   const userId = window.currentUser?.id;
   if (!userId) { toast('Session tidak valid','err'); return; }
   try {
-    await sbPatch('user_profiles', userId, {
+    const payload = {
       full_name:  name,
       phone:      phone||null,
+      jabatan:    jabatan||null,
+      division:   division||null,
+      nip:        nip||null,
+      bio:        bio||null,
       updated_at: new Date().toISOString(),
-    });
+    };
+    await sbPatch('user_profiles', userId, payload);
     if (window.currentUser?.profile) {
-      window.currentUser.profile.full_name = name;
-      window.currentUser.profile.phone     = phone;
+      Object.assign(window.currentUser.profile, payload);
     }
     toast('✅ Profil diupdate','ok');
     closeModalForce();
-    setupAppUI(); // refresh display
-  } catch(e) { toast('❌ '+e.message,'err'); }
+    setupAppUI();
+  } catch(e) {
+    if (e.message && e.message.includes('column')) {
+      toast('⚠️ Jalankan migration SQL dulu untuk field jabatan/divisi','warn',5000);
+    } else {
+      toast('❌ '+e.message,'err');
+    }
+  }
 }
 
 </script>
