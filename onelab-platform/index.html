@@ -8,222 +8,68 @@
 <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
-
-<!-- ═══ SIDEBAR ═══ -->
-<aside class="sidebar" id="sidebar">
-
-  <div class="sidebar-logo">
+<!-- ═══ SIDEBAR — Category Rail + Flyout Panel (Virtu Digilab style) ═══ -->
+<aside class="sidebar-rail" id="sidebar-rail">
+  <div class="rail-logo" onclick="navigate('dashboard');closeFlyout()">
     <div class="logo-mark">OL</div>
-    <div class="logo-text">
-      <span class="logo-main">OneLab</span>
-      <span class="logo-sub">Growth Platform</span>
-    </div>
   </div>
 
-  <button class="sidebar-toggle" onclick="toggleMini()" id="toggle-btn" title="Perluas / Perkecil menu">›</button>
-
-  <nav class="sidebar-nav" id="sidebar-nav">
-
-    <!-- ── UTAMA ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Utama</div>
-      <button class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard" data-tooltip="Dashboard">
-        <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
-      </button>
-    </div>
-
-    <!-- ── MARKETING & SALES ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Marketing &amp; Sales</div>
-      <button class="nav-item" onclick="navigate('partners')" data-page="partners" data-tooltip="Partner Database">
-        <span class="nav-icon">🤝</span><span class="nav-label">Partner Database</span>
-        <span class="nav-badge" id="badge-partners" style="display:none">0</span>
-      </button>
-      <button class="nav-item" onclick="navigate('maps')" data-page="maps" data-tooltip="Maps Prospecting">
-        <span class="nav-icon">🗺️</span><span class="nav-label">Maps Prospecting</span>
-      </button>
-      <button class="nav-item" onclick="navigate('leads')" data-page="leads" data-tooltip="Leads Management">
-        <span class="nav-icon">🎯</span><span class="nav-label">Leads Management</span>
-      </button>
-      <button class="nav-item" onclick="navigate('marketing')" data-page="marketing" data-tooltip="Marketing &amp; Voucher">
-        <span class="nav-icon">📣</span><span class="nav-label">Marketing &amp; Voucher</span>
-      </button>
-      <button class="nav-item" onclick="navigate('okr')" data-page="okr" data-tooltip="OKR &amp; Target Sales">
-        <span class="nav-icon">📈</span><span class="nav-label">OKR &amp; Target Sales</span>
-      </button>
-      <button class="nav-item" onclick="navigate('mcu')" data-page="mcu" data-tooltip="Project MCU">
-        <span class="nav-icon">🏥</span><span class="nav-label">Project MCU</span>
-      </button>
-      <button class="nav-item" onclick="navigate('surat')" data-page="surat" data-tooltip="Surat Keluar">
-        <span class="nav-icon">📄</span><span class="nav-label">Surat Keluar</span>
-      </button>
-      <button class="nav-item" onclick="navigate('mou')" data-page="mou" data-tooltip="MOU / Perjanjian">
-        <span class="nav-icon">📜</span><span class="nav-label">MOU / Perjanjian</span>
-      </button>
-    </div>
-
-    <!-- ── OPERASIONAL LAB ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Operasional Lab</div>
-      <button class="nav-item" onclick="navigate('lab')" data-page="lab-checkin" data-tooltip="Check In Sampel">
-        <span class="nav-icon">🧪</span><span class="nav-label">Check In Sampel</span>
-      </button>
-      <button class="nav-item" onclick="navigate('lab')" data-page="lab-result" data-tooltip="Enter Result">
-        <span class="nav-icon">📝</span><span class="nav-label">Enter Result</span>
-      </button>
-      <button class="nav-item" onclick="navigate('lab')" data-page="lab-validation" data-tooltip="Validasi Hasil">
-        <span class="nav-icon">✅</span><span class="nav-label">Validasi Hasil</span>
-      </button>
-      <button class="nav-item" onclick="navigate('lab')" data-page="lab-approval" data-tooltip="Approval">
-        <span class="nav-icon">🔏</span><span class="nav-label">Approval</span>
-      </button>
-      <button class="nav-item" onclick="navigate('medrecord')" data-page="medrecord" data-tooltip="Medical Record">
-        <span class="nav-icon">📁</span><span class="nav-label">Medical Record</span>
-      </button>
-    </div>
-
-    <!-- ── LAYANAN KLINIK ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Layanan Klinik</div>
-      <button class="nav-item" onclick="navigate('admission')" data-page="admission" data-tooltip="Admission">
-        <span class="nav-icon">🏨</span><span class="nav-label">Admission</span>
-      </button>
-      <button class="nav-item" onclick="navigate('radiology')" data-page="radiology" data-tooltip="Radiology">
-        <span class="nav-icon">🫁</span><span class="nav-label">Radiology</span>
-      </button>
-      <button class="nav-item" onclick="navigate('supportive')" data-page="supportive" data-tooltip="Supportive / EKG">
-        <span class="nav-icon">❤️</span><span class="nav-label">Supportive</span>
-      </button>
-      <button class="nav-item" onclick="navigate('package')" data-page="package" data-tooltip="Package Service">
-        <span class="nav-icon">🗂️</span><span class="nav-label">Package Service</span>
-      </button>
-      <button class="nav-item nav-item-soon" data-tooltip="Satu Sehat — Segera">
-        <span class="nav-icon">🏛️</span><span class="nav-label">Satu Sehat</span>
-        <span class="nav-soon">soon</span>
-      </button>
-    </div>
-
-    <!-- ── HOME CARE ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Home Care</div>
-      <button class="nav-item" onclick="navigate('homecare')" data-page="homecare" data-tooltip="Order Home Care">
-        <span class="nav-icon">🏠</span><span class="nav-label">Order Home Care</span>
-      </button>
-      <button class="nav-item" onclick="renderHCSchedule()" data-page="hc-schedule" data-tooltip="Jadwal Kunjungan">
-        <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kunjungan</span>
-      </button>
-      <button class="nav-item" onclick="renderHCBilling()" data-page="hc-billing" data-tooltip="Billing Fee Nakes">
-        <span class="nav-icon">💵</span><span class="nav-label">Billing Fee Nakes</span>
-      </button>
-      <button class="nav-item" onclick="renderHCFullReport()" data-page="hc-report" data-tooltip="Report Home Care">
-        <span class="nav-icon">📊</span><span class="nav-label">Report</span>
-      </button>
-    </div>
-
-    <!-- ── FINANCE ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Finance &amp; Billing</div>
-      <button class="nav-item" onclick="navigate('cashier')" data-page="cashier" data-tooltip="Cashier">
-        <span class="nav-icon">🏧</span><span class="nav-label">Cashier</span>
-      </button>
-      <button class="nav-item" onclick="navigate('finance')" data-page="finance" data-tooltip="Invoice &amp; Tagihan">
-        <span class="nav-icon">💰</span><span class="nav-label">Invoice &amp; Tagihan</span>
-      </button>
-      <button class="nav-item" onclick="navigate('finance')" data-page="finance-ar" data-tooltip="Tagihan Piutang AR">
-        <span class="nav-icon">📑</span><span class="nav-label">Tagihan AR</span>
-      </button>
-      <button class="nav-item" onclick="navigate('finance')" data-page="finance-comm" data-tooltip="Komisi Sales">
-        <span class="nav-icon">🏆</span><span class="nav-label">Komisi Sales</span>
-      </button>
-      <button class="nav-item" onclick="navigate('finance')" data-page="finance-report" data-tooltip="Laporan Keuangan">
-        <span class="nav-icon">📊</span><span class="nav-label">Laporan Keuangan</span>
-      </button>
-    </div>
-
-    <!-- ── INVENTORY ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Inventory &amp; Logistik</div>
-      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory" data-tooltip="Stock &amp; Reagen">
-        <span class="nav-icon">📦</span><span class="nav-label">Stock &amp; Reagen</span>
-      </button>
-      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory-pr" data-tooltip="Purchase Request">
-        <span class="nav-icon">🛒</span><span class="nav-label">Purchase Request</span>
-      </button>
-      <button class="nav-item" onclick="navigate('inventory')" data-page="inventory-supplier" data-tooltip="Supplier">
-        <span class="nav-icon">🏭</span><span class="nav-label">Supplier</span>
-      </button>
-    </div>
-
-    <!-- ── HRD ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">HRD &amp; SDM</div>
-      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd" data-tooltip="Data Karyawan">
-        <span class="nav-icon">👥</span><span class="nav-label">Data Karyawan</span>
-      </button>
-      <button class="nav-item" onclick="navigate('org-structure')" data-page="org-structure" data-tooltip="Struktur Organisasi">
-        <span class="nav-icon">🏛️</span><span class="nav-label">Struktur Organisasi</span>
-      </button>
-      <button class="nav-item" onclick="navigate('work-schedule')" data-page="work-schedule" data-tooltip="Jadwal Kerja &amp; Shift">
-        <span class="nav-icon">📅</span><span class="nav-label">Jadwal Kerja</span>
-      </button>
-      <button class="nav-item" onclick="navigate('attendance')" data-page="attendance" data-tooltip="Absensi &amp; Clock In/Out">
-        <span class="nav-icon">⏰</span><span class="nav-label">Absensi</span>
-      </button>
-      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-cuti" data-tooltip="Cuti &amp; Izin">
-        <span class="nav-icon">🕐</span><span class="nav-label">Cuti &amp; Izin</span>
-      </button>
-      <button class="nav-item" onclick="navigate('hrd')" data-page="hrd-payroll" data-tooltip="Penggajian">
-        <span class="nav-icon">💵</span><span class="nav-label">Penggajian</span>
-      </button>
-    </div>
-
-    <!-- ── TASK MANAGEMENT ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Produktivitas</div>
-      <button class="nav-item" onclick="navigate('tasks')" data-page="tasks" data-tooltip="Task Management">
-        <span class="nav-icon">📋</span><span class="nav-label">Task Management</span>
-      </button>
-      <button class="nav-item" onclick="navigate('regulatory')" data-page="regulatory" data-tooltip="Pelaporan &amp; Audit">
-        <span class="nav-icon">📊</span><span class="nav-label">Pelaporan &amp; Audit</span>
-      </button>
-    </div>
-
-    <!-- ── CONFIGURATION ── -->
-    <div class="nav-group">
-      <div class="nav-group-label">Konfigurasi</div>
-      <button class="nav-item" onclick="navigate('users')" data-page="users" id="nav-users" style="display:none" data-tooltip="User Management">
-        <span class="nav-icon">👤</span><span class="nav-label">User Management</span>
-      </button>
-      <button class="nav-item" onclick="navigate('product')" data-page="product" data-tooltip="Product">
-        <span class="nav-icon">🧬</span><span class="nav-label">Product</span>
-      </button>
-      <button class="nav-item" onclick="navigate('corporate')" data-page="corporate" data-tooltip="Corporate">
-        <span class="nav-icon">🏢</span><span class="nav-label">Corporate</span>
-      </button>
-      <button class="nav-item" onclick="navigate('import')" data-page="import" data-tooltip="Import Excel">
-        <span class="nav-icon">📥</span><span class="nav-label">Import Excel</span>
-      </button>
-      <button class="nav-item" onclick="navigate('settings')" data-page="settings" data-tooltip="Pengaturan Sistem">
-        <span class="nav-icon">⚙️</span><span class="nav-label">Pengaturan</span>
-      </button>
-    </div>
-
+  <nav class="rail-nav" id="rail-nav">
+    <button class="rail-item active" data-cat="utama" onclick="openFlyout('utama')" data-tooltip="Utama">
+      <span class="rail-icon">🏠</span>
+    </button>
+    <button class="rail-item" data-cat="marketing" onclick="openFlyout('marketing')" data-tooltip="Marketing & Sales">
+      <span class="rail-icon">🤝</span>
+      <span class="rail-badge" id="badge-partners-rail" style="display:none">0</span>
+    </button>
+    <button class="rail-item" data-cat="lab" onclick="openFlyout('lab')" data-tooltip="Operasional Lab">
+      <span class="rail-icon">🧪</span>
+    </button>
+    <button class="rail-item" data-cat="klinik" onclick="openFlyout('klinik')" data-tooltip="Layanan Klinik">
+      <span class="rail-icon">🏨</span>
+    </button>
+    <button class="rail-item" data-cat="homecare" onclick="openFlyout('homecare')" data-tooltip="Home Care">
+      <span class="rail-icon">🏡</span>
+    </button>
+    <button class="rail-item" data-cat="finance" onclick="openFlyout('finance')" data-tooltip="Finance & Billing">
+      <span class="rail-icon">💰</span>
+    </button>
+    <button class="rail-item" data-cat="inventory" onclick="openFlyout('inventory')" data-tooltip="Inventory & Logistik">
+      <span class="rail-icon">📦</span>
+    </button>
+    <button class="rail-item" data-cat="hrd" onclick="openFlyout('hrd')" data-tooltip="HRD & SDM">
+      <span class="rail-icon">👥</span>
+    </button>
+    <button class="rail-item" data-cat="produktivitas" onclick="openFlyout('produktivitas')" data-tooltip="Produktivitas">
+      <span class="rail-icon">📋</span>
+    </button>
+    <button class="rail-item" data-cat="konfigurasi" onclick="openFlyout('konfigurasi')" data-tooltip="Konfigurasi">
+      <span class="rail-icon">⚙️</span>
+    </button>
   </nav>
-  <!-- Connection status pill -->
-  <div style="padding:8px 18px;flex-shrink:0">
-    <div style="display:flex;align-items:center;gap:7px;padding:6px 10px;background:rgba(255,255,255,.05);border-radius:8px;">
-      <span class="conn-dot" id="conn-dot" style="width:7px;height:7px;border-radius:50%;background:#64748B;flex-shrink:0"></span>
-      <span id="conn-label" style="font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;flex:1">Memeriksa...</span>
-    </div>
+
+  <div class="rail-footer">
+    <span class="conn-dot" id="conn-dot" title="Status koneksi"></span>
   </div>
 
-  <!-- User info — hidden, moved to topbar dropdown -->
+  <!-- User info — hidden compat refs, moved to topbar dropdown -->
   <div id="sidebar-user" style="display:none">
     <div id="user-avatar"></div>
     <div><span id="user-name-sidebar"></span><span id="user-role-sidebar"></span></div>
   </div>
-
+  <div id="conn-label" style="display:none"></div>
 </aside>
+
+<!-- ═══ FLYOUT PANEL — Submenu per Category ═══ -->
+<div class="flyout-overlay" id="flyout-overlay" onclick="closeFlyout()"></div>
+<div class="flyout-panel" id="flyout-panel">
+  <div class="flyout-header">
+    <div class="flyout-title" id="flyout-title">Menu</div>
+    <button class="flyout-close" onclick="closeFlyout()">✕</button>
+  </div>
+  <div class="flyout-body" id="flyout-body"></div>
+</div>
+
 
 <!-- ═══ TOPBAR ═══ -->
 <div class="topbar" id="topbar">
@@ -356,41 +202,10 @@
 <script src="modules/import_excel.js"></script>
 
 <script>
-// ── Sidebar mini/expand ──────────────────
-let isMini = localStorage.getItem('ol_mini') !== '0'; // default = mini
-
-function applyMiniState() {
-  const sidebar = document.getElementById('sidebar');
-  const topbar  = document.getElementById('topbar');
-  const main    = document.getElementById('main-content');
-  const btn     = document.getElementById('toggle-btn');
-  if (isMini) {
-    sidebar.classList.remove('expanded');
-    topbar.classList.remove('expanded');
-    main.classList.remove('expanded');
-    sidebar.classList.add('mini');
-    topbar.classList.add('mini');
-    main.classList.add('mini');
-    if (btn) btn.textContent = '›';
-  } else {
-    sidebar.classList.remove('mini');
-    topbar.classList.remove('mini');
-    main.classList.remove('mini');
-    sidebar.classList.add('expanded');
-    topbar.classList.add('expanded');
-    main.classList.add('expanded');
-    if (btn) btn.textContent = '‹';
-  }
-}
-
-function toggleMini() {
-  isMini = !isMini;
-  localStorage.setItem('ol_mini', isMini ? '1' : '0');
-  applyMiniState();
-}
-
+// ── Sidebar rail — always 64px, flyout handles submenu ──
 function toggleSidebar() {
-  document.getElementById('sidebar')?.classList.toggle('open');
+  // Mobile: toggle rail visibility (kept for compat with hamburger button)
+  document.getElementById('sidebar-rail')?.classList.toggle('open');
 }
 
 // ── Date display ─────────────────────────
@@ -404,7 +219,6 @@ function updateDate() {
 
 // ── Boot ─────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  applyMiniState();
   updateDate();
   setInterval(updateDate, 60000);
 
@@ -488,26 +302,6 @@ async function checkConnection() {
     if (lbl) lbl.textContent = 'Offline';
   }
 }
-
-// ── Sidebar hover expand (when locked mini) ─────────
-document.addEventListener('DOMContentLoaded', () => {
-  const sb   = document.getElementById('sidebar');
-  const tb   = document.getElementById('topbar');
-  const main = document.getElementById('main-content');
-  if (!sb) return;
-
-  sb.addEventListener('mouseenter', () => {
-    if (!sb.classList.contains('expanded')) {
-      sb.classList.add('hover-expanded');
-      // Don't shift topbar/main on hover - just overlay sidebar
-    }
-  });
-
-  sb.addEventListener('mouseleave', () => {
-    sb.classList.remove('hover-expanded');
-  });
-});
-
 
 setInterval(checkConnection, 60000);
 
@@ -663,6 +457,175 @@ async function doSaveProfile() {
       toast('⚠️ Jalankan migration SQL dulu untuk field jabatan/divisi','warn',5000);
     } else {
       toast('❌ '+e.message,'err');
+    }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// FLYOUT PANEL — Category Rail Navigation (Virtu Digilab style)
+// ═══════════════════════════════════════════════════════════════
+
+const FLYOUT_MENUS = {
+  utama: {
+    label: 'Utama',
+    items: [
+      {page:'dashboard', icon:'🏠', label:'Dashboard', action:"navigate('dashboard')"},
+    ]
+  },
+  marketing: {
+    label: 'Marketing & Sales',
+    items: [
+      {page:'partners', icon:'🤝', label:'Partner Database', action:"navigate('partners')", badge:'badge-partners'},
+      {page:'maps', icon:'🗺️', label:'Maps Prospecting', action:"navigate('maps')"},
+      {page:'leads', icon:'🎯', label:'Leads Management', action:"navigate('leads')"},
+      {page:'marketing', icon:'📣', label:'Marketing & Voucher', action:"navigate('marketing')"},
+      {page:'okr', icon:'📈', label:'OKR & Target Sales', action:"navigate('okr')"},
+      {page:'mcu', icon:'🏥', label:'Project MCU', action:"navigate('mcu')"},
+      {page:'surat', icon:'📄', label:'Surat Keluar', action:"navigate('surat')"},
+      {page:'mou', icon:'📜', label:'MOU / Perjanjian', action:"navigate('mou')"},
+    ]
+  },
+  lab: {
+    label: 'Operasional Lab',
+    items: [
+      {page:'lab-checkin', icon:'🧪', label:'Check In Sampel', action:"navigate('lab')"},
+      {page:'lab-result', icon:'📝', label:'Enter Result', action:"navigate('lab')"},
+      {page:'lab-validation', icon:'✅', label:'Validasi Hasil', action:"navigate('lab')"},
+      {page:'lab-approval', icon:'🔏', label:'Approval', action:"navigate('lab')"},
+      {page:'medrecord', icon:'📁', label:'Medical Record', action:"navigate('medrecord')"},
+    ]
+  },
+  klinik: {
+    label: 'Layanan Klinik',
+    items: [
+      {page:'admission', icon:'🏨', label:'Admission', action:"navigate('admission')"},
+      {page:'radiology', icon:'🫁', label:'Radiology', action:"navigate('radiology')"},
+      {page:'supportive', icon:'❤️', label:'Supportive', action:"navigate('supportive')"},
+      {page:'package', icon:'🗂️', label:'Package Service', action:"navigate('package')"},
+      {page:'satusehat', icon:'🏛️', label:'Satu Sehat', action:"", soon:true},
+    ]
+  },
+  homecare: {
+    label: 'Home Care',
+    items: [
+      {page:'homecare', icon:'🏠', label:'Order Home Care', action:"navigate('homecare')"},
+      {page:'hc-schedule', icon:'📅', label:'Jadwal Kunjungan', action:"renderHCSchedule()"},
+      {page:'hc-billing', icon:'💵', label:'Billing Fee Nakes', action:"renderHCBilling()"},
+      {page:'hc-report', icon:'📊', label:'Report', action:"renderHCFullReport()"},
+    ]
+  },
+  finance: {
+    label: 'Finance & Billing',
+    items: [
+      {page:'cashier', icon:'🏧', label:'Cashier', action:"navigate('cashier')"},
+      {page:'finance', icon:'💰', label:'Invoice & Tagihan', action:"navigate('finance')"},
+      {page:'finance-ar', icon:'📑', label:'Tagihan AR', action:"navigate('finance')"},
+      {page:'finance-comm', icon:'🏆', label:'Komisi Sales', action:"navigate('finance')"},
+      {page:'finance-report', icon:'📊', label:'Laporan Keuangan', action:"navigate('finance')"},
+    ]
+  },
+  inventory: {
+    label: 'Inventory & Logistik',
+    items: [
+      {page:'inventory', icon:'📦', label:'Stock & Reagen', action:"navigate('inventory')"},
+      {page:'inventory-pr', icon:'🛒', label:'Purchase Request', action:"navigate('inventory')"},
+      {page:'inventory-supplier', icon:'🏭', label:'Supplier', action:"navigate('inventory')"},
+    ]
+  },
+  hrd: {
+    label: 'HRD & SDM',
+    items: [
+      {page:'hrd', icon:'👥', label:'Data Karyawan', action:"navigate('hrd')"},
+      {page:'org-structure', icon:'🏛️', label:'Struktur Organisasi', action:"navigate('org-structure')"},
+      {page:'work-schedule', icon:'📅', label:'Jadwal Kerja', action:"navigate('work-schedule')"},
+      {page:'attendance', icon:'⏰', label:'Absensi', action:"navigate('attendance')"},
+      {page:'hrd-cuti', icon:'🕐', label:'Cuti & Izin', action:"navigate('hrd')"},
+      {page:'hrd-payroll', icon:'💵', label:'Penggajian', action:"navigate('hrd')"},
+    ]
+  },
+  produktivitas: {
+    label: 'Produktivitas',
+    items: [
+      {page:'tasks', icon:'📋', label:'Task Management', action:"navigate('tasks')"},
+      {page:'regulatory', icon:'📊', label:'Pelaporan & Audit', action:"navigate('regulatory')"},
+    ]
+  },
+  konfigurasi: {
+    label: 'Konfigurasi',
+    items: [
+      {page:'users', icon:'👤', label:'User Management', action:"navigate('users')", adminOnly:true},
+      {page:'product', icon:'🧬', label:'Product', action:"navigate('product')"},
+      {page:'corporate', icon:'🏢', label:'Corporate', action:"navigate('corporate')"},
+      {page:'import', icon:'📥', label:'Import Excel', action:"navigate('import')"},
+      {page:'settings', icon:'⚙️', label:'Pengaturan', action:"navigate('settings')"},
+    ]
+  },
+};
+
+let activeFlyoutCat = null;
+
+function openFlyout(cat) {
+  const menu = FLYOUT_MENUS[cat];
+  if (!menu) return;
+  activeFlyoutCat = cat;
+
+  // Update rail active state
+  document.querySelectorAll('.rail-item').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.rail-item[data-cat="${cat}"]`)?.classList.add('active');
+
+  // Get current allowed pages (role-based)
+  const role = typeof getUserRole === 'function' ? getUserRole() : 'sales';
+  const allowedPages = window.roleConfig?.pages || null;
+  const isSuperAdmin = role === 'super_admin';
+
+  document.getElementById('flyout-title').textContent = menu.label;
+  document.getElementById('flyout-body').innerHTML = menu.items.map(item => {
+    if (item.adminOnly && !['super_admin','manager','direktur'].includes(role)) return '';
+    if (!isSuperAdmin && allowedPages && !allowedPages.includes(item.page) && !item.soon) return '';
+    const currentPage = window.currentPage || '';
+    const isActive = currentPage === item.page;
+    if (item.soon) {
+      return `<div class="flyout-item flyout-item-soon">
+        <span class="flyout-item-icon">${item.icon}</span>
+        <span class="flyout-item-label">${item.label}</span>
+        <span class="flyout-soon-badge">soon</span>
+      </div>`;
+    }
+    return `<button class="flyout-item ${isActive?'active':''}" data-page="${item.page}"
+      onclick="${item.action};setActiveFlyoutItem('${item.page}')">
+      <span class="flyout-item-icon">${item.icon}</span>
+      <span class="flyout-item-label">${item.label}</span>
+      ${item.badge?`<span class="flyout-item-badge" id="${item.badge}-flyout" style="display:none">0</span>`:''}
+    </button>`;
+  }).join('');
+
+  document.getElementById('flyout-panel').classList.add('open');
+  document.getElementById('flyout-overlay').classList.add('open');
+}
+
+function closeFlyout() {
+  document.getElementById('flyout-panel')?.classList.remove('open');
+  document.getElementById('flyout-overlay')?.classList.remove('open');
+}
+
+function setActiveFlyoutItem(page) {
+  window.currentPage = page;
+  document.querySelectorAll('.flyout-item').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.flyout-item[data-page="${page}"]`)?.classList.add('active');
+  // Close flyout on mobile after click (keep open on desktop for convenience)
+  if (window.innerWidth < 900) closeFlyout();
+}
+
+// Auto-open category based on current page (called from navigate())
+function syncFlyoutToPage(page) {
+  for (const [cat, menu] of Object.entries(FLYOUT_MENUS)) {
+    if (menu.items.some(i => i.page === page)) {
+      document.querySelectorAll('.rail-item').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.rail-item[data-cat="${cat}"]`)?.classList.add('active');
+      activeFlyoutCat = cat;
+      window.currentPage = page;
+      break;
     }
   }
 }

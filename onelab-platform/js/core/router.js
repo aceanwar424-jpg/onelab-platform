@@ -19,19 +19,15 @@ const PAGE_TITLES = {
 let currentPage = '';
 
 function navigate(page, params={}) {
-  document.querySelectorAll('.nav-item[data-page]').forEach(b => {
-    const bp = b.getAttribute('data-page');
-    b.classList.toggle('active',
-      bp===page || bp===`${page}-checkin` || bp===`${page}-result` ||
-      bp===`${page}-validation` || bp===`${page}-approval` || bp===`${page}-medrecord`
-    );
-  });
+  // Sync rail + flyout active states (new sidebar structure)
+  if (typeof syncFlyoutToPage === 'function') syncFlyoutToPage(page);
 
   const titleEl = document.getElementById('topbar-title');
   if (titleEl) titleEl.textContent = PAGE_TITLES[page] || page;
 
   if (window.innerWidth < 768) {
-    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-rail')?.classList.remove('open');
+    if (typeof closeFlyout === 'function') closeFlyout();
   }
 
   currentPage = page;

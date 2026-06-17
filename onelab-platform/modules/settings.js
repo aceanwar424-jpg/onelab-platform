@@ -511,7 +511,7 @@ function renderRoleMenuConfig() {
     </div>
 
     <div style="overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)">
-      <table style="border-collapse:collapse;min-width:900px;font-size:12.5px;width:100%">
+      <table class="role-access-table" style="border-collapse:collapse;min-width:900px;font-size:12.5px;width:100%">
         <thead>
           <tr style="background:var(--navy)">
             <th style="padding:12px 16px;color:#fff;text-align:left;min-width:200px;

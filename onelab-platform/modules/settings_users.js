@@ -170,14 +170,24 @@ function applyRoleMenu() {
     isSuperAdmin: role === 'super_admin',
   };
 
-  // Show/hide nav items
-  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    if (btn.classList.contains('nav-item-soon')) return;
-    const page = btn.getAttribute('data-page');
-    // super_admin always sees everything
-    if (role === 'super_admin') { btn.style.display = ''; return; }
-    btn.style.display = allowedPages.includes(page) ? '' : 'none';
-  });
+  // Note: menu visibility now handled by openFlyout() reading window.roleConfig.pages
+  // (old .nav-item DOM elements no longer exist — replaced by rail + flyout panel)
+
+  // Hide rail category icons entirely if NONE of their pages are allowed
+  if (role !== 'super_admin' && typeof FLYOUT_MENUS !== 'undefined') {
+    document.querySelectorAll('.rail-item[data-cat]').forEach(btn => {
+      const cat  = btn.getAttribute('data-cat');
+      const menu = FLYOUT_MENUS[cat];
+      if (!menu) return;
+      const hasAnyAccess = menu.items.some(item =>
+        item.soon || allowedPages.includes(item.page) ||
+        (item.adminOnly && ['manager','direktur'].includes(role))
+      );
+      btn.style.display = hasAnyAccess ? '' : 'none';
+    });
+  } else {
+    document.querySelectorAll('.rail-item[data-cat]').forEach(btn => { btn.style.display = ''; });
+  }
 
   // Role label in sidebar with color
   const roleEl = document.getElementById('user-role-sidebar');
