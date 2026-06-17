@@ -308,6 +308,18 @@ async function openSuratForm(id=null) {
       </div>
     </div>
 
+    <div class="form-row">
+      <div class="form-group">
+        <label>No. Surat</label>
+        <input type="text" id="sf-docnumber" value="${s.doc_number||'Otomatis saat disimpan'}" disabled
+          style="background:var(--bg2);color:var(--text3);font-style:${s.doc_number?'normal':'italic'}">
+      </div>
+      <div class="form-group">
+        <label>Lampiran</label>
+        <input type="text" id="sf-lampiran" value="${s.lampiran||''}" placeholder="1 (satu) berkas / -">
+      </div>
+    </div>
+
     <div class="form-group">
       <label>Perihal / Judul *</label>
       <input type="text" id="sf-title" value="${s.title||''}"
@@ -339,10 +351,17 @@ async function openSuratForm(id=null) {
       <input type="text" id="sf-to-addr" value="${s.to_address||''}" placeholder="Jl. ...">
     </div>
 
-    <div class="form-group">
-      <label>Penandatangan</label>
-      <input type="text" id="sf-signer" value="${s.signer||user}"
-        placeholder="Nama yang tanda tangan surat">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Penandatangan (Atas Nama)</label>
+        <input type="text" id="sf-signer" value="${s.signer||user}"
+          placeholder="Nama yang tanda tangan surat">
+      </div>
+      <div class="form-group">
+        <label>Jabatan Penandatangan</label>
+        <input type="text" id="sf-signer-jabatan" value="${s.signer_jabatan||'Head of Operations'}"
+          placeholder="Head of Operations">
+      </div>
     </div>
 
     <!-- Template DOCX -->
@@ -436,9 +455,12 @@ async function saveSurat(id) {
     title,
     letter_type:     typeCode,
     letter_date:     document.getElementById('sf-date').value,
+    lampiran:        document.getElementById('sf-lampiran').value.trim(),
     to_name:         toName,
     to_pic:          document.getElementById('sf-to-pic').value.trim(),
     to_address:      document.getElementById('sf-to-addr').value.trim(),
+    signer:          document.getElementById('sf-signer').value.trim()||user,
+    signer_jabatan:  document.getElementById('sf-signer-jabatan').value.trim()||'Head of Operations',
     file_url:        fileUrl,
     file_name:       fileName,
     status:          'Draft',
@@ -509,6 +531,7 @@ async function generateDocx(id, data, templateUrl) {
     doc.render({
       NO_SURAT:      data.doc_number   || '',
       TANGGAL:       dateStr,
+      LAMPIRAN:      data.lampiran     || '-',
       PERIHAL:       data.title        || '',
       NAMA_TUJUAN:   data.to_name      || '',
       ALAMAT_TUJUAN: data.to_address   || '',
@@ -516,7 +539,7 @@ async function generateDocx(id, data, templateUrl) {
       ORG_NAMA:      ORG.name,
       ORG_ALAMAT:    ORG.addr,
       PENANDATANGAN: data.signer || data.created_by_name || 'Pimpinan',
-      JABATAN:       data.jabatan  || 'Direktur',
+      JABATAN:       data.signer_jabatan || data.jabatan || 'Head of Operations',
       BULAN_TAHUN:   `${moR} ${now.getFullYear()}`,
       TAHUN:         String(now.getFullYear()),
     });
@@ -627,6 +650,7 @@ function previewSuratHTMLDirect(s) {
     </div>
     <div class="info"><table>
       <tr><td>Nomor</td><td>: ${s.doc_number||'—'}</td></tr>
+      <tr><td>Lampiran</td><td>: ${s.lampiran||'-'}</td></tr>
       <tr><td>Perihal</td><td>: ${s.title||'—'}</td></tr>
       <tr><td>Tanggal</td><td>: ${dateStr}</td></tr>
       <tr><td>Jenis</td><td>: ${tLabel}</td></tr>
@@ -642,7 +666,8 @@ function previewSuratHTMLDirect(s) {
     <div class="sig">
       <p>Tangerang Selatan, ${dateStr}</p>
       <p>Hormat kami,<br><strong>${ORG.name}</strong></p>
-      <div class="sig-line">${s.created_by_name||'Pimpinan'}</div>
+      <div class="sig-line">${s.signer||s.created_by_name||'Pimpinan'}<br>
+      <span style="font-size:10pt;font-weight:normal">${s.signer_jabatan||'Head of Operations'}</span></div>
     </div>
     </body></html>`);
   w.document.close();

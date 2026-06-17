@@ -63,9 +63,11 @@ async function renderVoucher(){
     </div>`;
 
   await loadCampaigns();
+  await loadAllVouchers();
 }
 
 let voucherState = { campaigns:[], vouchers:[], activeCampaign:null };
+let allVouchers = [];
 
 function switchVoucherTab(tab, btn){
   document.querySelectorAll('.tabs .tab-btn').forEach(b=>b.classList.remove('active'));
@@ -402,8 +404,6 @@ async function generateVouchers(campaignId){
 }
 
 // ── Voucher List ──────────────────────────────────
-let allVouchers = [];
-
 async function loadAllVouchers(){
   const tbl = document.getElementById('vouchers-table');
   if(!tbl) return;

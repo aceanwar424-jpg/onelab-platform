@@ -88,7 +88,8 @@ async function loadPartners() {
     PS.page = 1;
     applyPSFilter();
     renderPipelineBar();
-    document.getElementById('badge-partners').textContent = PS.all.length;
+    const badgeEl = document.getElementById('badge-partners-rail');
+    if (badgeEl) { badgeEl.textContent = PS.all.length; badgeEl.style.display = PS.all.length>0?'flex':'none'; }
   } catch(e) {
     document.getElementById('partner-tbody').innerHTML =
       `<div class="status-box status-err" style="margin:16px">❌ ${e.message}</div>`;

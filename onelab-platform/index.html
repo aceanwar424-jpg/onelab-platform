@@ -140,6 +140,10 @@
             class="dropdown-item">
             👤 Edit Profil
           </button>
+          <button onclick="closeUserDropdown();refreshMyRole()"
+            class="dropdown-item">
+            🔄 Refresh Role / Akses
+          </button>
           <div style="border-top:1px solid var(--border);margin:4px 0"></div>
           <button onclick="doLogout()"
             class="dropdown-item" style="color:#EF4444">
@@ -286,8 +290,7 @@ function setupAppUI() {
   // Hidden sidebar refs (kept for JS compat)
   // refs already updated above
 
-  const badge = document.getElementById('badge-partners');
-  if (badge) badge.style.display = '';
+  // badge-partners-rail visibility handled by partners/index.js loadPartners()
 }
 
 async function checkConnection() {
@@ -423,6 +426,28 @@ function openEditProfile() {
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
       <button class="btn btn-teal" onclick="doSaveProfile()">💾 Simpan Profil</button>
     </div>`, 'narrow');
+}
+
+async function refreshMyRole() {
+  const userId = window.currentUser?.id;
+  if (!userId) { toast('Session tidak valid, silakan login ulang','err'); return; }
+  try {
+    const fresh = await sbGet('user_profiles', `select=*&id=eq.${userId}`);
+    if (fresh?.[0]) {
+      const oldRole = getUserRole();
+      window.currentUser.profile = fresh[0];
+      const newRole = getUserRole();
+      setupAppUI();
+      applyRoleMenu();
+      if (oldRole === newRole) {
+        toast(`ℹ️ Role di database: "${newRole}" (sama seperti sebelumnya — jika seharusnya berbeda, cek SQL yang dijalankan untuk akun ini)`, 'info', 6000);
+      } else {
+        toast(`✅ Role diperbarui: "${oldRole}" → "${newRole}"`, 'ok', 4000);
+      }
+    } else {
+      toast('⚠️ Profil tidak ditemukan di database','warn');
+    }
+  } catch(e) { toast('❌ '+e.message,'err'); }
 }
 
 async function doSaveProfile() {
