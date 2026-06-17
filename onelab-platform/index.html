@@ -217,16 +217,10 @@
     </div>
   </div>
 
-  <!-- User info -->
-  <div class="sidebar-user" id="sidebar-user" style="display:none">
-    <div class="user-avatar" id="user-avatar">U</div>
-    <div class="user-info">
-      <span class="user-name" id="user-name-sidebar">User</span>
-      <span class="user-role" id="user-role-sidebar">—</span>
-    </div>
-    <button onclick="doLogout()" style="background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:14px;padding:5px 7px;flex-shrink:0;border-radius:6px;transition:all .15s" title="Logout"
-      onmouseover="this.style.background='rgba(239,68,68,.2)';this.style.color='#F87171'"
-      onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.45)'">⏻</button>
+  <!-- User info — hidden, moved to topbar dropdown -->
+  <div id="sidebar-user" style="display:none">
+    <div id="user-avatar"></div>
+    <div><span id="user-name-sidebar"></span><span id="user-role-sidebar"></span></div>
   </div>
 
 </aside>
@@ -245,9 +239,68 @@
       🔔
       <span class="topbar-notif-dot"></span>
     </button>
-    <div id="topbar-user" style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text)">
-      <div style="width:24px;height:24px;background:linear-gradient(135deg,var(--teal),var(--accent));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff" id="topbar-avatar">U</div>
-      <span id="topbar-user-name">—</span>
+    <!-- User dropdown -->
+    <div style="position:relative" id="topbar-user-wrap">
+      <div id="topbar-user" onclick="toggleUserDropdown()"
+        style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:var(--r);
+          background:var(--bg2);border:1px solid var(--border);cursor:pointer;
+          font-size:12.5px;font-weight:600;color:var(--text);user-select:none;transition:all .15s"
+        onmouseover="this.style.borderColor='var(--teal)';this.style.background='var(--teal-light)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'">
+        <div id="topbar-avatar" style="width:28px;height:28px;background:linear-gradient(135deg,var(--teal),var(--accent));
+          border-radius:50%;display:flex;align-items:center;justify-content:center;
+          font-size:11px;font-weight:800;color:#fff;flex-shrink:0">U</div>
+        <div style="min-width:0">
+          <div id="topbar-user-name" style="font-size:13px;font-weight:700;color:var(--text);
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">—</div>
+          <div id="topbar-user-role" style="font-size:10px;color:var(--text3);margin-top:-1px">—</div>
+        </div>
+        <span style="font-size:10px;color:var(--text3);margin-left:2px">▾</span>
+      </div>
+
+      <!-- Dropdown menu -->
+      <div id="user-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
+        background:#fff;border:1px solid var(--border);border-radius:var(--r-md);
+        box-shadow:var(--shadow-md);min-width:240px;z-index:999;overflow:hidden;
+        animation:modalIn .15s ease">
+
+        <!-- Header -->
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="dropdown-avatar" style="width:38px;height:38px;border-radius:50%;
+              background:linear-gradient(135deg,var(--teal),var(--accent));
+              display:flex;align-items:center;justify-content:center;
+              font-size:15px;font-weight:800;color:#fff;flex-shrink:0">U</div>
+            <div style="min-width:0">
+              <div id="dropdown-name" style="font-weight:800;font-size:13.5px;color:var(--text)">—</div>
+              <div id="dropdown-email" style="font-size:11.5px;color:var(--text3);
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">—</div>
+              <div id="dropdown-role-badge" style="margin-top:3px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu items -->
+        <div style="padding:6px 0">
+          <button onclick="closeUserDropdown();navigate('settings')"
+            class="dropdown-item">
+            ⚙️ Pengaturan Sistem
+          </button>
+          <button onclick="closeUserDropdown();openResetPassword()"
+            class="dropdown-item">
+            🔑 Ganti Password
+          </button>
+          <button onclick="closeUserDropdown();openEditProfile()"
+            class="dropdown-item">
+            👤 Edit Profil
+          </button>
+          <div style="border-top:1px solid var(--border);margin:4px 0"></div>
+          <button onclick="doLogout()"
+            class="dropdown-item" style="color:#EF4444">
+            ⏻ Logout
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -388,18 +441,36 @@ window.addEventListener('DOMContentLoaded', async () => {
 function setupAppUI() {
   const name      = getUserName();
   const role      = getUserRole();
+  const email     = window.currentUser?.email || '';
   const roleLabel = typeof getRoleLabel === 'function' ? getRoleLabel(role) : role;
-  const initials2 = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() || name.charAt(0).toUpperCase();
+  const initials  = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() || name.charAt(0).toUpperCase();
+  const ROLE_COLORS = {
+    super_admin:'#7B1FA2', direktur:'#0A2342', manager:'#00897B', spv:'#0E7490',
+    sales:'#1565C0', operasional:'#2E7D32', hrd_staff:'#E65100',
+    finance_staff:'#00838F', viewer:'#546E7A',
+  };
+  const roleColor = ROLE_COLORS[role] || 'var(--teal)';
 
-  document.getElementById('sidebar-user').style.display  = 'flex';
-  document.getElementById('user-avatar').textContent     = initials2;
-  document.getElementById('user-name-sidebar').textContent = name;
-  document.getElementById('user-role-sidebar').textContent = roleLabel;
-  const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const avatarEl = document.getElementById('topbar-avatar');
-  const nameEl   = document.getElementById('topbar-user-name');
-  if (avatarEl) avatarEl.textContent = initials || name.charAt(0).toUpperCase();
-  if (nameEl)   nameEl.textContent   = name;
+  // Topbar user pill
+  const topbarAvEl   = document.getElementById('topbar-avatar');
+  const topbarNameEl = document.getElementById('topbar-user-name');
+  const topbarRoleEl = document.getElementById('topbar-user-role');
+  if (topbarAvEl)   { topbarAvEl.textContent = initials; topbarAvEl.style.background = `linear-gradient(135deg,${roleColor},${roleColor}99)`; }
+  if (topbarNameEl) topbarNameEl.textContent = name;
+  if (topbarRoleEl) topbarRoleEl.textContent = roleLabel;
+
+  // Dropdown header
+  const ddAvEl    = document.getElementById('dropdown-avatar');
+  const ddNameEl  = document.getElementById('dropdown-name');
+  const ddEmailEl = document.getElementById('dropdown-email');
+  const ddRoleEl  = document.getElementById('dropdown-role-badge');
+  if (ddAvEl)    { ddAvEl.textContent = initials; ddAvEl.style.background = `linear-gradient(135deg,${roleColor},${roleColor}99)`; }
+  if (ddNameEl)  ddNameEl.textContent  = name;
+  if (ddEmailEl) ddEmailEl.textContent = email;
+  if (ddRoleEl)  ddRoleEl.innerHTML    = `<span style="background:${roleColor}20;color:${roleColor};font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px">${roleLabel}</span>`;
+
+  // Hidden sidebar refs (kept for JS compat)
+  // refs already updated above
 
   const badge = document.getElementById('badge-partners');
   if (badge) badge.style.display = '';
@@ -439,6 +510,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 setInterval(checkConnection, 60000);
+
+// ── User Dropdown ─────────────────────────────────────
+function toggleUserDropdown() {
+  const dd = document.getElementById('user-dropdown');
+  if (!dd) return;
+  const isOpen = dd.style.display !== 'none';
+  dd.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Close when clicking outside
+    setTimeout(() => {
+      document.addEventListener('click', closeDropdownOutside, {once:true});
+    }, 10);
+  }
+}
+
+function closeDropdownOutside(e) {
+  const wrap = document.getElementById('topbar-user-wrap');
+  if (wrap && !wrap.contains(e.target)) closeUserDropdown();
+}
+
+function closeUserDropdown() {
+  const dd = document.getElementById('user-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function openResetPassword() {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">🔑 Ganti Password</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Password Baru *</label>
+      <input type="password" id="rp-new" placeholder="Minimal 8 karakter">
+    </div>
+    <div class="form-group">
+      <label>Konfirmasi Password *</label>
+      <input type="password" id="rp-confirm" placeholder="Ulangi password baru">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="doResetPassword()">🔑 Simpan Password</button>
+    </div>`, 'narrow');
+}
+
+async function doResetPassword() {
+  const np = document.getElementById('rp-new')?.value;
+  const cp = document.getElementById('rp-confirm')?.value;
+  if (!np || np.length < 8) { toast('Password minimal 8 karakter','err'); return; }
+  if (np !== cp)            { toast('Password tidak cocok','err'); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method:'PUT',
+      headers:{...SB_HEADERS,'Authorization':`Bearer ${getStoredToken()}`},
+      body: JSON.stringify({password: np}),
+    });
+    if (!res.ok) throw new Error((await res.json()).message||'Gagal');
+    toast('✅ Password berhasil diubah','ok');
+    closeModalForce();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+function openEditProfile() {
+  const name  = getUserName ? getUserName() : '';
+  const phone = window.currentUser?.profile?.phone || '';
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">👤 Edit Profil</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="ep-name" value="${name}">
+    </div>
+    <div class="form-group">
+      <label>No. HP / WA</label>
+      <input type="text" id="ep-phone" value="${phone}" placeholder="08xxxxxxxxxx">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="doSaveProfile()">💾 Simpan</button>
+    </div>`, 'narrow');
+}
+
+async function doSaveProfile() {
+  const name  = document.getElementById('ep-name')?.value.trim();
+  const phone = document.getElementById('ep-phone')?.value.trim();
+  if (!name) { toast('Nama tidak boleh kosong','err'); return; }
+  const userId = window.currentUser?.id;
+  if (!userId) { toast('Session tidak valid','err'); return; }
+  try {
+    await sbPatch('user_profiles', userId, {
+      full_name:  name,
+      phone:      phone||null,
+      updated_at: new Date().toISOString(),
+    });
+    if (window.currentUser?.profile) {
+      window.currentUser.profile.full_name = name;
+      window.currentUser.profile.phone     = phone;
+    }
+    toast('✅ Profil diupdate','ok');
+    closeModalForce();
+    setupAppUI(); // refresh display
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
 </script>
 </body>
 </html>
