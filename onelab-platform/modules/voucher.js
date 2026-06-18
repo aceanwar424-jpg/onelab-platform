@@ -69,12 +69,12 @@ async function renderVoucher(){
 let voucherState = { campaigns:[], vouchers:[], activeCampaign:null };
 let allVouchers = [];
 
-function switchVoucherTab(tab, btn){
+async function switchVoucherTab(tab, btn){
   document.querySelectorAll('.tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn?.classList.add('active');
   document.getElementById('campaigns-tab').style.display = tab==='campaigns'?'block':'none';
   document.getElementById('vouchers-tab').style.display  = tab==='vouchers' ?'block':'none';
-  if(tab==='vouchers') loadAllVouchers();
+  if(tab==='vouchers') await loadAllVouchers();
 }
 
 // ── Campaigns ─────────────────────────────────────
@@ -400,7 +400,15 @@ async function generateVouchers(campaignId){
 
   closeModalForce();
   toast(`✅ ${created} voucher dibuat${failed?`, ${failed} gagal`:''}`, 'ok');
-  switchVoucherTab('vouchers', document.querySelectorAll('.tabs .tab-btn')[1]);
+
+  // Switch to "Daftar Voucher" tab — find it reliably instead of fragile index lookup
+  const allTabBtns = document.querySelectorAll('.tabs .tab-btn');
+  const vouchersBtn = Array.from(allTabBtns).find(b => b.textContent.includes('Daftar Voucher'));
+  await switchVoucherTab('vouchers', vouchersBtn);
+
+  // Auto-filter to the campaign that was just generated
+  const campaignSel = document.getElementById('vc-campaign');
+  if (campaignSel) { campaignSel.value = String(campaignId); filterVouchers(); }
 }
 
 // ── Voucher List ──────────────────────────────────

@@ -6,28 +6,28 @@
 // ═══════════════════════════════════════════
 
 const MKT_TYPES = [
-  { key:'wa_message',  label:'💬 Pesan WA',
+  { key:'wa_message',  label:'💬 Pesan WA', icon:'💬',
     fields:['content'],
     hint:'Template pesan WhatsApp. Gunakan *teks* untuk bold.',
     contentLabel:'Isi Pesan WA',
     contentPlaceholder:'Halo [NAMA],\n\nBerikut informasi dari OneLab...',
     hasFile: false },
 
-  { key:'script',      label:'🎤 Skrip Health Talk',
+  { key:'script',      label:'🎤 Skrip Health Talk', icon:'🎤',
     fields:['content'],
     hint:'Skrip untuk dibacakan dokter/perawat saat health talk komunitas.',
     contentLabel:'Isi Skrip',
     contentPlaceholder:'Pembukaan (3 menit):\n"Bapak/Ibu selamat pagi..."',
     hasFile: false },
 
-  { key:'email',       label:'📧 Email',
+  { key:'email',       label:'📧 Email', icon:'📧',
     fields:['subject','content'],
     hint:'Template email formal. Bisa pakai placeholder [NAMA], [PERUSAHAAN].',
     contentLabel:'Isi Email',
     contentPlaceholder:'Dengan hormat,\n\n...',
     hasFile: false },
 
-  { key:'proposal',    label:'📋 Proposal Mitra',
+  { key:'proposal',    label:'📋 Proposal Mitra', icon:'📋',
     fields:['content','file'],
     hint:'Proposal kerjasama. Bisa upload file DOC/PDF sebagai template visual.',
     contentLabel:'Isi Proposal (teks)',
@@ -38,7 +38,7 @@ const MKT_TYPES = [
     fileFolder: 'proposals',
     fileAccepts: ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'] },
 
-  { key:'flyer',       label:'📄 Flyer / Brosur',
+  { key:'flyer',       label:'📄 Flyer / Brosur', icon:'📄',
     fields:['content','file'],
     hint:'Upload desain flyer dalam format JPG/PNG/PDF.',
     contentLabel:'Deskripsi / Caption',
@@ -49,18 +49,19 @@ const MKT_TYPES = [
     fileFolder: 'flyers',
     fileAccepts: ['image/jpeg','image/png','image/webp','application/pdf'] },
 
-  { key:'surat',       label:'✉️ Template Surat',
-    fields:['content','file'],
-    hint:'Upload template surat dalam format DOC/DOCX agar mudah atur logo & layout. Gunakan {{VARIABEL}} sebagai placeholder.',
-    contentLabel:'Isi Surat (teks fallback)',
-    contentPlaceholder:'Dengan hormat,\n\n{{ISI_SURAT}}',
+  { key:'surat',       label:'✉️ Surat Penawaran', icon:'✉️',
+    fields:['letter_meta','content','file'],
+    hint:'Template surat penawaran kerjasama (Rujukan Spesimen, MCU Korporat, dll). Upload file DOCX dengan {{VARIABEL}} sebagai placeholder — terisi otomatis saat surat dibuat di modul Surat Keluar.',
+    contentLabel:'Isi Surat (teks fallback jika tanpa file DOCX)',
+    contentPlaceholder:'Dengan hormat,\n\nKami memahami bahwa di balik setiap keputusan klinis yang tepat...',
     hasFile: true,
-    fileLabel: 'Upload Template Surat (DOC/DOCX)',
+    fileLabel: 'Upload Template Surat (DOCX)',
     fileBucket: 'templates',
     fileFolder: 'surat',
-    fileAccepts: ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/pdf'] },
+    fileAccepts: ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    isLetterType: true },
 
-  { key:'mou_template',label:'📜 Template MOU',
+  { key:'mou_template',label:'📜 Template MOU', icon:'📜',
     fields:['content','file'],
     hint:'Upload template MOU dalam format DOC/DOCX.',
     contentLabel:'Ringkasan / Catatan MOU',
@@ -72,10 +73,60 @@ const MKT_TYPES = [
     fileAccepts: ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/pdf'] },
 ];
 
+// Variabel placeholder per kategori — panduan ditampilkan di form
+const MKT_PLACEHOLDER_GUIDE = {
+  surat: ['NO_SURAT','TANGGAL','LAMPIRAN','PERIHAL','NAMA_TUJUAN','PIC_TUJUAN','ALAMAT_TUJUAN','ORG_NAMA','ORG_ALAMAT','PENANDATANGAN','JABATAN'],
+  mou_template: ['NAMA_MITRA','TANGGAL_MULAI','TANGGAL_BERAKHIR','PIC_MITRA','NILAI_KERJASAMA'],
+  email: ['NAMA','PERUSAHAAN','TANGGAL'],
+  proposal: ['NAMA','PERUSAHAAN','TANGGAL'],
+  default: ['NAMA','TANGGAL','PERUSAHAAN','PRODUK'],
+};
+
+// Bentuk Kerjasama — sesuai struktur template Surat Penawaran OneLab
+const KERJASAMA_OPTIONS = [
+  'Rujukan Spesimen','Rujukan Pasien','Medical Check Up Korporat','Paket Skrining Komunitas'
+];
+
 const MKT_CHANNELS = [
   'Semua Channel','Komunitas & Warga','Dokter & Klinik',
   'Apotek','Perusahaan SME','Gym & Sport','Sekolah / Kampus','Internal'
 ];
+
+// ── Tombol Tambah Template — split-button per kategori ────────
+function renderAddTemplateBtn() {
+  return `
+    <div class="mkt-add-dropdown" style="position:relative;display:inline-block">
+      <button class="btn btn-teal" onclick="toggleMktAddMenu()">+ Tambah Template ▾</button>
+      <div id="mkt-add-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
+        background:#fff;border:1px solid var(--border);border-radius:var(--r-md);
+        box-shadow:var(--shadow-md);min-width:220px;z-index:300;overflow:hidden">
+        ${MKT_TYPES.map(t => `
+          <button onclick="closeMktAddMenu();openMktForm(null,'${t.key}')"
+            style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;
+              background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;
+              color:var(--text2);text-align:left;transition:background .12s"
+            onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='none'">
+            <span style="font-size:16px">${t.icon||'📄'}</span>${t.label}
+          </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function toggleMktAddMenu() {
+  const menu = document.getElementById('mkt-add-menu');
+  if (!menu) return;
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) setTimeout(() => document.addEventListener('click', closeMktAddMenuOutside, {once:true}), 10);
+}
+function closeMktAddMenuOutside(e) {
+  const wrap = document.querySelector('.mkt-add-dropdown');
+  if (wrap && !wrap.contains(e.target)) closeMktAddMenu();
+}
+function closeMktAddMenu() {
+  const menu = document.getElementById('mkt-add-menu');
+  if (menu) menu.style.display = 'none';
+}
 
 let mktAll = [];
 let mktActiveType = 'all';
@@ -89,7 +140,7 @@ async function renderMarketing() {
         <p>Template konten, proposal, skrip, dan manajemen voucher campaign</p>
       </div>
       <div class="btn-row" id="mkt-header-btns">
-        <button class="btn btn-teal" onclick="openMktForm()">+ Tambah Template</button>
+        ${renderAddTemplateBtn()}
       </div>
     </div>
 
@@ -150,7 +201,7 @@ function switchMktSection(section) {
     if (vch) vch.style.display = 'none';
     // Update header button
     const hdr = document.getElementById('mkt-header-btns');
-    if (hdr) hdr.innerHTML = `<button class="btn btn-teal" onclick="openMktForm()">+ Tambah Template</button>`;
+    if (hdr) hdr.innerHTML = renderAddTemplateBtn();
   } else if (section === 'voucher') {
     if (tpl) tpl.style.display = 'none';
     if (vch) {
@@ -167,12 +218,17 @@ function switchMktSection(section) {
 
 async function renderVoucherInline(container) {
   try {
-    // Render voucher tabs inside the container
+    // Same DOM structure as renderVoucher() in voucher.js — keeps loadAllVouchers/filterVouchers compatible
     container.innerHTML = `
-      <div class="tabs" style="margin-bottom:16px">
+      <div class="page-header" style="margin-bottom:16px">
+        <div><p style="color:var(--text3);font-size:13px">Buat campaign, generate voucher massal, share WA/Email, dan tracking redeem</p></div>
+        <div class="btn-row">
+          <button class="btn btn-teal" onclick="openCampaignForm()">+ Campaign Baru</button>
+        </div>
+      </div>
+      <div class="tabs">
         <button class="tab-btn active" onclick="switchVoucherTab('campaigns',this)">🎯 Campaign</button>
         <button class="tab-btn" onclick="switchVoucherTab('vouchers',this)">🎟 Daftar Voucher</button>
-        <button class="tab-btn" onclick="switchVoucherTab('redeem',this)">✅ Redeem</button>
       </div>
       <div id="campaigns-tab">
         <div id="campaigns-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">
@@ -182,30 +238,22 @@ async function renderVoucherInline(container) {
       <div id="vouchers-tab" style="display:none">
         <div class="table-wrap">
           <div class="table-toolbar">
-            <input class="table-search" id="vc-q" placeholder="Cari voucher..." oninput="filterVouchers()">
+            <input class="table-search" id="vc-search" placeholder="🔍 Cari kode, nama penerima..."
+              oninput="filterVouchers(this.value)">
+            <select class="table-filter" id="vc-campaign" onchange="filterVouchers()">
+              <option value="">Semua Campaign</option>
+            </select>
             <select class="table-filter" id="vc-status" onchange="filterVouchers()">
               <option value="">Semua Status</option>
-              <option>Aktif</option><option>Terpakai</option><option>Expired</option><option>Draft</option>
+              <option>Active</option><option>Used</option><option>Expired</option><option>Cancelled</option>
             </select>
           </div>
-          <div id="vouchers-tbody"></div>
-        </div>
-      </div>
-      <div id="redeem-tab" style="display:none">
-        <div class="card" style="max-width:500px;margin:0 auto">
-          <div class="card-title" style="margin-bottom:16px">✅ Redeem Voucher</div>
-          <div class="form-group">
-            <label>Kode Voucher</label>
-            <div style="display:flex;gap:8px">
-              <input type="text" id="redeem-code" placeholder="Masukkan kode voucher..." style="flex:1;text-transform:uppercase">
-              <button class="btn btn-teal" onclick="redeemVoucher()">Cek & Redeem</button>
-            </div>
-          </div>
-          <div id="redeem-result"></div>
+          <div id="vouchers-table"><div class="loading-row"><div class="spinner"></div></div></div>
         </div>
       </div>`;
-    // Load campaign data
+    // Load campaigns AND vouchers — both needed since this mirrors the standalone page
     if (typeof loadCampaigns === 'function') await loadCampaigns();
+    if (typeof loadAllVouchers === 'function') await loadAllVouchers();
   } catch(e) {
     container.innerHTML = `<div class="status-box status-err">❌ ${e.message}</div>`;
   }
@@ -357,25 +405,33 @@ async function openMktForm(id=null, defaultType=null) {
 
   const currentType = t.type || defaultType || 'wa_message';
   const typeInfo = MKT_TYPES.find(x=>x.key===currentType) || MKT_TYPES[0];
+  const placeholders = MKT_PLACEHOLDER_GUIDE[currentType] || MKT_PLACEHOLDER_GUIDE.default;
+  // Lock the type dropdown when launched from a category-specific button (new template only)
+  const lockType = !id && !!defaultType;
 
   openModal(`
     <div class="modal-header">
-      <div class="modal-title">${id?'✏️ Edit Template':'➕ Tambah Template'}</div>
+      <div class="modal-title">${typeInfo.icon||'📄'} ${id?'Edit':'Tambah'} ${typeInfo.label.replace(/^\S+\s/,'')}</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
 
     <div class="form-group">
       <label>Tipe Konten *</label>
-      <select id="mf-type" onchange="updateMktFormFields()">
-        ${MKT_TYPES.map(x=>`<option value="${x.key}"${currentType===x.key?' selected':''}>${x.label}</option>`).join('')}
-      </select>
+      ${lockType ? `
+        <input type="text" value="${typeInfo.label}" disabled style="background:var(--bg2);color:var(--text2);font-weight:600">
+        <input type="hidden" id="mf-type" value="${currentType}">
+      ` : `
+        <select id="mf-type" onchange="updateMktFormFields()">
+          ${MKT_TYPES.map(x=>`<option value="${x.key}"${currentType===x.key?' selected':''}>${x.label}</option>`).join('')}
+        </select>
+      `}
       <div id="mf-type-hint" style="font-size:12px;color:var(--gray);margin-top:4px">${typeInfo.hint}</div>
     </div>
 
     <div class="form-group">
       <label>Judul Template *</label>
       <input type="text" id="mf-title" value="${t.title||''}"
-        placeholder="Nama template yang mudah diingat">
+        placeholder="${currentType==='surat'?'Contoh: Penawaran Rujukan Spesimen — Klinik Pratama':'Nama template yang mudah diingat'}">
     </div>
 
     <div class="form-row">
@@ -397,13 +453,40 @@ async function openMktForm(id=null, defaultType=null) {
       <input type="text" id="mf-subject" value="${t.subject||''}" placeholder="Penawaran Kerjasama OneLab Diagnostics">
     </div>
 
+    <!-- Letter metadata (Surat Penawaran only) -->
+    <div id="mf-letter-meta-group" style="display:${typeInfo.isLetterType?'block':'none'}">
+      <div class="status-box status-info" style="font-size:12px;margin-bottom:14px">
+        📌 Field di bawah ini sebagai <strong>katalog acuan</strong> — saat surat aktual dibuat,
+        isi spesifik (nomor, tanggal, nama faskes) diinput di modul <strong>Surat Keluar</strong>.
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kode Prefix Nomor Surat</label>
+          <input type="text" id="mf-letter-prefix" value="${t.letter_prefix||'REF-S'}" placeholder="REF-S">
+          <div class="form-hint">Contoh: 001/<strong>REF-S</strong>/MKT-SDI/OLD/IV/2026</div>
+        </div>
+        <div class="form-group">
+          <label>Bentuk Kerjasama</label>
+          <select id="mf-letter-kerjasama">
+            ${KERJASAMA_OPTIONS.map(k=>`<option${t.letter_kerjasama===k?' selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Catatan SLA / Lampiran Standar</label>
+        <textarea id="mf-letter-sla" rows="3"
+          placeholder="Penjemputan Spesimen ≤4 Jam, Same Day Result, Notifikasi Critical Value <30 Menit...">${t.letter_sla||''}</textarea>
+        <div class="form-hint">Dicatat sebagai referensi tim — tidak otomatis masuk ke DOCX kecuali ditulis sebagai {{VARIABEL}} di file template.</div>
+      </div>
+    </div>
+
     <!-- Content -->
     <div class="form-group" id="mf-content-group">
       <label id="mf-content-label">${typeInfo.contentLabel}</label>
       <textarea id="mf-content" rows="8"
         placeholder="${typeInfo.contentPlaceholder}">${t.content||''}</textarea>
-      <div style="font-size:11px;color:var(--gray);margin-top:3px">
-        Placeholder: <code>[NAMA]</code> <code>[TANGGAL]</code> <code>[PERUSAHAAN]</code> <code>[PRODUK]</code>
+      <div id="mf-placeholder-guide" style="font-size:11px;color:var(--gray);margin-top:3px">
+        Placeholder: ${placeholders.map(p=>`<code>{{${p}}}</code>`).join(' ')}
       </div>
     </div>
 
@@ -428,12 +511,17 @@ async function openMktForm(id=null, defaultType=null) {
 function updateMktFormFields() {
   const type = document.getElementById('mf-type')?.value;
   const typeInfo = MKT_TYPES.find(x=>x.key===type)||MKT_TYPES[0];
+  const placeholders = MKT_PLACEHOLDER_GUIDE[type] || MKT_PLACEHOLDER_GUIDE.default;
 
   document.getElementById('mf-type-hint').textContent = typeInfo.hint;
   document.getElementById('mf-content-label').textContent = typeInfo.contentLabel;
   document.getElementById('mf-content').placeholder = typeInfo.contentPlaceholder;
   document.getElementById('mf-subject-group').style.display = type==='email'?'flex':'none';
   document.getElementById('mf-file-group').style.display = typeInfo.hasFile?'block':'none';
+  document.getElementById('mf-letter-meta-group').style.display = typeInfo.isLetterType?'block':'none';
+
+  const guideEl = document.getElementById('mf-placeholder-guide');
+  if (guideEl) guideEl.innerHTML = 'Placeholder: ' + placeholders.map(p=>`<code>{{${p}}}</code>`).join(' ');
 
   if (typeInfo.hasFile) {
     const label = document.getElementById('mf-file-label');
@@ -479,6 +567,11 @@ async function saveMkt(id) {
     tags:       document.getElementById('mf-tags').value.trim(),
     updated_at: new Date().toISOString(),
     created_by_name: getUserName ? getUserName() : 'User',
+    ...(type==='surat' ? {
+      letter_prefix:    document.getElementById('mf-letter-prefix')?.value.trim()||'REF-S',
+      letter_kerjasama: document.getElementById('mf-letter-kerjasama')?.value||null,
+      letter_sla:       document.getElementById('mf-letter-sla')?.value.trim()||null,
+    } : {}),
     ...(fileData ? {
       file_url:  fileData.url,
       file_name: fileData.name,
