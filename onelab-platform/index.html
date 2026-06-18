@@ -235,11 +235,13 @@ window.addEventListener('DOMContentLoaded', async () => {
       if (res.ok) {
         const user = await res.json();
         if (user && user.id) {
+          console.log('[BOOT DEBUG] Auth UUID:', user.id, '| Auth email:', user.email);
           window.currentUser = user;
           try {
             const profile = await sbGet('user_profiles',`select=*&id=eq.${user.id}`);
+            console.log('[BOOT DEBUG] Profile query result:', profile);
             if (profile?.[0]) window.currentUser.profile = profile[0];
-          } catch(e) {}
+          } catch(e) { console.log('[BOOT DEBUG] Profile query error:', e); }
           setupAppUI();
           applyRoleMenu();
           if (typeof injectExecToggle==='function') setTimeout(injectExecToggle,500);
@@ -430,24 +432,52 @@ function openEditProfile() {
 
 async function refreshMyRole() {
   const userId = window.currentUser?.id;
+  const userEmail = window.currentUser?.email;
   if (!userId) { toast('Session tidak valid, silakan login ulang','err'); return; }
   try {
     const fresh = await sbGet('user_profiles', `select=*&id=eq.${userId}`);
+    console.log('[DEBUG] Session UUID:', userId, '| Session email:', userEmail);
+    console.log('[DEBUG] DB query result:', fresh);
     if (fresh?.[0]) {
       const oldRole = getUserRole();
       window.currentUser.profile = fresh[0];
       const newRole = getUserRole();
       setupAppUI();
       applyRoleMenu();
-      if (oldRole === newRole) {
-        toast(`ℹ️ Role di database: "${newRole}" (sama seperti sebelumnya — jika seharusnya berbeda, cek SQL yang dijalankan untuk akun ini)`, 'info', 6000);
+      if (oldRole === newRole && newRole !== 'super_admin') {
+        openModal(`
+          <div class="modal-header">
+            <div class="modal-title">🔍 Diagnosa Role</div>
+            <button class="modal-close" onclick="closeModalForce()">✕</button>
+          </div>
+          <div style="font-size:13px;line-height:1.7">
+            <p><strong>Session login saat ini:</strong></p>
+            <p>UUID: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px">${userId}</code></p>
+            <p>Email: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px">${userEmail||'(tidak ada)'}</code></p>
+            <p><strong>Hasil dari database (user_profiles):</strong></p>
+            <p>Role: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px">${fresh[0].role}</code></p>
+            <p>Email tersimpan: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px">${fresh[0].email||'(kosong)'}</code></p>
+            <hr style="margin:14px 0;border:none;border-top:1px solid var(--border)">
+            <p style="color:#DC2626"><strong>⚠️ Jika UUID di atas BERBEDA dari UUID Ace di SQL Editor Supabase:</strong></p>
+            <p>Berarti browser ini sedang login dengan <strong>akun/session berbeda</strong> dari yang Anda update di SQL. Klik tombol di bawah untuk logout total dan login ulang dengan email Ace yang benar.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+            <button class="btn btn-danger" onclick="forceCleanLogout()">🚪 Logout Total & Bersihkan Session</button>
+          </div>`, 'narrow');
       } else {
-        toast(`✅ Role diperbarui: "${oldRole}" → "${newRole}"`, 'ok', 4000);
+        toast(`✅ Role: "${newRole}" · UUID: ${userId.slice(0,8)}...`, 'ok', 4000);
       }
     } else {
-      toast('⚠️ Profil tidak ditemukan di database','warn');
+      toast(`⚠️ TIDAK ADA baris user_profiles untuk UUID ${userId} — akun ini belum punya profile di database`, 'warn', 8000);
     }
   } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+function forceCleanLogout() {
+  localStorage.clear();
+  closeModalForce();
+  location.reload();
 }
 
 async function doSaveProfile() {
