@@ -7,7 +7,7 @@ const HRD_DIVISIONS = [
 ];
 const LEAVE_TYPES = ['Cuti Tahunan','Cuti Sakit','Cuti Melahirkan','Izin','Cuti Khusus','Tanpa Keterangan'];
 
-let empAll = [], leaveAll = [];
+let empAll = [], leaveAll = [], hrdPositionsCache = [];
 
 async function renderHRD() {
   document.getElementById('main-content').innerHTML = `
@@ -15,6 +15,7 @@ async function renderHRD() {
       <div><h1>HRD &amp; SDM</h1>
         <p>Data karyawan, absensi, cuti, dan penggajian OneLab Diagnostics</p></div>
       <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="openBulkSyncPositionShift()">🔗 Lengkapi Jabatan &amp; Jadwal</button>
         <button class="btn btn-ghost btn-sm" onclick="openPayrollModal()">💵 Payroll</button>
         <button class="btn btn-teal" onclick="openEmpForm()">+ Tambah Karyawan</button>
       </div>
@@ -199,6 +200,18 @@ async function openEmpForm(id=null) {
   const user=getUserName?getUserName():'User';
   const empCode = `EMP-${Date.now().toString().slice(-5)}`;
 
+  // Load positions for the Jabatan dropdown (cached across modal opens this session)
+  if (!hrdPositionsCache.length) {
+    hrdPositionsCache = await sbGet('positions','select=*&order=level,title').catch(()=>[]);
+  }
+  // Existing schedule for this employee, if editing
+  let existingSchedule = null;
+  if (id) {
+    const sc = await sbGet('work_schedules',`select=*&employee_id=eq.${id}&is_active=eq.true&limit=1`).catch(()=>[]);
+    existingSchedule = sc?.[0]||null;
+  }
+  const shiftTemplates = (typeof SHIFT_TEMPLATES !== 'undefined') ? SHIFT_TEMPLATES : [];
+
   openModal(`
     <div class="modal-header">
       <div class="modal-title">${id?'✏️ Edit Karyawan':'➕ Tambah Karyawan'}</div>
@@ -227,7 +240,7 @@ async function openEmpForm(id=null) {
         </select>
       </div>
       <div class="form-group">
-        <label>Posisi / Jabatan</label>
+        <label>Posisi / Jabatan (teks bebas)</label>
         <input type="text" id="ef-pos" value="${e.position||''}" placeholder="Analis Medis, Sales Executive...">
       </div>
       <div class="form-group">
@@ -249,6 +262,33 @@ async function openEmpForm(id=null) {
       <div class="form-group" style="grid-column:1/-1">
         <label>Alamat</label>
         <textarea id="ef-addr" rows="2">${e.address||''}</textarea>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);margin:12px 0;padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">
+        🏛️ Jabatan &amp; Jadwal Kerja <span style="font-weight:500;text-transform:none;color:var(--text3)">(opsional — bisa dilengkapi belakangan)</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--text3);margin-bottom:10px">
+        Pilih di sini agar otomatis sinkron ke Struktur Organisasi dan Jadwal Kerja — tidak perlu input ulang di modul terpisah.
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jabatan (Struktur Organisasi)</label>
+          <select id="ef-position-id">
+            <option value="">-- Belum dipilih --</option>
+            ${hrdPositionsCache.map(p=>`<option value="${p.id}" ${e.position_id==p.id?'selected':''}>${p.title} (${p.department})</option>`).join('')}
+          </select>
+          <div class="form-hint">Tidak ada jabatan yang cocok? Tambahkan dulu di menu Struktur Organisasi.</div>
+        </div>
+        <div class="form-group">
+          <label>Shift Kerja</label>
+          <select id="ef-shift-code">
+            <option value="">-- Belum dipilih --</option>
+            ${shiftTemplates.map(t=>`<option value="${t.code}" ${existingSchedule?.shift_code===t.code?'selected':''}>${t.name} (${t.masuk_wd}–${t.pulang_wd})</option>`).join('')}
+          </select>
+          <div class="form-hint">${existingSchedule?'Karyawan ini sudah punya jadwal aktif — memilih ulang akan menggantikannya.':'Jadwal weekday/sabtu pakai jam default template; bisa diubah detail di menu Jadwal Kerja.'}</div>
+        </div>
       </div>
     </div>
 
@@ -291,11 +331,17 @@ async function saveEmployee(id) {
   if (!name) { toast('Nama wajib diisi','err'); return; }
   const user=getUserName?getUserName():'User';
 
+  const positionId  = document.getElementById('ef-position-id')?.value || null;
+  const shiftCode    = document.getElementById('ef-shift-code')?.value || '';
+  const selectedPos  = positionId ? hrdPositionsCache.find(p=>String(p.id)===String(positionId)) : null;
+
   const payload={
     employee_id:   document.getElementById('ef-code').value.trim(),
     full_name:     name,
-    division:      document.getElementById('ef-div').value,
-    position:      document.getElementById('ef-pos').value.trim(),
+    // If a structured Jabatan was picked, its department takes priority over the manual dropdown
+    division:      selectedPos?.department || document.getElementById('ef-div').value,
+    position:      selectedPos?.title || document.getElementById('ef-pos').value.trim(),
+    position_id:   positionId ? parseInt(positionId) : null,
     status:        document.getElementById('ef-status').value,
     phone:         document.getElementById('ef-phone').value.trim(),
     email:         document.getElementById('ef-email').value.trim(),
@@ -311,11 +357,56 @@ async function saveEmployee(id) {
   };
 
   try {
+    let empId = id;
     if (id) { await sbPatch('employees',id,payload); toast('✅ Data diupdate','ok'); }
-    else    { await sbPost('employees',payload);     toast('✅ Karyawan ditambahkan','ok'); }
+    else    {
+      const created = await sbPost('employees',payload);
+      empId = created?.[0]?.id || created?.id;
+      toast('✅ Karyawan ditambahkan','ok');
+    }
+
+    // Sync shift selection to work_schedules — only if a shift was actually chosen
+    if (shiftCode && empId) {
+      await syncEmployeeShift(empId, shiftCode);
+    }
+
     closeModalForce();
     await loadEmployees();
   } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// Create/update the employee's active work_schedules row from a chosen SHIFT_TEMPLATES code
+async function syncEmployeeShift(employeeId, shiftCode) {
+  const tpl = (typeof SHIFT_TEMPLATES !== 'undefined') ? SHIFT_TEMPLATES.find(t=>t.code===shiftCode) : null;
+  if (!tpl) return;
+  try {
+    const existing = await sbGet('work_schedules',
+      `select=id&employee_id=eq.${employeeId}&is_active=eq.true&limit=1`).catch(()=>[]);
+    const schedulePayload = {
+      employee_id:        employeeId,
+      shift_name:          tpl.name,
+      shift_code:          tpl.code,
+      jam_masuk_weekday:   tpl.masuk_wd,
+      jam_pulang_weekday:  tpl.pulang_wd,
+      jam_masuk_sabtu:     tpl.masuk_sb||null,
+      jam_pulang_sabtu:    tpl.pulang_sb||null,
+      is_cross_midnight:   tpl.cross||false,
+      hari_kerja:          JSON.stringify(tpl.hari||['Mon','Tue','Wed','Thu','Fri']),
+      primary_max_pct:     80,
+      rotation_type:       'none',
+      is_active:           true,
+      created_by:          getUserName?getUserName():'System',
+      updated_at:          new Date().toISOString(),
+    };
+    if (existing?.[0]?.id) {
+      await sbPatch('work_schedules', existing[0].id, schedulePayload);
+    } else {
+      await sbPost('work_schedules', {...schedulePayload, created_at: new Date().toISOString()});
+    }
+  } catch(e) {
+    console.error('[syncEmployeeShift] Failed:', e);
+    toast('⚠️ Karyawan tersimpan, tapi sinkron jadwal gagal: '+e.message,'warn',5000);
+  }
 }
 
 async function deleteEmp(id) {
@@ -513,4 +604,131 @@ function renderPayrollTab() {
 
 function openPayrollModal() {
   switchHRDTab('payroll', document.querySelector('#hrd-tabs .tab-btn:nth-child(3)'));
+}
+
+// ══════════════════════════════════════════════════════════════
+// BULK SYNC — Lengkapi Jabatan & Jadwal untuk karyawan existing
+// ══════════════════════════════════════════════════════════════
+async function openBulkSyncPositionShift() {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">🔗 Lengkapi Jabatan &amp; Jadwal Massal</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div id="bulk-sync-body"><div class="loading-row"><div class="spinner"></div></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+      <button class="btn btn-teal" onclick="saveBulkSyncPositionShift()">💾 Simpan Semua</button>
+    </div>`, 'wide');
+
+  await loadBulkSyncList();
+}
+
+let bulkSyncState = { employees:[], positions:[] };
+
+async function loadBulkSyncList() {
+  const body = document.getElementById('bulk-sync-body');
+  try {
+    const [emps, positions, schedules] = await Promise.all([
+      sbGet('employees','select=*&status=eq.Aktif&order=full_name').catch(()=>[]),
+      sbGet('positions','select=*&order=level,title').catch(()=>[]),
+      sbGet('work_schedules','select=employee_id,shift_code&is_active=eq.true').catch(()=>[]),
+    ]);
+    bulkSyncState.positions = positions||[];
+
+    const scheduleMap = {};
+    (schedules||[]).forEach(s => { scheduleMap[s.employee_id] = s.shift_code; });
+
+    // Only show employees missing position_id OR missing an active schedule
+    const incomplete = (emps||[]).filter(e => !e.position_id || !scheduleMap[e.id]);
+    bulkSyncState.employees = incomplete;
+
+    if (!incomplete.length) {
+      body.innerHTML = `
+        <div class="empty-state" style="padding:30px">
+          <div class="ico" style="font-size:36px">✅</div>
+          <h3>Semua karyawan aktif sudah lengkap</h3>
+          <p>Jabatan dan jadwal kerja sudah ter-link untuk seluruh karyawan aktif.</p>
+        </div>`;
+      return;
+    }
+
+    const shiftTemplates = (typeof SHIFT_TEMPLATES !== 'undefined') ? SHIFT_TEMPLATES : [];
+
+    body.innerHTML = `
+      <div style="font-size:12.5px;color:var(--text3);margin-bottom:12px">
+        ${incomplete.length} karyawan aktif belum lengkap jabatan dan/atau jadwalnya. Pilih untuk masing-masing, lalu klik Simpan Semua.
+      </div>
+      <div style="max-height:55vh;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead><tr>
+            ${['KARYAWAN','DIVISI SAAT INI','JABATAN','SHIFT'].map(h=>`
+              <th style="padding:8px 10px;background:var(--bg);font-size:10.5px;color:var(--text3);
+                text-align:left;border-bottom:1px solid var(--border)">${h}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${incomplete.map((e,i)=>`
+              <tr style="background:${i%2?'var(--bg2)':'#fff'};border-bottom:1px solid var(--border)" data-emp-id="${e.id}">
+                <td style="padding:8px 10px;font-weight:600">${e.full_name}</td>
+                <td style="padding:8px 10px;color:var(--text3)">${e.division||'—'}</td>
+                <td style="padding:8px 10px">
+                  <select class="bulk-sync-pos" data-emp-id="${e.id}" style="font-size:12px;padding:5px 8px">
+                    <option value="">${e.position_id?'(sudah ada)':'-- Pilih --'}</option>
+                    ${bulkSyncState.positions.map(p=>`<option value="${p.id}">${p.title}</option>`).join('')}
+                  </select>
+                </td>
+                <td style="padding:8px 10px">
+                  <select class="bulk-sync-shift" data-emp-id="${e.id}" style="font-size:12px;padding:5px 8px">
+                    <option value="">${scheduleMap[e.id]?'(sudah ada)':'-- Pilih --'}</option>
+                    ${shiftTemplates.map(t=>`<option value="${t.code}">${t.code} — ${t.masuk_wd}-${t.pulang_wd}</option>`).join('')}
+                  </select>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch(e) {
+    body.innerHTML = `<div class="status-box status-err">❌ ${e.message}</div>`;
+  }
+}
+
+async function saveBulkSyncPositionShift() {
+  const posSelects   = document.querySelectorAll('.bulk-sync-pos');
+  const shiftSelects = document.querySelectorAll('.bulk-sync-shift');
+  let posUpdated = 0, shiftUpdated = 0, errs = 0;
+
+  for (const sel of posSelects) {
+    const empId = sel.getAttribute('data-emp-id');
+    const posId = sel.value;
+    if (!posId) continue;
+    const pos = bulkSyncState.positions.find(p=>String(p.id)===String(posId));
+    try {
+      await sbPatch('employees', empId, {
+        position_id: parseInt(posId),
+        position:    pos?.title || null,
+        division:    pos?.department || undefined,
+        updated_at:  new Date().toISOString(),
+      });
+      posUpdated++;
+    } catch(e) { errs++; console.error('[bulkSync position]', empId, e); }
+  }
+
+  for (const sel of shiftSelects) {
+    const empId = sel.getAttribute('data-emp-id');
+    const shiftCode = sel.value;
+    if (!shiftCode) continue;
+    try {
+      await syncEmployeeShift(parseInt(empId), shiftCode);
+      shiftUpdated++;
+    } catch(e) { errs++; console.error('[bulkSync shift]', empId, e); }
+  }
+
+  if (posUpdated === 0 && shiftUpdated === 0) {
+    toast('Tidak ada perubahan dipilih','warn');
+    return;
+  }
+
+  toast(`✅ ${posUpdated} jabatan & ${shiftUpdated} jadwal disinkronkan${errs?` · ${errs} gagal`:''}`, errs?'warn':'ok', 4000);
+  closeModalForce();
+  await loadEmployees();
 }
