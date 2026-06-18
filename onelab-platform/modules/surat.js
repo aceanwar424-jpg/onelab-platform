@@ -385,7 +385,7 @@ async function openSuratForm(id=null) {
 
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
-      <button class="btn btn-outline" onclick="previewSuratHTML()">👁 Preview HTML</button>
+      <button class="btn btn-outline" onclick="previewSuratHTML()" title="Preview generik — bukan render dari file DOCX yang diupload">👁 Preview HTML (Generik)</button>
       <button class="btn btn-teal" id="sf-save-btn" onclick="saveSurat(${id||'null'})">
         ${id?'💾 Simpan':'📄 Buat & Download'}
       </button>
@@ -450,6 +450,19 @@ async function saveSurat(id) {
     }
   }
 
+  // Warn explicitly if no template selected — avoids silent fallback to generic HTML
+  if (!fileUrl && !id) {
+    const proceed = confirm(
+      'Belum ada template DOCX yang dipilih atau diupload.\n\n' +
+      'Surat akan dibuat dengan PREVIEW HTML generik (bukan dari file template Anda).\n\n' +
+      'Lanjutkan tanpa template DOCX?'
+    );
+    if (!proceed) {
+      if(btn){ btn.disabled=false; btn.textContent='📄 Buat & Download'; }
+      return;
+    }
+  }
+
   const payload = {
     doc_number:      docNumber,
     title,
@@ -501,11 +514,20 @@ async function generateDocx(id, data, templateUrl) {
   // Load library docxtemplater + pizzip
   await loadDocxLibraries();
 
+  if (!window.PizZip || !window.docxtemplater) {
+    toast('❌ Library DOCX gagal dimuat (kemungkinan CDN diblokir/offline). Membuka preview HTML sebagai gantinya.','err',6000);
+    previewSuratHTMLDirect(data);
+    return;
+  }
+
   try {
     toast('⏳ Memproses template DOCX...','info',5000);
 
     // Fetch template file
-    const res  = await fetch(templateUrl);
+    const res = await fetch(templateUrl);
+    if (!res.ok) {
+      throw new Error(`File template tidak bisa diakses (HTTP ${res.status}). Cek apakah bucket "templates" sudah di-set Public di Supabase Storage.`);
+    }
     const blob = await res.arrayBuffer();
 
     const PizZip = window.PizZip;
@@ -559,9 +581,16 @@ async function generateDocx(id, data, templateUrl) {
     toast('✅ DOCX berhasil didownload!','ok');
 
   } catch(e) {
-    console.error(e);
-    toast('❌ Gagal generate DOCX: '+e.message+' — menggunakan preview HTML','err');
-    previewSuratHTMLDirect(data);
+    console.error('[generateDocx] Failed:', e);
+    let hint = e.message;
+    if (e.message?.includes('Multi error') || e.properties?.errors) {
+      // Docxtemplater template syntax error — usually wrong {{VARIABEL}} naming
+      hint = 'Template DOCX punya placeholder tidak valid. Pastikan pakai format {{NO_SURAT}}, {{TANGGAL}}, {{PERIHAL}}, dst (lihat panduan placeholder di form template).';
+    }
+    toast('❌ Gagal generate DOCX: '+hint,'err',8000);
+    if (confirm('Gagal generate dari template DOCX.\n\nError: ' + hint + '\n\nTampilkan preview HTML sebagai gantinya?')) {
+      previewSuratHTMLDirect(data);
+    }
   }
 }
 

@@ -587,9 +587,15 @@ async function selectCalEmp(empId, empName) {
   const y = calendarState.year, m = calendarState.month;
   const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
   const endDate   = `${y}-${String(m+1).padStart(2,'0')}-31`;
-  const recs = await sbGet('attendance',`select=tanggal,shift_code,leave_type&employee_id=eq.${empId}&tanggal=gte.${startDate}&tanggal=lte.${endDate}`).catch(()=>[]);
-  calendarState.assignments = {};
-  (recs||[]).forEach(r => { calendarState.assignments[r.tanggal] = r.leave_type??(r.shift_code||'P1'); });
+  try {
+    const recs = await sbGet('attendance',`select=tanggal,shift_code,leave_type&employee_id=eq.${empId}&tanggal=gte.${startDate}&tanggal=lte.${endDate}`);
+    calendarState.assignments = {};
+    (recs||[]).forEach(r => { calendarState.assignments[r.tanggal] = r.leave_type??(r.shift_code||'P1'); });
+  } catch(e) {
+    calendarState.assignments = {};
+    toast('⚠️ Gagal load data shift: tabel attendance mungkin belum di-migrate. Jalankan supabase_attendance.sql di Supabase SQL Editor.', 'warn', 6000);
+    console.error('[selectCalEmp] Query failed:', e);
+  }
   renderCalEmpList();
   renderCalGrid();
 }
@@ -679,13 +685,13 @@ async function saveCalendarShifts() {
   const empName = calendarState.selectedEmpName;
   const entries = Object.entries(calendarState.assignments);
   if (!entries.length) { toast('Tidak ada data untuk disimpan','warn'); return; }
-  let saved=0, errs=0;
+  let saved=0, errs=0, lastError=null;
   for (const [date, shift] of entries) {
     try {
       const leaveMap = {C:'Cuti',S:'Sakit',I:'Izin'};
       const isLeave  = ['C','S','I'].includes(shift);
       const ex = await sbGet('attendance',
-        `select=id&employee_id=eq.${empId}&tanggal=eq.${date}&limit=1`).catch(()=>[]);
+        `select=id&employee_id=eq.${empId}&tanggal=eq.${date}&limit=1`);
       const payload = {
         employee_id:   empId,
         employee_name: empName,
@@ -697,9 +703,13 @@ async function saveCalendarShifts() {
       if (ex[0]?.id) await sbPatch('attendance', ex[0].id, payload);
       else await sbPost('attendance', {...payload, created_at: new Date().toISOString()});
       saved++;
-    } catch(e) { errs++; }
+    } catch(e) { errs++; lastError = e.message; console.error('[saveCalendarShifts]', date, e); }
   }
-  toast(`✅ ${saved} tanggal disimpan${errs?` · ${errs} gagal`:''}`, errs?'warn':'ok');
+  if (errs && saved === 0) {
+    toast(`❌ Gagal simpan semua (${errs} tanggal). Error: ${lastError||'unknown'} — kemungkinan tabel attendance belum di-migrate, jalankan supabase_attendance.sql`, 'err', 7000);
+  } else {
+    toast(`✅ ${saved} tanggal disimpan${errs?` · ${errs} gagal`:''}`, errs?'warn':'ok');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════

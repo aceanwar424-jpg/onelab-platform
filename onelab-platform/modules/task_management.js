@@ -154,9 +154,9 @@ function renderMyTasks() {
 
     ${overdue.length?`
     <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:10px 14px;margin-bottom:14px;cursor:pointer"
-      onclick="taskState.filterStatus='Todo';renderMyTasks()">
+      onclick="showOverdueTasksModal()">
       <div style="font-weight:700;color:#C2410C;font-size:12.5px">
-        ⚠️ ${overdue.length} task overdue dari hari sebelumnya
+        ⚠️ ${overdue.length} task overdue dari hari sebelumnya — klik untuk lihat &amp; kerjakan
       </div>
       <div style="font-size:11px;color:#9A3412;margin-top:2px">
         ${overdue.slice(0,3).map(t=>t.title).join(', ')}${overdue.length>3?` +${overdue.length-3} lainnya`:''}
@@ -299,6 +299,71 @@ function shiftDate(days) {
   renderMyTasks();
 }
 
+function showOverdueTasksModal() {
+  const today = new Date().toISOString().split('T')[0];
+  const overdue = taskState.myTasks.filter(t=>
+    t.due_date < today && !['Done','CarryOver'].includes(t.status)
+  ).sort((a,b)=>a.due_date.localeCompare(b.due_date));
+
+  const TYPE_COLOR = {PRIMARY:'#EF4444', SECONDARY:'#F59E0B'};
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">⚠️ ${overdue.length} Task Overdue</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button class="btn btn-teal btn-sm" onclick="rescheduleAllOverdue()">📅 Pindahkan Semua ke Hari Ini</button>
+    </div>
+    <div style="max-height:55vh;overflow-y:auto">
+      ${overdue.map(t=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;
+          border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px">
+          <span style="width:6px;height:36px;border-radius:3px;background:${TYPE_COLOR[t.type]||'#94A3B8'};flex-shrink:0"></span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px">${t.title}</div>
+            <div style="font-size:11px;color:var(--text3)">
+              ${t.category||'Admin'} · Due: <strong style="color:#DC2626">${t.due_date}</strong> · ${t.status}
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="rescheduleOverdueTask(${t.id})">→ Hari Ini</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModalForce();openTaskForm(${t.id})">✏️</button>
+        </div>`).join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+    </div>`, 'wide');
+}
+
+async function rescheduleOverdueTask(taskId) {
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    await sbPatch('tasks', taskId, { due_date: today, updated_at: new Date().toISOString() });
+    toast('✅ Task dipindahkan ke hari ini', 'ok', 1500);
+    closeModalForce();
+    await loadTaskData();
+    renderMyTasks();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+async function rescheduleAllOverdue() {
+  const today = new Date().toISOString().split('T')[0];
+  const overdue = taskState.myTasks.filter(t=>
+    t.due_date < today && !['Done','CarryOver'].includes(t.status)
+  );
+  if (!overdue.length) { closeModalForce(); return; }
+  if (!confirm(`Pindahkan ${overdue.length} task overdue ke hari ini?`)) return;
+  let ok=0;
+  for (const t of overdue) {
+    try { await sbPatch('tasks', t.id, { due_date: today, updated_at: new Date().toISOString() }); ok++; }
+    catch(e) {}
+  }
+  toast(`✅ ${ok} task dipindahkan ke hari ini`, 'ok');
+  closeModalForce();
+  await loadTaskData();
+  renderMyTasks();
+}
+
 // ══════════════════════════════════════════════════════════════
 // VIEW 2: TEAM BOARD (SPV only)
 // ══════════════════════════════════════════════════════════════
@@ -419,7 +484,7 @@ async function renderLogbook() {
   const today  = taskState.logbookDate;
   const user   = getUserName?getUserName():'';
   const role   = getUserRole?getUserRole():'sales';
-  const isSpv  = isSpv();
+  const isSpvUser = isSpv();
 
   // Load today's log + tasks
   const [logs, dayTasks] = await Promise.all([
@@ -550,13 +615,13 @@ async function renderLogbook() {
     <div class="status-box status-ok">✅ Logbook sudah disetujui SPV. Tidak bisa diubah lagi.</div>`}
 
     <!-- SPV: logbook pending review -->
-    ${isSpv?`
+    ${isSpvUser?`
     <div style="margin-top:20px">
       <div class="card-title" style="margin-bottom:12px">👥 Logbook Tim — Perlu Review</div>
       <div id="spv-logbook-list"><div class="spinner"></div></div>
     </div>`:''}`;
 
-  if (isSpv) loadSpvLogbookList();
+  if (isSpvUser) loadSpvLogbookList();
 }
 
 function shiftLogDate(days) {
@@ -707,9 +772,9 @@ async function renderWeeklySummary() {
   const el = document.getElementById('task-main-area'); if (!el) return;
   const weekDates = getWeekDates(taskState.weekStart);
   const role = getUserRole?getUserRole():'sales';
-  const isManager = isManager();
+  const isManagerUser = isManager();
 
-  if (!isManager) {
+  if (!isManagerUser) {
     el.innerHTML = `<div class="empty-state"><div class="ico">🔒</div>
       <h3>Akses Terbatas</h3><p>Weekly Summary hanya untuk Manager & Admin.</p></div>`;
     return;
