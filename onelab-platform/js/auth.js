@@ -2,7 +2,12 @@
 // Auth — Supabase Auth
 // ═══════════════════════════════════════════════════
 
-let currentUser = null;
+// auth.js operates on window.currentUser directly (not a local `let` binding),
+// since the boot sequence in index.html sets `window.currentUser = user`.
+// IMPORTANT: do not redeclare with `let`/`const` here — a top-level `let` does
+// NOT become a window property, which previously caused getUserRole()/getUserName()
+// to read a permanently-null local variable instead of the real session data.
+if (typeof window.currentUser === 'undefined') window.currentUser = null;
 
 async function initAuth(){
   // Check active session via Supabase
@@ -13,7 +18,7 @@ async function initAuth(){
     if(res.ok){
       const user = await res.json();
       if(user && user.id){
-        currentUser = user;
+        window.currentUser = user;
         await loadUserProfile();
         showApp();
         return;
@@ -28,10 +33,10 @@ function setStoredToken(t){ localStorage.setItem('ol_token', t); }
 function clearStoredToken(){ localStorage.removeItem('ol_token'); }
 
 async function loadUserProfile(){
-  if(!currentUser) return;
+  if(!window.currentUser) return;
   try {
-    const data = await sbGet('user_profiles',`select=*&id=eq.${currentUser.id}`);
-    if(data && data[0]) currentUser.profile = data[0];
+    const data = await sbGet('user_profiles',`select=*&id=eq.${window.currentUser.id}`);
+    if(data && data[0]) window.currentUser.profile = data[0];
   } catch(e){}
 }
 
@@ -144,7 +149,7 @@ async function doLogin(){
     const data = await res.json();
     if(data.access_token){
       setStoredToken(data.access_token);
-      currentUser = data.user;
+      window.currentUser = data.user;
       await loadUserProfile();
       showApp();
     } else {
@@ -226,18 +231,18 @@ async function doLogout(){
     });
   } catch(e){}
   clearStoredToken();
-  currentUser = null;
+  window.currentUser = null;
   location.reload();
 }
 
 function getUserName(){
-  return currentUser?.profile?.full_name || currentUser?.email?.split('@')[0] || 'User';
+  return window.currentUser?.profile?.full_name || window.currentUser?.email?.split('@')[0] || 'User';
 }
 
 function getUserRole(){
-  let role = currentUser?.profile?.role 
-      || currentUser?.user_metadata?.role
-      || currentUser?.role
+  let role = window.currentUser?.profile?.role 
+      || window.currentUser?.user_metadata?.role
+      || window.currentUser?.role
       || 'sales';
   role = String(role).trim().toLowerCase();
   const map = { admin:'super_admin', head:'super_admin', superadmin:'super_admin' };
