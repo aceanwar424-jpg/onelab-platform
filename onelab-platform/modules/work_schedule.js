@@ -589,7 +589,8 @@ async function selectCalEmp(empId, empName) {
   calendarState.selectedEmpName = empName;
   const y = calendarState.year, m = calendarState.month;
   const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
-  const endDate   = `${y}-${String(m+1).padStart(2,'0')}-31`;
+  const lastDay   = new Date(y, m+1, 0).getDate(); // actual last day of this month (28-31)
+  const endDate   = `${y}-${String(m+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
   try {
     const recs = await sbGet('attendance',`select=tanggal,shift_code,leave_type&employee_id=eq.${empId}&tanggal=gte.${startDate}&tanggal=lte.${endDate}`);
     calendarState.assignments = {};

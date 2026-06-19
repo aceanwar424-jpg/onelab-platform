@@ -70,6 +70,10 @@ async function renderSettings() {
       </div>
     </div>
 
+    <div id="set-masterdata" style="display:none">
+      <div id="masterdata-content" class="loading-row"><div class="spinner"></div></div>
+    </div>
+
     <div id="set-admin" style="display:none">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
 

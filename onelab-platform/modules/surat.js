@@ -600,6 +600,7 @@ async function regenerateSurat(id) {
   if(s.file_url) {
     generateDocx(id, s, s.file_url);
   } else {
+    toast('⚠️ Surat ini tidak punya file template DOCX terlampir — menampilkan preview HTML generik.','warn',5000);
     previewSuratHTMLDirect(s);
   }
 }

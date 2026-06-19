@@ -425,7 +425,21 @@ async function loadAllVouchers(){
   }
 
   try {
-    const data = await sbGet('vouchers','select=*,voucher_campaigns(campaign_name)&order=created_at.desc&limit=200');
+    let data;
+    try {
+      data = await sbGet('vouchers','select=*,voucher_campaigns!campaign_id(campaign_name)&order=created_at.desc&limit=200');
+    } catch(embedErr) {
+      // Fallback: embed still ambiguous/fails (FK name may differ on this DB) —
+      // fetch separately and join client-side so the table never breaks
+      console.warn('[loadAllVouchers] Embed query failed, falling back to client-side join:', embedErr);
+      const [vRaw, cRaw] = await Promise.all([
+        sbGet('vouchers','select=*&order=created_at.desc&limit=200'),
+        sbGet('voucher_campaigns','select=id,campaign_name'),
+      ]);
+      const campMap = {};
+      (cRaw||[]).forEach(c => { campMap[c.id] = c.campaign_name; });
+      data = (vRaw||[]).map(v => ({...v, voucher_campaigns: v.campaign_id ? {campaign_name: campMap[v.campaign_id]} : null}));
+    }
     allVouchers = Array.isArray(data)?data:[];
     renderVoucherTable(allVouchers);
   } catch(e){ tbl.innerHTML=`<div class="status-box status-err" style="margin:16px">❌ ${e.message}</div>`; }
