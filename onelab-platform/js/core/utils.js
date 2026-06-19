@@ -13,8 +13,10 @@ function toast(msg, type='info', dur=2800) {
 }
 
 // Modal
-function openModal(html) {
-  document.getElementById('modal-box').innerHTML = html;
+function openModal(html, size='') {
+  const box = document.getElementById('modal-box');
+  box.innerHTML = html;
+  box.className = 'modal-box' + (size ? ' '+size : '');
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModalForce() {

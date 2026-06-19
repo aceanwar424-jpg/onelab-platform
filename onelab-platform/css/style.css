@@ -1457,3 +1457,7 @@ select { cursor: pointer; }
 .role-access-table tbody td {
   color: var(--text) !important;
 }
+
+/* ── Utility text colors (used by Inventory module) ──── */
+.text-red { color: #DC2626; }
+.text-green { color: #16A34A; }
