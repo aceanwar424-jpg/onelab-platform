@@ -82,10 +82,16 @@ async function renderHRD() {
   await Promise.all([loadEmployees(), loadLeaves()]);
 }
 
+let linkedEmployeeIds = new Set();
+
 async function loadEmployees() {
   try {
-    const data = await sbGet('employees','select=*&order=full_name.asc');
+    const [data, linkedUsers] = await Promise.all([
+      sbGet('employees','select=*&order=full_name.asc'),
+      sbGet('user_profiles','select=employee_id&employee_id=not.is.null').catch(()=>[]),
+    ]);
     empAll = Array.isArray(data) ? data : [];
+    linkedEmployeeIds = new Set((linkedUsers||[]).map(u=>u.employee_id));
     renderHRDKPI();
     filterEmp();
   } catch(e) {
@@ -145,9 +151,11 @@ function renderEmpTable(data) {
   const stColors={Aktif:'#22C55E',Probasi:'#F59E0B',Kontrak:'#0EA5E9','Non-Aktif':'#EF4444'};
   el.innerHTML=`<table><thead><tr>
     <th>Karyawan</th><th>Divisi & Posisi</th><th>Kontak</th>
-    <th>Status</th><th>Gaji Pokok</th><th>Bergabung</th><th>Aksi</th>
+    <th>Status</th><th>Akun Login</th><th>Gaji Pokok</th><th>Bergabung</th><th>Aksi</th>
   </tr></thead><tbody>
-  ${data.map(e=>`<tr>
+  ${data.map(e=>{
+    const hasAccount = linkedEmployeeIds.has(e.id);
+    return `<tr>
     <td>
       <div style="display:flex;align-items:center;gap:8px">
         <div style="width:32px;height:32px;border-radius:50%;background:${stColors[e.status]||'#94A3B8'}20;
@@ -171,6 +179,11 @@ function renderEmpTable(data) {
     </td>
     <td><span style="background:${(stColors[e.status]||'#94A3B8')}20;color:${stColors[e.status]||'#94A3B8'};
       padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${e.status||'—'}</span></td>
+    <td>
+      ${hasAccount
+        ? '<span style="color:#22C55E;font-size:11px;font-weight:700">✓ Terhubung</span>'
+        : `<button class="btn btn-xs btn-ghost" onclick="openCreateAccountForm(${e.id},'${(e.full_name||'').replace(/'/g,"\\'")}','${e.email||''}')">+ Buat Akun</button>`}
+    </td>
     <td style="font-size:12px;font-weight:600;color:var(--navy)">${e.base_salary?formatCurrency(e.base_salary):'—'}</td>
     <td style="font-size:11px;color:var(--gray)">${e.join_date?formatDateShort(e.join_date):'—'}</td>
     <td>
@@ -180,7 +193,8 @@ function renderEmpTable(data) {
         <button class="act-btn del" onclick="deleteEmp(${e.id})">🗑</button>
       </div>
     </td>
-  </tr>`).join('')}</tbody></table>`;
+  </tr>`;
+  }).join('')}</tbody></table>`;
 }
 
 function switchHRDTab(tab, btn) {
@@ -731,4 +745,58 @@ async function saveBulkSyncPositionShift() {
   toast(`✅ ${posUpdated} jabatan & ${shiftUpdated} jadwal disinkronkan${errs?` · ${errs} gagal`:''}`, errs?'warn':'ok', 4000);
   closeModalForce();
   await loadEmployees();
+}
+
+// ══════════════════════════════════════════════════════════════
+// BUAT AKUN dari Data SDM — placeholder user_profiles ter-link
+// ══════════════════════════════════════════════════════════════
+function openCreateAccountForm(empId, empName, empEmail) {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">👤 Buat Akun untuk ${empName}</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="status-box status-info" style="font-size:12px;margin-bottom:14px">
+      ℹ️ Ini membuat profil akses di sistem. Karyawan tetap perlu mendaftar/login sendiri
+      di halaman login menggunakan email yang sama — begitu login pertama kali,
+      akun ini otomatis terhubung ke data karyawan dan role berikut langsung berlaku.
+    </div>
+    <div class="form-group">
+      <label>Email (wajib sama dengan yang dipakai untuk login nanti) *</label>
+      <input type="email" id="ca-email" value="${empEmail||''}" placeholder="nama@onelab.id">
+      ${!empEmail?'<div class="form-hint" style="color:#DC2626">⚠️ Data karyawan ini belum punya email — isi dulu di sini, sebaiknya juga lengkapi di Edit Karyawan.</div>':''}
+    </div>
+    <div class="form-group">
+      <label>Role Akses</label>
+      <select id="ca-role">
+        ${Object.entries(ROLES).map(([k,r])=>`
+          <option value="${k}" ${k==='sales'?'selected':''}>${r.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveCreateAccount(${empId},'${empName.replace(/'/g,"\\'")}')">👤 Buat Akun</button>
+    </div>`, 'narrow');
+}
+
+async function saveCreateAccount(empId, empName) {
+  const email = document.getElementById('ca-email')?.value.trim();
+  const role  = document.getElementById('ca-role')?.value;
+  if (!email) { toast('Email wajib diisi','err'); return; }
+  try {
+    // If employee record doesn't have this email yet, sync it back
+    await sbPatch('employees', empId, { email, updated_at: new Date().toISOString() }).catch(()=>{});
+
+    await sbPost('user_profiles', {
+      full_name:   empName,
+      email,
+      role,
+      employee_id: empId,
+      created_at:  new Date().toISOString(),
+      updated_at:  new Date().toISOString(),
+    });
+    toast(`✅ Akun untuk ${empName} dibuat dan terhubung ke Data SDM`,'ok');
+    closeModalForce();
+    await loadEmployees();
+  } catch(e) { toast('❌ '+e.message,'err'); }
 }

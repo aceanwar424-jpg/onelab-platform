@@ -255,15 +255,36 @@ async function renderUsers() {
 
 async function loadUsers() {
   try {
-    const data = await sbGet('user_profiles','select=*&order=created_at.asc');
-    renderUsersTable(Array.isArray(data) ? data : []);
+    const [users, employees] = await Promise.all([
+      sbGet('user_profiles','select=*&order=created_at.asc'),
+      sbGet('employees','select=id,full_name,email,position,division&status=eq.Aktif').catch(()=>[]),
+    ]);
+    const userList = Array.isArray(users) ? users : [];
+    const empList  = Array.isArray(employees) ? employees : [];
+
+    // Client-side auto-match by email for any user not yet linked
+    // (covers users created/logged-in after the SQL migration ran)
+    const autoMatchPromises = userList
+      .filter(u => !u.employee_id && u.email)
+      .map(async u => {
+        const match = empList.find(e => e.email && e.email.trim().toLowerCase() === u.email.trim().toLowerCase());
+        if (match) {
+          try {
+            await sbPatch('user_profiles', u.id, { employee_id: match.id, updated_at: new Date().toISOString() });
+            u.employee_id = match.id;
+          } catch(e) { /* non-fatal, will retry next load */ }
+        }
+      });
+    await Promise.all(autoMatchPromises);
+
+    renderUsersTable(userList, empList);
   } catch(e) {
     document.getElementById('users-tbody').innerHTML =
       `<div class="status-box status-err" style="margin:16px">❌ ${e.message}</div>`;
   }
 }
 
-function renderUsersTable(users) {
+function renderUsersTable(users, employees=[]) {
   const el = document.getElementById('users-tbody');
   if (!users.length) {
     el.innerHTML = `
@@ -280,6 +301,7 @@ function renderUsersTable(users) {
       const role = u.role||'sales';
       const rc   = ROLES[role]||ROLES.sales;
       const isMe = u.id === window.currentUser?.id;
+      const linkedEmp = u.employee_id ? employees.find(e=>e.id===u.employee_id) : null;
       return `<tr>
         <td>
           <div style="display:flex;align-items:center;gap:10px">
@@ -297,8 +319,17 @@ function renderUsersTable(users) {
           </div>
         </td>
         <td>
-          <div style="font-size:12px;font-weight:600">${u.jabatan||'—'}</div>
-          <div style="font-size:10.5px;color:var(--text3)">${u.division||''}</div>
+          ${linkedEmp ? `
+            <div style="font-size:12px;font-weight:600">${linkedEmp.position||'—'}</div>
+            <div style="font-size:10.5px;color:var(--text3)">${linkedEmp.division||''}</div>
+            <div style="font-size:9.5px;color:var(--teal);margin-top:2px">🔗 ${linkedEmp.full_name}</div>
+          ` : `
+            <div style="font-size:11px;color:var(--text3);font-style:italic">Belum terhubung</div>
+            <button class="btn btn-xs btn-ghost" style="margin-top:3px;padding:1px 7px"
+              onclick="openLinkEmployeeForm('${u.id}','${(u.full_name||'').replace(/'/g,"\\'")}')">
+              🔗 Hubungkan
+            </button>
+          `}
         </td>
         <td>
           <span style="background:${rc.color}20;color:${rc.color};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">
@@ -535,6 +566,50 @@ async function createUserProfile() {
       updated_at:new Date().toISOString()
     });
     toast('✅ User profile dibuat','ok');
+    closeModalForce();
+    await loadUsers();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MANUAL LINK — User Management ↔ Data SDM
+// ══════════════════════════════════════════════════════════════
+async function openLinkEmployeeForm(userId, userName) {
+  const employees = await sbGet('employees',
+    'select=id,full_name,position,division,email&status=eq.Aktif&order=full_name').catch(()=>[]);
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">🔗 Hubungkan ke Data Karyawan</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px">
+      Hubungkan akun login <strong>${userName}</strong> ke data karyawan yang sesuai di Data SDM.
+      Setelah terhubung, Jabatan &amp; Divisi akan otomatis tampil di User Management.
+    </div>
+    <div class="form-group">
+      <label>Pilih Karyawan</label>
+      <select id="link-emp-select">
+        <option value="">-- Pilih Karyawan --</option>
+        ${employees.map(e=>`<option value="${e.id}">${e.full_name} — ${e.position||'—'} (${e.division||'—'})</option>`).join('')}
+      </select>
+      <div class="form-hint">${employees.length===0?'Belum ada data karyawan aktif. Tambahkan dulu di menu Data Karyawan.':`${employees.length} karyawan aktif tersedia.`}</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveLinkEmployee('${userId}')">🔗 Hubungkan</button>
+    </div>`, 'narrow');
+}
+
+async function saveLinkEmployee(userId) {
+  const empId = document.getElementById('link-emp-select')?.value;
+  if (!empId) { toast('Pilih karyawan dulu','err'); return; }
+  try {
+    await sbPatch('user_profiles', userId, {
+      employee_id: parseInt(empId),
+      updated_at:  new Date().toISOString(),
+    });
+    toast('✅ Berhasil dihubungkan ke Data SDM','ok');
     closeModalForce();
     await loadUsers();
   } catch(e) { toast('❌ '+e.message,'err'); }
