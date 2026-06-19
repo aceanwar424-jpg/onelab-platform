@@ -226,11 +226,30 @@ async function openEmpForm(id=null) {
   }
   const shiftTemplates = (typeof SHIFT_TEMPLATES !== 'undefined') ? SHIFT_TEMPLATES : [];
 
+  // Only relevant for NEW employees: users who registered/logged in but have no employee_id yet
+  let unlinkedUsers = [];
+  if (!id) {
+    const allUsers = await sbGet('user_profiles','select=id,full_name,email,phone,employee_id').catch(()=>[]);
+    unlinkedUsers = (allUsers||[]).filter(u=>!u.employee_id);
+  }
+
   openModal(`
     <div class="modal-header">
       <div class="modal-title">${id?'✏️ Edit Karyawan':'➕ Tambah Karyawan'}</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
+
+    ${(!id && unlinkedUsers.length) ? `
+    <div style="background:var(--teal-light);border-radius:var(--r);padding:10px 14px;margin-bottom:14px">
+      <label style="font-size:11.5px;font-weight:700;color:var(--teal);margin-bottom:4px;display:block">
+        ⚡ Isi Otomatis dari User Terdaftar
+      </label>
+      <select id="ef-from-user" onchange="fillEmpFromUser(this)" style="font-size:12.5px">
+        <option value="">-- Ketik manual, atau pilih user di sini --</option>
+        ${unlinkedUsers.map(u=>`<option value="${u.id}" data-name="${(u.full_name||'').replace(/"/g,'')}" data-email="${u.email||''}" data-phone="${u.phone||''}">${u.full_name||'(tanpa nama)'} ${u.email?`— ${u.email}`:''}</option>`).join('')}
+      </select>
+      <div class="form-hint">Pilih untuk auto-isi Nama/Email/HP dan langsung terhubung ke akun login tersebut.</div>
+    </div>` : ''}
 
     <div class="form-row">
       <div class="form-group">
@@ -257,6 +276,7 @@ async function openEmpForm(id=null) {
         <label>Posisi / Jabatan (teks bebas)</label>
         <input type="text" id="ef-pos" value="${e.position||''}" placeholder="Analis Medis, Sales Executive...">
       </div>
+      <input type="hidden" id="ef-link-user-id" value="">
       <div class="form-group">
         <label>No. HP</label>
         <input type="text" id="ef-phone" value="${e.phone||''}" placeholder="08xxxxxxxxxx">
@@ -348,6 +368,7 @@ async function saveEmployee(id) {
   const positionId  = document.getElementById('ef-position-id')?.value || null;
   const shiftCode    = document.getElementById('ef-shift-code')?.value || '';
   const selectedPos  = positionId ? hrdPositionsCache.find(p=>String(p.id)===String(positionId)) : null;
+  const linkUserId   = document.getElementById('ef-link-user-id')?.value || null;
 
   const payload={
     employee_id:   document.getElementById('ef-code').value.trim(),
@@ -379,6 +400,15 @@ async function saveEmployee(id) {
       toast('✅ Karyawan ditambahkan','ok');
     }
 
+    // If this employee was created from a "pilih user terdaftar" selection,
+    // link back so user_profiles.employee_id points here too (true 2-way sync)
+    if (linkUserId && empId && !id) {
+      await sbPatch('user_profiles', linkUserId, {
+        employee_id: empId,
+        updated_at:  new Date().toISOString(),
+      }).catch(e => console.error('[saveEmployee] link-back failed:', e));
+    }
+
     // Sync shift selection to work_schedules — only if a shift was actually chosen
     if (shiftCode && empId) {
       await syncEmployeeShift(empId, shiftCode);
@@ -400,6 +430,11 @@ async function syncEmployeeShift(employeeId, shiftCode) {
       employee_id:        employeeId,
       shift_name:          tpl.name,
       shift_code:          tpl.code,
+      // Legacy columns (jam_masuk/jam_pulang) may still be NOT NULL on databases
+      // that haven't run fix_all_constraints.sql yet — fill them defensively
+      // so saving never breaks regardless of migration state.
+      jam_masuk:           tpl.masuk_wd,
+      jam_pulang:          tpl.pulang_wd,
       jam_masuk_weekday:   tpl.masuk_wd,
       jam_pulang_weekday:  tpl.pulang_wd,
       jam_masuk_sabtu:     tpl.masuk_sb||null,
@@ -799,4 +834,24 @@ async function saveCreateAccount(empId, empName) {
     closeModalForce();
     await loadEmployees();
   } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILL FROM USER — auto-isi form Tambah Karyawan dari user terdaftar
+// ══════════════════════════════════════════════════════════════
+function fillEmpFromUser(sel) {
+  const opt = sel.options[sel.selectedIndex];
+  const userId = opt.value;
+  document.getElementById('ef-link-user-id').value = userId || '';
+  if (!userId) return;
+  const name  = opt.getAttribute('data-name')  || '';
+  const email = opt.getAttribute('data-email') || '';
+  const phone = opt.getAttribute('data-phone') || '';
+  const nameEl  = document.getElementById('ef-name');
+  const emailEl = document.getElementById('ef-email');
+  const phoneEl = document.getElementById('ef-phone');
+  if (nameEl  && name)  nameEl.value  = name;
+  if (emailEl && email) emailEl.value = email;
+  if (phoneEl && phone) phoneEl.value = phone;
+  toast(`✓ Form diisi dari akun "${name}" — akan otomatis terhubung saat disimpan`,'info',2500);
 }

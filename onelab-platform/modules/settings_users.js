@@ -324,11 +324,17 @@ function renderUsersTable(users, employees=[]) {
             <div style="font-size:10.5px;color:var(--text3)">${linkedEmp.division||''}</div>
             <div style="font-size:9.5px;color:var(--teal);margin-top:2px">🔗 ${linkedEmp.full_name}</div>
           ` : `
-            <div style="font-size:11px;color:var(--text3);font-style:italic">Belum terhubung</div>
-            <button class="btn btn-xs btn-ghost" style="margin-top:3px;padding:1px 7px"
-              onclick="openLinkEmployeeForm('${u.id}','${(u.full_name||'').replace(/'/g,"\\'")}')">
-              🔗 Hubungkan
-            </button>
+            <div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:3px">Belum terhubung</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <button class="btn btn-xs btn-ghost" style="padding:1px 7px"
+                onclick="openLinkEmployeeForm('${u.id}','${(u.full_name||'').replace(/'/g,"\\'")}')">
+                🔗 Hubungkan
+              </button>
+              <button class="btn btn-xs" style="padding:1px 7px;background:var(--teal-light);color:var(--teal);border:1px solid var(--teal)"
+                onclick="jadikanKaryawan('${u.id}','${(u.full_name||'').replace(/'/g,"\\'")}','${u.email||''}','${u.phone||''}')">
+                + Jadikan Karyawan
+              </button>
+            </div>
           `}
         </td>
         <td>
@@ -611,6 +617,35 @@ async function saveLinkEmployee(userId) {
     });
     toast('✅ Berhasil dihubungkan ke Data SDM','ok');
     closeModalForce();
+    await loadUsers();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// JADIKAN KARYAWAN — auto-create row Data SDM dari user existing
+// ══════════════════════════════════════════════════════════════
+async function jadikanKaryawan(userId, userName, userEmail, userPhone) {
+  if (!confirm(`Buat data karyawan baru untuk "${userName}" dan langsung hubungkan?\n\nData akan terisi: Nama, Email, No. HP dari akun ini.\nJabatan & Divisi bisa dilengkapi setelahnya di Data SDM.`)) return;
+  try {
+    const created = await sbPost('employees', {
+      full_name:   userName,
+      email:       userEmail || null,
+      phone:       userPhone || null,
+      status:      'Aktif',
+      join_date:   new Date().toISOString().split('T')[0],
+      created_by_name: getUserName ? getUserName() : 'System',
+      created_at:  new Date().toISOString(),
+      updated_at:  new Date().toISOString(),
+    });
+    const newEmpId = created?.[0]?.id || created?.id;
+    if (!newEmpId) throw new Error('Gagal mendapatkan ID karyawan baru');
+
+    await sbPatch('user_profiles', userId, {
+      employee_id: newEmpId,
+      updated_at:  new Date().toISOString(),
+    });
+
+    toast(`✅ Data karyawan untuk "${userName}" dibuat dan terhubung. Lengkapi Jabatan & Divisi di Data SDM.`,'ok',5000);
     await loadUsers();
   } catch(e) { toast('❌ '+e.message,'err'); }
 }

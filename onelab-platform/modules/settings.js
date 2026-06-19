@@ -9,12 +9,11 @@ async function renderSettings() {
 
     <div class="tabs" id="set-tabs">
       <button class="tab-btn active" onclick="switchSetTab('general',this)">⚙️ Umum</button>
-      <button class="tab-btn" onclick="switchSetTab('users',this)">👥 Pengguna</button>
       <button class="tab-btn" onclick="switchSetTab('rolemenu',this)">🔐 Akses Menu</button>
       <button class="tab-btn" onclick="switchSetTab('activity',this)">📋 Log Aktivitas</button>
       <button class="tab-btn" onclick="switchSetTab('data',this)">🗄 Data</button>
       <button class="tab-btn" onclick="switchSetTab('masterdata',this)">📋 Master Data</button>
-      ${isSuperAdmin ? `<button class="tab-btn" onclick="switchSetTab('admin',this)">🔐 Super Admin</button>` : ''}
+      ${isSuperAdmin ? `<button class="tab-btn" onclick="switchSetTab('admin',this)">🛠 Admin Tools</button>` : ''}
     </div>
 
     <div id="set-general">
@@ -46,14 +45,7 @@ async function renderSettings() {
       </div>
     </div>
 
-    <div id="set-users" style="display:none">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">👥 Pengguna Terdaftar</div>
-        </div>
-        <div id="set-users-list" class="loading-row"><div class="spinner"></div></div>
-      </div>
-    </div>
+    <!-- Pengguna lama dipindah ke User Management (menu Konfigurasi → User Management) -->
 
     <div id="set-rolemenu" style="display:none">
       <div id="set-rolemenu-content"></div>
@@ -136,12 +128,12 @@ async function renderSettings() {
 function switchSetTab(tab, btn) {
   document.querySelectorAll('#set-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  if (tab === 'rolemenu') { ['general','users','activity','data','masterdata','admin'].forEach(t=>{const d=document.getElementById('set-'+t);if(d)d.style.display='none';}); document.getElementById('set-rolemenu').style.display=''; renderRoleMenuConfig(); return; }
-  ['general','users','activity','data','admin','masterdata'].forEach(t=>{
+  if (tab === 'rolemenu') { ['general','activity','data','masterdata','admin'].forEach(t=>{const d=document.getElementById('set-'+t);if(d)d.style.display='none';}); document.getElementById('set-rolemenu').style.display=''; renderRoleMenuConfig(); return; }
+  ['general','activity','data','admin','masterdata'].forEach(t=>{
     const el = document.getElementById(`set-${t}`);
     if (el) el.style.display = t===tab?'block':'none';
   });
-  if(tab==='users') loadSetUsers();
+  document.getElementById('set-rolemenu').style.display='none';
   if(tab==='activity') loadSetActivity();
   if(tab==='masterdata') renderMasterData().then(html=>{
     const el=document.getElementById('masterdata-content');
@@ -177,24 +169,7 @@ async function loadSetStats() {
   } catch(e){ el.innerHTML='<span style="color:var(--gray);font-size:13px">Gagal load</span>'; }
 }
 
-async function loadSetUsers() {
-  const el=document.getElementById('set-users-list');
-  if(!el)return;
-  try {
-    const data=await sbGet('user_profiles','select=*&order=created_at.desc');
-    el.innerHTML=(data&&data.length)?`
-      <table>
-        <thead><tr><th>Nama</th><th>Role</th><th>Bergabung</th></tr></thead>
-        <tbody>${(data||[]).map(u=>`
-          <tr><td><strong>${u.full_name||'—'}</strong></td>
-              <td><span class="badge ${u.role==='admin'?'badge-teal':'badge-gray'}">${u.role||'sales'}</span></td>
-              <td style="font-size:12px;color:var(--gray)">${formatDateShort(u.created_at)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`:
-      '<div class="empty-state"><div class="ico">👥</div><h3>Belum ada pengguna terdaftar</h3></div>';
-  } catch(e){ el.innerHTML=`<div class="status-box status-err">❌ ${e.message}</div>`; }
-}
+// loadSetUsers removed — User Management is now the single source of truth (navigate('users'))
 
 async function loadSetActivity() {
   const el=document.getElementById('set-activity-list');

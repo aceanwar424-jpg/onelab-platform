@@ -399,6 +399,9 @@ async function saveSchedule(id) {
     employee_id:       parseInt(empId),
     shift_name:        shift,
     shift_code:        document.getElementById('sf-code')?.value||'P1',
+    // Legacy columns — fill defensively in case NOT NULL constraint still exists
+    jam_masuk:         masukWd,
+    jam_pulang:        pulangWd,
     jam_masuk_weekday: masukWd,
     jam_pulang_weekday:pulangWd,
     jam_masuk_sabtu:   masukSb,
