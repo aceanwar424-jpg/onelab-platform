@@ -161,6 +161,7 @@ function renderAdmList(data) {
             ${a.status==='Registered'?`<button class="btn btn-teal btn-xs" onclick="updateAdmStatus(${a.id},'Anamnesa')">→ Anamnesa</button>`:''}
             ${a.status==='Anamnesa'?`<button class="btn btn-teal btn-xs" onclick="updateAdmStatus(${a.id},'Lab')">→ Lab</button>`:''}
             ${a.status==='Lab'?`<button class="btn btn-teal btn-xs" onclick="updateAdmStatus(${a.id},'Done')">→ Selesai</button>`:''}
+            ${a.package_id?`<button class="act-btn" title="Cetak Ulang Label Sampel" onclick="reprintSampleLabels(${a.id})">🏷️</button>`:''}
             <button class="act-btn edit" onclick="openAdmissionForm(${a.id})">✏️</button>
             ${a.payment_status!=='Paid'?`<button class="act-btn" style="color:#22C55E;font-size:11px" onclick="markAdmPaid(${a.id})">Bayar</button>`:''}
           </div>
@@ -415,11 +416,113 @@ async function saveAdmission(id) {
   if (id) delete payload.status;
 
   try {
-    if (id) { await sbPatch('admissions',id,payload); toast('✅ Data diupdate','ok'); }
-    else    { await sbPost('admissions',payload);    toast('✅ Pasien terdaftar','ok'); }
+    let admissionId = id;
+    if (id) {
+      await sbPatch('admissions',id,payload); toast('✅ Data diupdate','ok');
+    } else {
+      const created = await sbPost('admissions',payload);
+      admissionId = created?.[0]?.id || created?.id;
+      toast('✅ Pasien terdaftar','ok');
+    }
     closeModalForce();
     await loadAdmissions();
+
+    // Auto-generate sample labels from package breakdown — only for new registrations with a package
+    if (!id && admissionId && payload.package_id) {
+      await generateSampleLabelsFromPackage(admissionId, payload);
+    }
   } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SAMPLE LABEL GENERATION — breakdown paket → kelompok per jenis sampel
+// ══════════════════════════════════════════════════════════════
+async function generateSampleLabelsFromPackage(admissionId, adm) {
+  try {
+    const items = await sbGet('package_items',
+      `select=*,products!product_id(id,nama_tes,kategori,sampel_type)&package_id=eq.${adm.package_id}`).catch(()=>[]);
+    if (!items || !items.length) {
+      toast('⚠️ Paket ini belum punya daftar tes (package_items kosong) — label tidak bisa digenerate otomatis. Lengkapi dulu di Konfigurasi Paket.','warn',6000);
+      return;
+    }
+
+    // Group tests by sampel_type — same sample type shares one label, different types get separate labels
+    const groups = {};
+    for (const it of items) {
+      const prod = it.products || {};
+      const sampelType = prod.sampel_type || 'Lainnya';
+      if (!groups[sampelType]) groups[sampelType] = [];
+      groups[sampelType].push({ product_id: prod.id, product_name: prod.nama_tes||it.product_name, kategori: prod.kategori });
+    }
+
+    const sampelCodes = { 'Darah Vena':'DRH', 'Darah':'DRH', 'Urin':'URN', 'Swab':'SWB', 'Feses':'FCS', 'Sputum':'SPT' };
+    const createdLabels = [];
+    let idx = 1;
+    for (const [sampelType, tests] of Object.entries(groups)) {
+      const code = sampelCodes[sampelType] || sampelType.substring(0,3).toUpperCase();
+      const barcode = `${adm.visit_number}-${code}${tests.length>1?'':''}`;
+      const labelPayload = {
+        label_barcode: barcode,
+        admission_id: admissionId,
+        visit_number: adm.visit_number,
+        patient_name: adm.patient_name,
+        patient_dob: adm.patient_dob||null,
+        patient_gender: adm.patient_gender||null,
+        sampel_type: sampelType,
+        status: 'Created',
+        created_by: getUserName?getUserName():'User',
+      };
+      const created = await sbPost('sample_labels', labelPayload);
+      const labelId = created?.[0]?.id || created?.id;
+      for (const t of tests) {
+        await sbPost('sample_label_items', {
+          label_id: labelId, product_id: t.product_id, product_name: t.product_name, kategori: t.kategori,
+        });
+      }
+      createdLabels.push({ ...labelPayload, id: labelId, tests });
+      idx++;
+    }
+
+    toast(`✅ ${createdLabels.length} label sampel digenerate dari paket (${items.length} tes)`,'ok',4000);
+    printSampleLabels(createdLabels);
+  } catch(e) {
+    console.error('[generateSampleLabelsFromPackage] Failed:', e);
+    toast('❌ Gagal generate label sampel: '+e.message,'err',6000);
+  }
+}
+
+function printSampleLabels(labels) {
+  const w = window.open('','_blank');
+  w.document.write(`
+    <html><head><title>Label Sampel</title>
+    <style>
+      body{font-family:Arial,sans-serif;margin:0;padding:10px}
+      .label{width:7cm;min-height:4.5cm;border:1.5px dashed #999;border-radius:6px;padding:10px 12px;
+        margin-bottom:10px;page-break-inside:avoid;display:inline-block;vertical-align:top}
+      .barcode{font-family:'Courier New',monospace;font-size:15px;font-weight:700;letter-spacing:1px;
+        background:#000;color:#fff;padding:4px 8px;text-align:center;margin-bottom:6px;border-radius:3px}
+      .patient{font-size:12px;font-weight:700;margin-bottom:2px}
+      .meta{font-size:10px;color:#555;margin-bottom:6px}
+      .sampel-type{display:inline-block;background:#0891B2;color:#fff;font-size:10px;font-weight:700;
+        padding:2px 8px;border-radius:8px;margin-bottom:6px}
+      .tests{font-size:9.5px;color:#333;border-top:1px dashed #ccc;padding-top:5px}
+      .tests div{padding:1px 0}
+      @media print { .label{border:1px solid #333} }
+    </style></head><body>
+    ${labels.map(l => `
+      <div class="label">
+        <div class="barcode">${l.label_barcode}</div>
+        <div class="patient">${l.patient_name}</div>
+        <div class="meta">${l.visit_number} · ${l.patient_gender||''} ${l.patient_dob?'· '+l.patient_dob:''}</div>
+        <div class="sampel-type">${l.sampel_type}</div>
+        <div class="tests">
+          ${l.tests.map(t=>`<div>• ${t.product_name}</div>`).join('')}
+        </div>
+      </div>
+    `).join('')}
+    <script>window.print()</script>
+    </body></html>`);
+  w.document.close();
 }
 
 async function renderAdmissionReport() {
@@ -442,4 +545,22 @@ async function renderAdmissionReport() {
       </div>`).join('')}
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button></div>`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// REPRINT LABEL — untuk label rusak/hilang sebelum check-in
+// ══════════════════════════════════════════════════════════════
+async function reprintSampleLabels(admissionId) {
+  try {
+    const labels = await sbGet('sample_labels', `select=*&admission_id=eq.${admissionId}`).catch(()=>[]);
+    if (!labels || !labels.length) {
+      toast('⚠️ Belum ada label untuk kunjungan ini. Label hanya digenerate otomatis saat registrasi awal dengan paket.','warn',5000);
+      return;
+    }
+    const withTests = await Promise.all(labels.map(async l => {
+      const items = await sbGet('sample_label_items', `select=*&label_id=eq.${l.id}`).catch(()=>[]);
+      return { ...l, tests: (items||[]).map(it=>({product_name:it.product_name})) };
+    }));
+    printSampleLabels(withTests);
+  } catch(e) { toast('❌ '+e.message,'err'); }
 }

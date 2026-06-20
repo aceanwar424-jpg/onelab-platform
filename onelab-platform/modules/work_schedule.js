@@ -36,6 +36,12 @@ async function renderWorkSchedule() {
       </div>
     </div>
 
+    <div style="background:var(--teal-light);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--teal)">
+      ℹ️ Tabel di bawah ini adalah <strong>template shift mingguan</strong> per karyawan (jam masuk/pulang, hari kerja).
+      Untuk assign shift ke <strong>tanggal spesifik di kalender</strong> (misal: tanggal 25 Juni karyawan X masuk P2),
+      gunakan tombol "📅 Kalender Shift" — itu sistem terpisah yang mencatat kehadiran harian.
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px" id="sched-kpi">
       <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
     </div>
@@ -554,6 +560,10 @@ async function renderShiftCalendar() {
         </div>
       </div>
     </div>`;
+  // Always reload fresh — this page can be reached directly (rail icon, back/forward)
+  // without having visited the Jadwal Kerja list page first, which would otherwise
+  // leave scheduleAll/scheduleEmpList empty and make saved schedules appear missing.
+  await loadSchedules();
   renderCalEmpList();
   renderCalGrid();
 }

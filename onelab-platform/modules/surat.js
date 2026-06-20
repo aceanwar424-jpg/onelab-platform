@@ -511,16 +511,15 @@ async function saveSurat(id) {
 
 // ── Generate DOCX dari template ───────────────────
 async function generateDocx(id, data, templateUrl) {
-  // Load library docxtemplater + pizzip
-  await loadDocxLibraries();
-
-  if (!window.PizZip || !window.docxtemplater) {
-    toast('❌ Library DOCX gagal dimuat (kemungkinan CDN diblokir/offline). Membuka preview HTML sebagai gantinya.','err',6000);
-    previewSuratHTMLDirect(data);
-    return;
-  }
-
   try {
+    toast('⏳ Memuat library DOCX...','info',4000);
+    // Load library docxtemplater + pizzip
+    await loadDocxLibraries();
+
+    if (!window.PizZip || !window.docxtemplater) {
+      throw new Error('Library DOCX gagal dimuat (kemungkinan CDN diblokir/offline).');
+    }
+
     toast('⏳ Memproses template DOCX...','info',5000);
 
     // Fetch template file
@@ -595,27 +594,42 @@ async function generateDocx(id, data, templateUrl) {
 }
 
 async function regenerateSurat(id) {
-  const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
-  const s = d[0]; if(!s) return;
-  if(s.file_url) {
-    generateDocx(id, s, s.file_url);
-  } else {
-    toast('⚠️ Surat ini tidak punya file template DOCX terlampir — menampilkan preview HTML generik.','warn',5000);
-    previewSuratHTMLDirect(s);
+  toast('⏳ Memproses dokumen...','info',2000);
+  try {
+    const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
+    const s = d[0];
+    if (!s) { toast('❌ Surat tidak ditemukan (mungkin sudah dihapus)','err'); return; }
+    if (s.file_url) {
+      await generateDocx(id, s, s.file_url);
+    } else {
+      toast('⚠️ Surat ini tidak punya file template DOCX terlampir — menampilkan preview HTML generik.','warn',5000);
+      previewSuratHTMLDirect(s);
+    }
+  } catch(e) {
+    console.error('[regenerateSurat] Failed:', e);
+    toast('❌ Gagal memuat surat: '+e.message,'err',6000);
   }
 }
 
 // ── Load docxtemplater libraries ──────────────────
 function loadDocxLibraries() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if(window.PizZip && window.docxtemplater){ resolve(); return; }
+
+    // Safety net: if CDN scripts never fire onload/onerror (e.g. silently
+    // blocked by network policy), don't hang forever — fail visibly instead.
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Timeout memuat library DOCX (CDN tidak merespons dalam 10 detik). Cek koneksi internet atau apakah cdnjs.cloudflare.com diblokir oleh firewall/network settings.'));
+    }, 10000);
 
     const s1 = document.createElement('script');
     s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js';
+    s1.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat PizZip dari CDN (cdnjs.cloudflare.com). Cek koneksi internet atau apakah domain ini diblokir.')); };
     s1.onload = () => {
       const s2 = document.createElement('script');
       s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.12/docxtemplater.js';
-      s2.onload = () => resolve();
+      s2.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat Docxtemplater dari CDN (cdnjs.cloudflare.com). Cek koneksi internet atau apakah domain ini diblokir.')); };
+      s2.onload = () => { clearTimeout(timeoutId); resolve(); };
       document.head.appendChild(s2);
     };
     document.head.appendChild(s1);

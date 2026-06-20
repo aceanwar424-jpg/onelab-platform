@@ -108,11 +108,12 @@ function renderCheckinTab() {
 
   el.innerHTML=`
     <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
-      <input class="table-search" id="barcode-input" placeholder="🔍 Scan / Ketik Barcode atau Nama Pasien..."
+      <input class="table-search" id="barcode-input" placeholder="🔍 Scan / Ketik Barcode Label atau Nama Pasien..."
         onkeydown="if(event.key==='Enter')checkInBarcode(this.value)" style="flex:1">
       <button class="btn btn-teal" onclick="checkInBarcode(document.getElementById('barcode-input').value)">Check In</button>
       <button class="btn btn-ghost" onclick="openSampleForm()">+ Manual</button>
     </div>
+    <div id="lab-pending-labels"></div>
     <div class="table-wrap">
       <table><thead><tr>
         <th>Barcode</th><th>Pasien</th><th>Tes</th><th>Tipe Sampel</th>
@@ -145,13 +146,55 @@ function renderCheckinTab() {
         ✅ Tidak ada sampel pending</td></tr>`}
       </tbody></table>
     </div>`;
+  loadPendingLabels();
+}
+
+async function loadPendingLabels() {
+  const el = document.getElementById('lab-pending-labels');
+  if (!el) return;
+  try {
+    const labels = await sbGet('sample_labels',
+      'select=*&status=eq.Created&order=created_at.desc&limit=30').catch(()=>[]);
+    if (!labels || !labels.length) { el.innerHTML=''; return; }
+
+    const itemCounts = await Promise.all(labels.map(l =>
+      sbGet('sample_label_items',`select=product_name&label_id=eq.${l.id}`).catch(()=>[])
+    ));
+
+    el.innerHTML = `
+      <div style="background:var(--mint);border-radius:var(--r);padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;margin-bottom:8px">
+          🏷️ ${labels.length} Label Menunggu Check-In dari Klinik
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${labels.map((l,i)=>`
+            <div onclick="openLabelCheckin(${l.id})" style="cursor:pointer;background:#fff;border:1px solid var(--border);
+              border-radius:var(--r);padding:8px 12px;min-width:180px">
+              <div style="font-family:monospace;font-size:11px;font-weight:700;color:var(--teal)">${l.label_barcode}</div>
+              <div style="font-size:12px;font-weight:600">${l.patient_name}</div>
+              <div style="font-size:10.5px;color:var(--gray)">
+                <span style="background:#0891B2;color:#fff;padding:1px 6px;border-radius:6px;margin-right:4px">${l.sampel_type}</span>
+                ${itemCounts[i]?.length||0} tes
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } catch(e) { el.innerHTML=''; }
 }
 
 async function checkInBarcode(val) {
   val = (val||'').trim();
   if (!val) return;
   try {
-    // Try find by barcode
+    // Primary path: search by sample_labels (the label printed at registration)
+    const labels = await sbGet('sample_labels',
+      `select=*&label_barcode=ilike.${encodeURIComponent('%'+val+'%')}&status=eq.Created&limit=5`).catch(()=>[]);
+    if (labels?.length) {
+      await openLabelCheckin(labels[0].id);
+      return;
+    }
+
+    // Fallback: legacy lab_samples (manual check-in, no label system used)
     let samples = await sbGet('lab_samples',`select=*&barcode=ilike.${encodeURIComponent('%'+val+'%')}&limit=5`);
     if (!samples?.length) {
       // Try by patient name via admissions
@@ -164,8 +207,117 @@ async function checkInBarcode(val) {
     if (samples?.length) {
       await processSample(samples[0].id);
     } else {
-      toast('Barcode/pasien tidak ditemukan','warn');
+      toast('Barcode label/pasien tidak ditemukan','warn');
     }
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// LABEL CHECK-IN — scan 1 barcode label, check-in semua tes sekaligus
+// ══════════════════════════════════════════════════════════════
+async function openLabelCheckin(labelId) {
+  const [labelData, items] = await Promise.all([
+    sbGet('sample_labels',`select=*&id=eq.${labelId}`),
+    sbGet('sample_label_items',`select=*&label_id=eq.${labelId}`).catch(()=>[]),
+  ]);
+  const label = labelData?.[0]; if (!label) { toast('Label tidak ditemukan','err'); return; }
+
+  let analyzerOpts='<option value="">-- Pilih Alat (opsional) --</option>';
+  try {
+    const azs=await sbGet('analyzers','select=id,nama_alat&status=eq.Aktif');
+    analyzerOpts+=(azs||[]).map(a=>`<option value="${a.id}">${a.nama_alat}</option>`).join('');
+  } catch(e){}
+
+  const now = new Date().toISOString().slice(0,16);
+  const user = getUserName?getUserName():'User';
+
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">🧪 Check In Label — ${label.label_barcode}</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div style="background:var(--mint);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px">
+      <strong>${label.patient_name}</strong> · ${label.visit_number} ·
+      <span style="background:#0891B2;color:#fff;padding:1px 8px;border-radius:8px;font-size:10.5px;margin-left:4px">${label.sampel_type}</span>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;margin-bottom:8px">
+      ${items.length} Tes dalam Label Ini — semua akan check-in sekaligus
+    </div>
+    <div style="max-height:180px;overflow-y:auto;margin-bottom:14px">
+      ${items.map(it=>`<div style="padding:6px 10px;background:var(--bg2);border-radius:var(--r);margin-bottom:4px;font-size:12.5px">
+        • ${it.product_name}</div>`).join('')}
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Volume Total (mL)</label><input type="number" id="lc-vol" step="0.1" placeholder="3"></div>
+      <div class="form-group"><label>Waktu Pengambilan</label><input type="datetime-local" id="lc-collected" value="${now}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Diambil/Diterima Oleh</label><input type="text" id="lc-collector" value="${user}"></div>
+      <div class="form-group"><label>Alat Analyzer</label><select id="lc-analyzer">${analyzerOpts}</select></div>
+    </div>
+    <div class="form-group"><label>Catatan</label><input type="text" id="lc-notes" placeholder="Kondisi sampel..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveLabelCheckin(${labelId})">🧪 Check In Semua (${items.length} Tes)</button>
+    </div>`);
+}
+
+async function saveLabelCheckin(labelId) {
+  const [labelData, items] = await Promise.all([
+    sbGet('sample_labels',`select=*&id=eq.${labelId}`),
+    sbGet('sample_label_items',`select=*&label_id=eq.${labelId}`).catch(()=>[]),
+  ]);
+  const label = labelData?.[0]; if (!label) return;
+
+  const vol       = parseFloat(document.getElementById('lc-vol')?.value)||null;
+  const collected = document.getElementById('lc-collected')?.value||new Date().toISOString();
+  const collector = document.getElementById('lc-collector')?.value.trim()||(getUserName?getUserName():'User');
+  const azSel      = document.getElementById('lc-analyzer');
+  const azId       = azSel?.value;
+  const azName     = azSel?.options[azSel?.selectedIndex]?.textContent?.trim()||'';
+  const notes      = document.getElementById('lc-notes')?.value.trim()||null;
+  const user = getUserName?getUserName():'User';
+
+  try {
+    for (const it of items) {
+      await sbPost('lab_samples',{
+        barcode: `${label.label_barcode}-${it.product_id}`,
+        admission_id: label.admission_id,
+        visit_number: label.visit_number,
+        patient_name: label.patient_name,
+        product_id: it.product_id,
+        product_name: it.product_name,
+        sampel_type: label.sampel_type,
+        volume_ml: vol,
+        collected_at: collected,
+        collected_by: collector,
+        analyzer_id: parseInt(azId)||null,
+        analyzer_name: azName||null,
+        received_at: new Date().toISOString(),
+        status: 'Pending',
+        notes,
+        label_id: labelId,
+      });
+      await sbPost('lab_results',{
+        admission_id: label.admission_id,
+        visit_number: label.visit_number,
+        patient_name: label.patient_name,
+        product_id: it.product_id,
+        product_name: it.product_name,
+        status: 'Draft',
+        entered_by: user,
+        entered_at: new Date().toISOString(),
+      });
+    }
+    await sbPatch('sample_labels', labelId, {
+      status:'CheckedIn', checked_in_at: new Date().toISOString(),
+      collected_at: collected, collected_by: collector,
+    });
+
+    toast(`✅ ${items.length} tes berhasil check-in dari 1 label`,'ok');
+    closeModalForce();
+    await Promise.all([loadLabSamples(), loadLabResults()]);
+    renderLabKPI(); renderCheckinTab(); renderResultTab();
   } catch(e) { toast('❌ '+e.message,'err'); }
 }
 
