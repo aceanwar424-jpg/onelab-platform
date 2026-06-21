@@ -157,9 +157,84 @@ function renderProdTable(data) {
     </tbody></table>`;
 }
 
+let prodItemState = [];
+
+async function loadProductItems(productId) {
+  try {
+    const items = await sbGet('product_items', `select=*&product_id=eq.${productId}&order=display_order.asc`).catch(()=>[]);
+    prodItemState = (items||[]).map(r=>({ ...r }));
+  } catch(e) { prodItemState = []; }
+}
+
+const SPECIMEN_TYPES = ['BLOOD, WHOLE','BLOOD, SERUM','BLOOD, PLASMA','URINE','STOOL/FECES','SWAB, NASOPHARYNGEAL',
+  'SWAB, THROAT','SPUTUM','SALIVA','CSF','TISSUE','OTHER'];
+
+function renderProductItemTable() {
+  const el = document.getElementById('pf-item-table'); if (!el) return;
+  if (!prodItemState.length) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:10px;text-align:center">Belum ada item komponen — tambahkan jika tes ini adalah panel (misal Hematologi Lengkap berisi WBC/RBC/HGB/HCT)</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <table style="width:100%;font-size:11.5px;border-collapse:collapse">
+      <thead><tr style="background:var(--bg)">
+        <th style="padding:4px;text-align:left">Code</th><th style="padding:4px;text-align:left">UoM</th>
+        <th style="padding:4px;text-align:left">Name (ID)</th><th style="padding:4px;text-align:left">Name (EN)</th>
+        <th style="padding:4px">Order</th><th style="padding:4px;text-align:left">Specimen</th>
+        <th style="padding:4px">Active</th><th style="padding:4px;width:36px"></th>
+      </tr></thead>
+      <tbody>
+        ${prodItemState.map((row,i)=>`
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:3px"><input type="text" value="${row.code||''}" oninput="updateProdItem(${i},'code',this.value)" style="font-size:11px;padding:3px;width:70px"></td>
+            <td style="padding:3px"><input type="text" value="${row.uom||''}" oninput="updateProdItem(${i},'uom',this.value)" style="font-size:11px;padding:3px;width:60px"></td>
+            <td style="padding:3px"><input type="text" value="${row.name_id||''}" oninput="updateProdItem(${i},'name_id',this.value)" style="font-size:11px;padding:3px;width:100%"></td>
+            <td style="padding:3px"><input type="text" value="${row.name_en||''}" oninput="updateProdItem(${i},'name_en',this.value)" style="font-size:11px;padding:3px;width:100%"></td>
+            <td style="padding:3px"><input type="number" value="${row.display_order||i+1}" oninput="updateProdItem(${i},'display_order',this.value)" style="font-size:11px;padding:3px;width:50px"></td>
+            <td style="padding:3px">
+              <select onchange="updateProdItem(${i},'specimen_type',this.value)" style="font-size:11px;padding:3px;width:100%">
+                <option value="">-- Pilih --</option>
+                ${SPECIMEN_TYPES.map(s=>`<option ${row.specimen_type===s?'selected':''}>${s}</option>`).join('')}
+              </select>
+            </td>
+            <td style="padding:3px;text-align:center"><input type="checkbox" ${row.is_active!==false?'checked':''} onchange="updateProdItem(${i},'is_active',this.checked)"></td>
+            <td style="padding:3px;text-align:center"><button class="btn btn-ghost btn-xs" onclick="removeProdItem(${i})" style="color:#EF4444">✕</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+function addProdItem() {
+  prodItemState.push({ code:'', uom:'', name_id:'', name_en:'', display_order:prodItemState.length+1, specimen_type:'', is_active:true });
+  renderProductItemTable();
+}
+function removeProdItem(i) { prodItemState.splice(i,1); renderProductItemTable(); }
+function updateProdItem(i,key,val) {
+  if (!prodItemState[i]) return;
+  prodItemState[i][key] = key==='display_order' ? parseInt(val)||1 : val;
+}
+
+async function saveProductItems(productId) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/product_items?product_id=eq.${productId}`,{
+      method:'DELETE', headers:{...SB_HEADERS,'Prefer':'return=minimal'}
+    });
+    const toSave = prodItemState.filter(r=>r.name_id);
+    if (toSave.length) {
+      await sbPost('product_items', toSave.map(r=>({
+        product_id: productId, code:r.code||null, uom:r.uom||null,
+        name_id:r.name_id, name_en:r.name_en||null,
+        display_order:r.display_order||1, specimen_type:r.specimen_type||null,
+        is_active: r.is_active!==false,
+      })));
+    }
+  } catch(e) { console.error('[saveProductItems] Failed:', e); toast('⚠️ Produk tersimpan, tapi gagal simpan item komponen: '+e.message,'warn',5000); }
+}
+
 async function openProductForm(id=null) {
   let p = {};
   if (id) { const d=await sbGet('products',`select=*&id=eq.${id}`); p=d[0]||{}; }
+  prodItemState = [];
+  if (id) await loadProductItems(id);
 
   // Load analyzers
   let analyzerOpts = '<option value="">-- Pilih Alat --</option>';
@@ -283,13 +358,31 @@ async function openProductForm(id=null) {
       </div>
     </div>
 
+    ${id?`
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase">
+          Product Item List (komponen tes — untuk panel multi-parameter)
+        </div>
+        <button class="btn btn-ghost btn-xs" onclick="addProdItem()">+ Add</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">
+        Kolom Specimen di sini menentukan jenis label sampel yang dicetak per komponen — misalnya WBC/RBC/HGB di bawah panel "Hematologi Lengkap" semuanya "BLOOD, WHOLE".
+      </div>
+      <div id="pf-item-table"></div>
+    </div>` : `
+    <div class="status-box status-info" style="margin-top:12px;font-size:11.5px">
+      ℹ️ Simpan produk dulu, lalu buka kembali untuk menambahkan Product Item List (komponen tes per parameter).
+    </div>`}
+
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
       ${id?`<button class="btn btn-outline btn-sm" onclick="closeModalForce();openRefRangeForProduct(${id},'${(p.nama_tes||'').replace(/'/g,"\\'")}')">📊 Ref Range</button>`:''}
       <button class="btn btn-teal" onclick="saveProduct(${id||'null'})">💾 Simpan</button>
-    </div>`);
+    </div>`,'wide');
 
   calcProdMargin();
+  if (id) renderProductItemTable();
 }
 
 function calcProdMargin() {
@@ -335,8 +428,14 @@ async function saveProduct(id) {
   };
 
   try {
+    let productId = id;
     if (id) { await sbPatch('products',id,payload); toast('✅ Produk diupdate','ok'); }
-    else    { await sbPost('products',payload);     toast('✅ Produk ditambahkan','ok'); }
+    else    {
+      const created = await sbPost('products',payload);
+      productId = created?.[0]?.id || created?.id;
+      toast('✅ Produk ditambahkan','ok');
+    }
+    if (productId && prodItemState.length) await saveProductItems(productId);
     closeModalForce();
     await loadProducts();
   } catch(e) { toast('❌ '+e.message,'err'); }

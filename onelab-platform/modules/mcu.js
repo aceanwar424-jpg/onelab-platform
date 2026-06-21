@@ -1467,8 +1467,146 @@ async function saveRAB(projectId) {
   } catch(e) { toast('❌ '+e.message,'err'); }
 }
 
-function printRAB(projectId) {
-  toast('🖨 Fitur print sedang dikembangkan','info');
+async function printRAB(projectId) {
+  toast('⏳ Menyiapkan RAB untuk print...','info',2000);
+
+  const isLiveModalOpen = !!document.getElementById('rab-peserta');
+  let p, peserta, days, margin, mg, testRows, opsRows, hppTests, hppOps, hppOpsActual;
+
+  try {
+    const d = await sbGet('projects',`select=*&id=eq.${projectId}`);
+    p = d?.[0];
+    if (!p) { toast('❌ Project tidak ditemukan','err'); return; }
+
+    if (isLiveModalOpen) {
+      // Read live unsaved form state — gives an accurate printout even before clicking "Simpan"
+      peserta = parseInt(document.getElementById('rab-peserta')?.value||p.target_participants||100);
+      days    = parseInt(document.getElementById('rab-days')?.value||p.rab_days||1);
+      margin  = parseFloat(document.getElementById('rab-margin')?.value||p.rab_margin_pct||30);
+      mg      = parseInt(document.getElementById('rab-mg')?.value||p.minimum_guarantee||0);
+
+      testRows = rabParams.selectedTests.map(t=>{
+        const qty = (t.qty||1) * (t.perPeserta ? peserta : 1);
+        return { name:t.name, kategori:t.kat||'—', uom:'UNT', qty, harga:t.hpp||0, total:(t.hpp||0)*qty };
+      });
+      hppTests = testRows.reduce((s,t)=>s+t.total,0);
+
+      opsRows = []; hppOps = 0; hppOpsActual = 0;
+      document.querySelectorAll('.rab-price').forEach(priceEl=>{
+        const key   = priceEl.dataset.key;
+        const name  = priceEl.dataset.name;
+        const price = parseFloat(priceEl.value||0);
+        const planEl= document.querySelector(`.rab-qty-plan[data-key="${key}"]`);
+        const actEl = document.querySelector(`.rab-qty-actual[data-key="${key}"]`);
+        const qtyP  = parseFloat(planEl?.value||0);
+        const qtyA  = parseFloat(actEl?.value||0);
+        if (qtyP > 0 || qtyA > 0) {
+          const total = price*qtyP, totalA = price*qtyA;
+          hppOps += total; hppOpsActual += totalA;
+          opsRows.push({
+            name, uom:priceEl.dataset.uom||'UNT', source:priceEl.dataset.source||'—', scheme:priceEl.dataset.scheme||'—',
+            harga:price, qtyPlan:qtyP, qtyActual:qtyA, total, totalActual:totalA,
+          });
+        }
+      });
+    } else {
+      // Fallback: read the last-saved version from rab_items
+      const items = await sbGet('rab_items',`select=*&project_id=eq.${projectId}`).catch(()=>[]);
+      peserta = p.target_participants||100;
+      days    = p.rab_days||1;
+      margin  = p.rab_margin_pct||30;
+      mg      = p.minimum_guarantee||0;
+
+      testRows = (items||[]).filter(r=>r.category==='LAB_TEST').map(r=>({
+        name:r.item_name, kategori:(r.notes||'').split('|')[0]||'—', uom:r.unit||'UNT',
+        qty:r.qty||0, harga:r.unit_price||0, total:r.total_price||0,
+      }));
+      opsRows = (items||[]).filter(r=>r.category!=='LAB_TEST').map(r=>{
+        const [source,scheme] = (r.notes||'').split('|');
+        return { name:r.item_name, uom:r.unit||'UNT', source:source||'—', scheme:scheme||'—',
+          harga:r.unit_price||0, qtyPlan:r.qty||0, qtyActual:r.qty_actual||0,
+          total:r.total_price||0, totalActual:r.total_actual||0 };
+      });
+      hppTests = testRows.reduce((s,t)=>s+t.total,0);
+      hppOps = opsRows.reduce((s,o)=>s+o.total,0);
+      hppOpsActual = opsRows.reduce((s,o)=>s+o.totalActual,0);
+
+      if (!testRows.length && !opsRows.length) {
+        toast('⚠️ RAB belum pernah disimpan untuk project ini','warn',4000);
+        return;
+      }
+    }
+  } catch(e) {
+    toast('❌ Gagal menyiapkan data RAB: '+e.message,'err',6000);
+    console.error('[printRAB] Failed:', e);
+    return;
+  }
+
+  const hppTotal    = hppTests + hppOps;
+  const hargaJual   = margin < 100 ? hppTotal / (1 - margin/100) : hppTotal;
+  const hargaPerPes = peserta > 0 ? hargaJual / peserta : 0;
+  const grossMargin = hargaJual - hppTotal;
+  const grossMarginPct = hargaJual > 0 ? (grossMargin/hargaJual*100).toFixed(1) : 0;
+  const mgValue     = mg > 0 ? mg * hargaPerPes : 0;
+
+  // Group ops rows by source (mirrors the on-screen STEP 3 grouping)
+  const opsBySource = {};
+  opsRows.forEach(o => { (opsBySource[o.source] = opsBySource[o.source]||[]).push(o); });
+
+  const w = window.open('','_blank');
+  w.document.write(`
+    <html><head><title>RAB — ${p.project_name}</title>
+    <style>
+      body{font-family:Arial,sans-serif;font-size:11px;padding:20px;color:#1E293B}
+      h2{margin-bottom:2px} .sub{color:#666;margin-bottom:16px;font-size:12px}
+      table{width:100%;border-collapse:collapse;margin-bottom:14px}
+      th,td{border:1px solid #ccc;padding:5px 8px;text-align:left}
+      th{background:#f1f5f9} .r{text-align:right} .c{text-align:center}
+      .section{font-weight:700;font-size:12.5px;color:#0891B2;text-transform:uppercase;margin:16px 0 6px}
+      .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+      .sumcard{border:1px solid #ddd;border-radius:6px;padding:10px}
+      .sumcard .lbl{font-size:10px;color:#777} .sumcard .val{font-size:14px;font-weight:700}
+      .total-row{font-weight:700;background:#f8fafc}
+      .sign{margin-top:40px;display:flex;justify-content:space-between}
+      .sign div{width:200px;text-align:center;border-top:1px solid #333;padding-top:4px}
+    </style></head><body>
+    <h2>💰 RAB (Rencana Anggaran Biaya) — ${p.project_name}</h2>
+    <div class="sub">${p.partner_name||'—'} · ${peserta} peserta · ${days} hari · Dicetak: ${new Date().toLocaleString('id-ID')}</div>
+
+    <div class="summary">
+      <div class="sumcard"><div class="lbl">TOTAL HPP (Pengeluaran)</div><div class="val">${formatCurrency(hppTotal)}</div></div>
+      <div class="sumcard"><div class="lbl">HARGA JUAL (Pemasukan)</div><div class="val">${formatCurrency(hargaJual)}</div></div>
+      <div class="sumcard"><div class="lbl">GROSS MARGIN</div><div class="val">${formatCurrency(grossMargin)} (${grossMarginPct}%)</div></div>
+      <div class="sumcard"><div class="lbl">HARGA / PESERTA</div><div class="val">${formatCurrency(hargaPerPes)}</div></div>
+      <div class="sumcard"><div class="lbl">NILAI MG (${mg} peserta)</div><div class="val">${formatCurrency(mgValue)}</div></div>
+      <div class="sumcard"><div class="lbl">TARGET MARGIN</div><div class="val">${margin}%</div></div>
+    </div>
+
+    <div class="section">Step 1 — Parameter Tes (HPP Lab)</div>
+    <table><thead><tr><th>Nama Tes</th><th>Kategori</th><th class="c">UoM</th><th class="c">Qty</th><th class="r">HPP Satuan</th><th class="r">Total</th></tr></thead>
+    <tbody>
+      ${testRows.map(t=>`<tr><td>${t.name}</td><td>${t.kategori}</td><td class="c">${t.uom}</td><td class="c">${t.qty}</td><td class="r">${formatCurrency(t.harga)}</td><td class="r">${formatCurrency(t.total)}</td></tr>`).join('')}
+      <tr class="total-row"><td colspan="5">TOTAL HPP TES</td><td class="r">${formatCurrency(hppTests)}</td></tr>
+    </tbody></table>
+
+    <div class="section">Step 3 — Biaya Operasional (per Sumber Dana)</div>
+    ${Object.entries(opsBySource).map(([source, rows])=>{
+      const subTotal = rows.reduce((s,o)=>s+o.total,0);
+      return `<table><thead><tr><th colspan="7" style="background:#0891B2;color:#fff">${source}</th></tr>
+        <tr><th>Item</th><th class="c">UoM</th><th>Skema</th><th class="r">Harga</th><th class="c">Qty Plan</th><th class="c">Qty Aktual</th><th class="r">Total Plan</th></tr></thead>
+        <tbody>
+          ${rows.map(o=>`<tr><td>${o.name}</td><td class="c">${o.uom}</td><td>${o.scheme}</td><td class="r">${formatCurrency(o.harga)}</td><td class="c">${o.qtyPlan}</td><td class="c">${o.qtyActual}</td><td class="r">${formatCurrency(o.total)}</td></tr>`).join('')}
+          <tr class="total-row"><td colspan="6">Subtotal ${source}</td><td class="r">${formatCurrency(subTotal)}</td></tr>
+        </tbody></table>`;
+    }).join('')}
+    <table><tbody><tr class="total-row"><td style="width:80%">TOTAL HPP OPERASIONAL</td><td class="r">${formatCurrency(hppOps)}</td></tr></tbody></table>
+
+    <div class="sign">
+      <div>Disusun oleh<br><br><br>${getUserName?getUserName():'_______________'}</div>
+      <div>Disetujui oleh<br><br><br>Head of Operations</div>
+    </div>
+    <script>window.print()</script></body></html>`);
+  w.document.close();
 }
 
 // ══════════════════════════════════════════════════════════════

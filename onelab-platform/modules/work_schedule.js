@@ -518,7 +518,7 @@ const SHIFT_COLORS_CAL = {P1:'#0891B2',P2:'#7C3AED',P3:'#059669',OH:'#F59E0B',ML
 async function renderShiftCalendar() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-header">
-      <div><h1>📅 Kalender Shift</h1><p>Klik tanggal → set shift. Pilih shift dulu di panel atas.</p></div>
+      <div><h1>📅 Kalender Shift</h1><p>Klik tanggal → set shift. Pilih shift dulu di panel atas. Simpan otomatis menambahkan karyawan ke Daftar Jadwal jika belum ada.</p></div>
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" onclick="renderWorkSchedule()">← Daftar</button>
         <button class="btn btn-teal btn-sm" onclick="seedOKRTasks()">📥 Import OKR Tasks (164)</button>
@@ -699,30 +699,94 @@ async function saveCalendarShifts() {
   const empName = calendarState.selectedEmpName;
   const entries = Object.entries(calendarState.assignments);
   if (!entries.length) { toast('Tidak ada data untuk disimpan','warn'); return; }
-  let saved=0, errs=0, lastError=null;
-  for (const [date, shift] of entries) {
-    try {
-      const leaveMap = {C:'Cuti',S:'Sakit',I:'Izin'};
-      const isLeave  = ['C','S','I'].includes(shift);
-      const ex = await sbGet('attendance',
-        `select=id&employee_id=eq.${empId}&tanggal=eq.${date}&limit=1`);
-      const payload = {
-        employee_id:   empId,
-        employee_name: empName,
-        tanggal:       date,
-        shift_code:    isLeave ? null : shift,
-        leave_type:    isLeave ? leaveMap[shift] : null,
-        updated_at:    new Date().toISOString(),
-      };
-      if (ex[0]?.id) await sbPatch('attendance', ex[0].id, payload);
-      else await sbPost('attendance', {...payload, created_at: new Date().toISOString()});
-      saved++;
-    } catch(e) { errs++; lastError = e.message; console.error('[saveCalendarShifts]', date, e); }
+
+  toast(`⏳ Menyimpan ${entries.length} tanggal...`,'info',3000);
+
+  // Batch fetch ALL existing records for this employee+month in ONE query,
+  // instead of one query per date (this was the main cause of slowness).
+  const y = calendarState.year, m = calendarState.month;
+  const startDate = `${y}-${String(m+1).padStart(2,'0')}-01`;
+  const lastDay   = new Date(y, m+1, 0).getDate();
+  const endDate   = `${y}-${String(m+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  let existingMap = {};
+  try {
+    const existing = await sbGet('attendance',
+      `select=id,tanggal&employee_id=eq.${empId}&tanggal=gte.${startDate}&tanggal=lte.${endDate}`);
+    (existing||[]).forEach(r => { existingMap[r.tanggal] = r.id; });
+  } catch(e) {
+    toast(`❌ Gagal membaca data existing: ${e.message} — kemungkinan tabel attendance belum di-migrate, jalankan supabase_attendance.sql`, 'err', 7000);
+    console.error('[saveCalendarShifts] Batch fetch failed:', e);
+    return;
   }
-  if (errs && saved === 0) {
-    toast(`❌ Gagal simpan semua (${errs} tanggal). Error: ${lastError||'unknown'} — kemungkinan tabel attendance belum di-migrate, jalankan supabase_attendance.sql`, 'err', 7000);
+
+  // Write all dates in parallel instead of sequential await-in-loop.
+  const leaveMap = {C:'Cuti',S:'Sakit',I:'Izin'};
+  const results = await Promise.allSettled(entries.map(([date, shift]) => {
+    const isLeave = ['C','S','I'].includes(shift);
+    const payload = {
+      employee_id:   empId,
+      employee_name: empName,
+      tanggal:       date,
+      shift_code:    isLeave ? null : shift,
+      leave_type:    isLeave ? leaveMap[shift] : null,
+      updated_at:    new Date().toISOString(),
+    };
+    const existingId = existingMap[date];
+    return existingId
+      ? sbPatch('attendance', existingId, payload)
+      : sbPost('attendance', {...payload, created_at: new Date().toISOString()});
+  }));
+
+  const saved = results.filter(r => r.status==='fulfilled').length;
+  const errs  = results.filter(r => r.status==='rejected');
+  if (errs.length) console.error('[saveCalendarShifts] Failed dates:', errs.map(e=>e.reason?.message));
+
+  if (errs.length && saved === 0) {
+    toast(`❌ Gagal simpan semua (${errs.length} tanggal). Error: ${errs[0]?.reason?.message||'unknown'}`, 'err', 7000);
   } else {
-    toast(`✅ ${saved} tanggal disimpan${errs?` · ${errs} gagal`:''}`, errs?'warn':'ok');
+    toast(`✅ ${saved} tanggal disimpan${errs.length?` · ${errs.length} gagal`:''}`, errs.length?'warn':'ok');
+  }
+
+  // Always refresh from DB after saving — this is the actual source of truth.
+  // Without this, the grid kept showing local state even when a save failed,
+  // which looked like "data lama masih ke-record" even after a successful click.
+  await selectCalEmp(empId, empName);
+
+  // Bridge to Daftar Jadwal (work_schedules) — without this, saving shifts here
+  // never shows up in the schedule list page because they're two separate tables
+  // with no link between them. Auto-create a work_schedules row using the most
+  // common shift code from what was just saved, only if the employee doesn't
+  // already have an active schedule entry.
+  if (saved > 0) {
+    try {
+      const hasSchedule = await sbGet('work_schedules',
+        `select=id&employee_id=eq.${empId}&is_active=eq.true&limit=1`);
+      if (!hasSchedule?.length) {
+        const codeCounts = {};
+        entries.forEach(([,shift]) => {
+          if (!['C','S','I','OFF'].includes(shift)) codeCounts[shift] = (codeCounts[shift]||0)+1;
+        });
+        const topCode = Object.entries(codeCounts).sort((a,b)=>b[1]-a[1])[0]?.[0];
+        const tmpl = SHIFT_TEMPLATES.find(t=>t.code===topCode);
+        if (tmpl) {
+          await sbPost('work_schedules', {
+            employee_id: empId,
+            shift_name:  tmpl.name,
+            jam_masuk:   tmpl.masuk_wd,
+            jam_pulang:  tmpl.pulang_wd,
+            is_cross_midnight: !!tmpl.cross,
+            hari_kerja:  JSON.stringify(tmpl.hari),
+            is_active:   true,
+            notes:       'Auto-generated dari Kalender Shift',
+            created_by:  getUserName?getUserName():'System',
+          });
+          toast(`📋 ${empName} otomatis ditambahkan ke Daftar Jadwal (${tmpl.name})`, 'info', 4000);
+        }
+      }
+    } catch(e) {
+      console.error('[saveCalendarShifts] Bridge to work_schedules failed:', e);
+      // Non-fatal — calendar save itself already succeeded, this is a secondary convenience step
+    }
   }
 }
 
