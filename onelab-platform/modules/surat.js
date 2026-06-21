@@ -115,7 +115,7 @@ async function renderSurat() {
                 ${TEMPLATE_VARS.map((v,i)=>`
                   <tr style="background:${i%2===0?'#fff':'#F8FAFC'}">
                     <td style="padding:7px 10px;font-family:monospace;color:var(--teal);font-weight:700">
-                      {{${v.key}}}
+                      [[${v.key}]]
                     </td>
                     <td style="padding:7px 10px;color:var(--gray)">${v.label}</td>
                     <td style="padding:7px 10px;color:var(--text)">${v.example}</td>
@@ -125,14 +125,21 @@ async function renderSurat() {
           </div>
           <div style="background:#FFF8E1;border-radius:8px;padding:12px 14px;font-size:12px;color:#5D4037">
             <strong>Contoh penggunaan di Word:</strong><br>
-            "Kepada Yth. <strong>{{PIC_TUJUAN}}</strong><br>
-            <strong>{{NAMA_TUJUAN}}</strong><br>
-            <strong>{{ALAMAT_TUJUAN}}</strong>"<br><br>
+            "Kepada Yth. <strong>[[PIC_TUJUAN]]</strong><br>
+            <strong>[[NAMA_TUJUAN]]</strong><br>
+            <strong>[[ALAMAT_TUJUAN]]</strong>"<br><br>
             Setelah generate, teks ini akan otomatis terisi dengan data yang Anda input.
           </div>
           <div style="margin-top:14px;padding:12px 14px;background:#E3F2FD;border-radius:8px;font-size:12px;color:#0D47A1">
             <strong>💡 Tips:</strong> Simpan template dalam format <strong>.docx</strong> (bukan .doc).
             Setelah upload, template bisa digunakan berkali-kali — tinggal ganti tujuan dan tanggal.
+            Gunakan tanda kurung siku ganda <strong>[[ ]]</strong>, bukan kurung kurawal <strong>{{ }}</strong> —
+            format kurung kurawal punya bug yang menyebabkan error "Duplicate tag" pada beberapa kasus.
+          </div>
+          <div style="margin-top:14px;padding:12px 14px;background:#FEF2F2;border-radius:8px;font-size:12px;color:#991B1B">
+            <strong>⚠️ Punya template lama dengan format {{NAMA}}?</strong><br><br>
+            Buka file Word-nya, gunakan Find &amp; Replace (Ctrl+H): ganti semua <strong>{{</strong> menjadi <strong>[[</strong>,
+            lalu ganti semua <strong>}}</strong> menjadi <strong>]]</strong>. Simpan, lalu upload ulang.
           </div>
         </div>
       </div>
@@ -537,6 +544,12 @@ async function generateDocx(id, data, templateUrl) {
       paragraphLoop: true,
       linebreaks: true,
       nullGetter: () => '',
+      // IMPORTANT: explicit [[ ]] delimiters instead of default {{ }}.
+      // The default {{ }} delimiter has a confirmed lexer bug in this version
+      // of docxtemplater that throws false "Duplicate open/close tag" errors
+      // even on perfectly valid templates (reproduced on a minimal hand-built
+      // test file with a single placeholder). [[ ]] avoids this entirely.
+      delimiters: { start: '[[', end: ']]' },
     });
 
     // Build variables
@@ -582,12 +595,28 @@ async function generateDocx(id, data, templateUrl) {
   } catch(e) {
     console.error('[generateDocx] Failed:', e);
     let hint = e.message;
-    if (e.message?.includes('Multi error') || e.properties?.errors) {
-      // Docxtemplater template syntax error — usually wrong {{VARIABEL}} naming
-      hint = 'Template DOCX punya placeholder tidak valid. Pastikan pakai format {{NO_SURAT}}, {{TANGGAL}}, {{PERIHAL}}, dst (lihat panduan placeholder di form template).';
+
+    // Try to extract the specific broken tag name from docxtemplater's detailed
+    // error list, so the user knows exactly which placeholder to fix in Word.
+    let brokenTagInfo = '';
+    const errList = e.properties?.errors || (Array.isArray(e.errors) ? e.errors : null);
+    if (errList?.length) {
+      const tagNames = errList
+        .map(err => err.properties?.context || err.properties?.xtag)
+        .filter(Boolean);
+      if (tagNames.length) brokenTagInfo = ` Tag bermasalah: "${tagNames.join('", "')}".`;
     }
-    toast('❌ Gagal generate DOCX: '+hint,'err',8000);
-    if (confirm('Gagal generate dari template DOCX.\n\nError: ' + hint + '\n\nTampilkan preview HTML sebagai gantinya?')) {
+
+    if (e.message?.includes('Duplicate') || errList?.some(err=>err.name==='TemplateError'&&/duplicate/i.test(err.message||''))) {
+      hint = `Template ini masih pakai format placeholder lama {{NAMA}}.${brokenTagInfo} Format kurung kurawal punya bug — sistem sekarang pakai format [[NAMA]] (kurung siku ganda). `
+           + `Buka file Word, ganti semua {{ jadi [[ dan }} jadi ]] (pakai Find & Replace Ctrl+H), simpan, lalu upload ulang. `
+           + `Lihat tab Panduan untuk detail.`;
+    } else if (e.message?.includes('Multi error') || e.properties?.errors) {
+      // Docxtemplater template syntax error — usually wrong [[VARIABEL]] naming
+      hint = `Template DOCX punya placeholder tidak valid.${brokenTagInfo} Pastikan pakai format [[NO_SURAT]], [[TANGGAL]], [[PERIHAL]], dst (lihat panduan placeholder di tab Panduan).`;
+    }
+    toast('❌ Gagal generate DOCX: '+hint,'err',9000);
+    if (confirm('Gagal generate dari template DOCX.\n\nError: ' + hint + '\n\nTampilkan layout cadangan generik sebagai gantinya? (Catatan: ini BUKAN tampilan dari file Word asli Anda, hanya placeholder darurat)')) {
       previewSuratHTMLDirect(data);
     }
   }
@@ -701,12 +730,14 @@ function previewSuratHTMLDirect(s) {
   toast('⚠️ Popup diblokir browser — preview ditampilkan di dalam halaman','warn',4000);
   openModal(`
     <div class="modal-header">
-      <div class="modal-title">📄 Preview Surat (Popup Diblokir)</div>
+      <div class="modal-title">📄 Preview Generik (Bukan Template Asli)</div>
       <button class="modal-close" onclick="closeModalForce()">✕</button>
     </div>
     <div class="status-box status-warn" style="margin-bottom:10px;font-size:12px">
-      ⚠️ Browser memblokir popup window. Untuk fitur Print, izinkan popup untuk domain ini di pengaturan browser,
-      lalu klik "Buka di Tab Baru" di bawah.
+      ⚠️ Ini adalah <strong>layout cadangan generik</strong>, BUKAN rendering dari file Word/DOCX yang Anda upload.
+      Tampilan ini hanya jalan darurat saat generate dari template asli gagal — desainnya tidak akan sama
+      dengan template Word Anda. Browser juga memblokir popup, jadi tampil di dalam halaman ini.
+      Untuk fitur Print, izinkan popup untuk domain ini di pengaturan browser, lalu klik "Buka di Tab Baru" di bawah.
     </div>
     <div style="border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow:auto">
       <iframe id="surat-preview-iframe" style="width:100%;height:60vh;border:none"></iframe>
