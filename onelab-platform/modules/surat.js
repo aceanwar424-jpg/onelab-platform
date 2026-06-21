@@ -616,23 +616,46 @@ function loadDocxLibraries() {
   return new Promise((resolve, reject) => {
     if(window.PizZip && window.docxtemplater){ resolve(); return; }
 
-    // Safety net: if CDN scripts never fire onload/onerror (e.g. silently
-    // blocked by network policy), don't hang forever — fail visibly instead.
+    // Safety net: if scripts never fire onload/onerror, don't hang forever.
     const timeoutId = setTimeout(() => {
-      reject(new Error('Timeout memuat library DOCX (CDN tidak merespons dalam 10 detik). Cek koneksi internet atau apakah cdnjs.cloudflare.com diblokir oleh firewall/network settings.'));
+      reject(new Error('Timeout memuat library DOCX (10 detik). Cek apakah folder /vendor/ ter-deploy dengan benar.'));
     }, 10000);
 
-    const s1 = document.createElement('script');
-    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js';
-    s1.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat PizZip dari CDN (cdnjs.cloudflare.com). Cek koneksi internet atau apakah domain ini diblokir.')); };
-    s1.onload = () => {
-      const s2 = document.createElement('script');
-      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.12/docxtemplater.js';
-      s2.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat Docxtemplater dari CDN (cdnjs.cloudflare.com). Cek koneksi internet atau apakah domain ini diblokir.')); };
-      s2.onload = () => { clearTimeout(timeoutId); resolve(); };
-      document.head.appendChild(s2);
-    };
-    document.head.appendChild(s1);
+    // Bundled locally — no external CDN dependency, so this works even when
+    // cdnjs.cloudflare.com (or any external CDN) is blocked by firewall/network
+    // policy. This was the root cause of "Gagal memuat PizZip dari CDN" errors.
+    const localBase = 'vendor/';
+    const cdnBase = 'https://cdnjs.cloudflare.com/ajax/libs/';
+    let triedFallback = false;
+
+    function loadScript(src, onSuccess, onFail) {
+      const tag = document.createElement('script');
+      tag.src = src;
+      tag.onerror = onFail;
+      tag.onload = onSuccess;
+      document.head.appendChild(tag);
+    }
+
+    function loadPizZip(useFallback) {
+      const src = useFallback ? cdnBase+'pizzip/3.1.4/pizzip.min.js' : localBase+'pizzip.min.js';
+      loadScript(src, loadDocxtemplater, () => {
+        if (!useFallback) { loadPizZip(true); return; } // try CDN as fallback
+        clearTimeout(timeoutId);
+        reject(new Error('Gagal memuat PizZip baik dari lokal (/vendor/) maupun CDN cdnjs.cloudflare.com. Cek deployment atau koneksi internet.'));
+      });
+    }
+
+    function loadDocxtemplater(useFallback) {
+      useFallback = useFallback === true || triedFallback;
+      const src = useFallback ? cdnBase+'docxtemplater/3.37.12/docxtemplater.js' : localBase+'docxtemplater.min.js';
+      loadScript(src, () => { clearTimeout(timeoutId); resolve(); }, () => {
+        if (!useFallback) { triedFallback = true; loadDocxtemplater(true); return; }
+        clearTimeout(timeoutId);
+        reject(new Error('Gagal memuat Docxtemplater baik dari lokal (/vendor/) maupun CDN cdnjs.cloudflare.com. Cek deployment atau koneksi internet.'));
+      });
+    }
+
+    loadPizZip(false);
   });
 }
 
@@ -652,6 +675,72 @@ function previewSuratHTML() {
 }
 
 function previewSuratHTMLDirect(s) {
+  const html = buildSuratPreviewHTML(s);
+
+  // Try opening as a popup window first (lets the user print/save as PDF easily).
+  // If the browser/extension blocks it, window.open returns null instead of
+  // throwing — that null was previously crashing on w.document.write with
+  // "Cannot read properties of null (reading 'document')". Fall back to an
+  // in-page modal instead of failing silently.
+  let w = null;
+  try { w = window.open('','_blank','width=900,height=700'); } catch(e) { w = null; }
+
+  if (w) {
+    try {
+      w.document.write(html);
+      w.document.close();
+      return;
+    } catch(e) {
+      console.error('[previewSuratHTMLDirect] Popup write failed:', e);
+      // fall through to inline modal below
+    }
+  }
+
+  // Popup blocked or failed — show inline instead, with a clear explanation
+  // and a manual "open as popup" retry button.
+  toast('⚠️ Popup diblokir browser — preview ditampilkan di dalam halaman','warn',4000);
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">📄 Preview Surat (Popup Diblokir)</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="status-box status-warn" style="margin-bottom:10px;font-size:12px">
+      ⚠️ Browser memblokir popup window. Untuk fitur Print, izinkan popup untuk domain ini di pengaturan browser,
+      lalu klik "Buka di Tab Baru" di bawah.
+    </div>
+    <div style="border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow:auto">
+      <iframe id="surat-preview-iframe" style="width:100%;height:60vh;border:none"></iframe>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Tutup</button>
+      <button class="btn btn-teal" onclick="retryOpenSuratPreviewPopup()">↗️ Coba Buka di Tab Baru</button>
+    </div>`,'wide');
+
+  // Render the same HTML into the iframe so the user can still see/print it
+  window.__lastSuratPreviewHTML = html;
+  setTimeout(() => {
+    const iframe = document.getElementById('surat-preview-iframe');
+    if (iframe) {
+      const doc = iframe.contentWindow.document;
+      doc.open(); doc.write(html); doc.close();
+    }
+  }, 50);
+}
+
+function retryOpenSuratPreviewPopup() {
+  const html = window.__lastSuratPreviewHTML;
+  if (!html) return;
+  const w = window.open('','_blank','width=900,height=700');
+  if (!w) {
+    toast('❌ Popup masih diblokir — izinkan popup untuk domain ini di pengaturan browser (ikon 🚫 di address bar)','err',6000);
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
+  closeModalForce();
+}
+
+function buildSuratPreviewHTML(s) {
   const tLabel  = LETTER_TYPES.find(t=>t.key===s.letter_type)?.label||s.letter_type||'';
   const dateStr = s.letter_date
     ? new Date(s.letter_date).toLocaleDateString('id-ID',
@@ -660,8 +749,7 @@ function previewSuratHTMLDirect(s) {
                    'Juli','Agustus','September','Oktober','November','Desember']
                    [new Date().getMonth()];
 
-  const w = window.open('','_blank','width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>${s.doc_number}</title>
     <style>
       @page{size:A4;margin:2.5cm 2.5cm 2.5cm 3cm}
@@ -713,8 +801,7 @@ function previewSuratHTMLDirect(s) {
       <div class="sig-line">${s.signer||s.created_by_name||'Pimpinan'}<br>
       <span style="font-size:10pt;font-weight:normal">${s.signer_jabatan||'Head of Operations'}</span></div>
     </div>
-    </body></html>`);
-  w.document.close();
+    </body></html>`;
 }
 
 // ── Templates ─────────────────────────────────────
