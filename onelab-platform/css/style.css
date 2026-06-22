@@ -1461,3 +1461,10 @@ select { cursor: pointer; }
 /* ── Utility text colors (used by Inventory module) ──── */
 .text-red { color: #DC2626; }
 .text-green { color: #16A34A; }
+
+/* ── DOCX Preview Modal ────────────────────────────── */
+.modal-box.docx-preview-modal { max-width: 900px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+#docx-preview-container { flex: 1; overflow-y: auto; background: #e8e8e8; }
+/* docx-preview renders pages as divs with class .docx; style them as A4 pages */
+#docx-preview-container .docx-wrapper { background: #e8e8e8; padding: 20px; }
+#docx-preview-container .docx { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin: 0 auto 16px; }

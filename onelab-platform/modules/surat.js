@@ -19,14 +19,16 @@ const LETTER_TYPES = [
 const ORG = {
   name:  'OneLab Diagnostics by Plebo',
   addr:  'Bintaro Jaya, Jl. Elang Raya No.15, Pd. Pucung, Kec. Pd. Aren, Kota Tangerang Selatan',
+  city:  'Tangerang Selatan',
   phone: '(021) xxxx-xxxx',
   email: 'info@onelab.id',
 };
 
 // Variabel yang bisa dipakai di template DOCX
 const TEMPLATE_VARS = [
-  { key:'NO_SURAT',       label:'Nomor Surat',         example:'001/SP/OL/VI/2026' },
+  { key:'NO_SURAT',       label:'Nomor Surat',         example:'001/SP/OPS/OL/VI/2026' },
   { key:'TANGGAL',        label:'Tanggal Surat',        example:'13 Juni 2026' },
+  { key:'TANGGAL_KOTA',   label:'Tanggal + Kota',       example:'Tangerang Selatan, 13 Juni 2026' },
   { key:'PERIHAL',        label:'Perihal / Judul',      example:'Penawaran Kerjasama' },
   { key:'NAMA_TUJUAN',    label:'Nama Perusahaan',      example:'PT. Contoh Maju' },
   { key:'ALAMAT_TUJUAN',  label:'Alamat Tujuan',        example:'Jl. Contoh No.1' },
@@ -52,6 +54,7 @@ async function renderSurat() {
     <div class="tabs" id="surat-tabs">
       <button class="tab-btn active" onclick="switchSuratTab('list',this)">📋 Arsip Surat</button>
       <button class="tab-btn" onclick="switchSuratTab('templates',this)">📄 Template Surat</button>
+      <button class="tab-btn" onclick="switchSuratTab('numbering',this)">⚙️ Pengaturan Nomor</button>
       <button class="tab-btn" onclick="switchSuratTab('panduan',this)">❓ Panduan</button>
     </div>
 
@@ -87,6 +90,62 @@ async function renderSurat() {
       <div id="templates-grid"
         style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
         <div class="loading-row"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Pengaturan Nomor -->
+    <div id="tab-numbering" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:4px">🔢 Format Penomoran Surat</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px">
+            Susun urutan token sesuai kebutuhan, dipisah tanda "/". Klik token untuk menambahkan ke akhir format.
+          </div>
+          <div class="form-group">
+            <label>Format Template</label>
+            <input type="text" id="nf-template" style="font-family:monospace;font-size:13px">
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px">
+            ${NUMBER_FORMAT_TOKENS.map(t=>`
+              <button class="btn btn-ghost btn-xs" onclick="addNumberFormatToken('${t.token}')"
+                style="font-family:monospace;font-size:11px" title="${t.label}">${t.token}</button>`).join('')}
+          </div>
+          <div class="status-box status-info" style="font-size:12px;margin-bottom:14px">
+            <strong>Preview:</strong> <span id="nf-preview" style="font-family:monospace;font-weight:700"></span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kode Organisasi</label>
+              <input type="text" id="nf-orgcode" placeholder="OL" style="font-family:monospace">
+            </div>
+            <div class="form-group">
+              <label>Kota (untuk Tanggal+Kota)</label>
+              <input type="text" id="nf-orgcity" placeholder="Tangerang Selatan">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Reset Nomor Urut</label>
+            <select id="nf-reset">
+              <option value="monthly">Setiap Bulan</option>
+              <option value="yearly">Setiap Tahun</option>
+              <option value="never">Tidak Pernah (terus naik)</option>
+            </select>
+          </div>
+          <button class="btn btn-teal" style="width:100%;margin-top:8px" onclick="saveNumberFormat()">💾 Simpan Format</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <div class="card-title">🏢 Departemen</div>
+            <button class="btn btn-ghost btn-xs" onclick="openDeptForm()">+ Tambah</button>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px">
+            Setiap departemen punya kode sendiri untuk dipakai di token {DEPT}.
+          </div>
+          <div id="dept-list"><div class="loading-row"><div class="spinner"></div></div></div>
+        </div>
+
       </div>
     </div>
 
@@ -140,6 +199,21 @@ async function renderSurat() {
             <strong>⚠️ Punya template lama dengan format {{NAMA}}?</strong><br><br>
             Buka file Word-nya, gunakan Find &amp; Replace (Ctrl+H): ganti semua <strong>{{</strong> menjadi <strong>[[</strong>,
             lalu ganti semua <strong>}}</strong> menjadi <strong>]]</strong>. Simpan, lalu upload ulang.
+          </div>
+          <div style="margin-top:14px;padding:12px 14px;background:#F0FDF4;border-radius:8px;font-size:12px;color:#166534">
+            <strong>📄 Setup Download PDF (sekali saja)</strong><br><br>
+            Tombol "Download PDF" (ikon 📄 di Arsip Surat) butuh setup satu kali di Supabase:
+            <ol style="margin:6px 0 0 18px;padding:0">
+              <li>Daftar akun gratis di <strong>convertapi.com</strong>, ambil API token dari dashboard mereka</li>
+              <li>Di dashboard Supabase: <strong>Edge Functions</strong> → "Deploy a new function" → "Via Editor"</li>
+              <li>Beri nama function: <strong>docx-to-pdf</strong>, lalu paste kode dari file
+                <code>supabase/functions/docx-to-pdf/index.ts</code> (ada di paket project)</li>
+              <li>Klik Deploy</li>
+              <li>Di <strong>Settings → Edge Functions → Secrets</strong>, tambahkan secret baru:
+                key <code>CONVERTAPI_TOKEN</code>, value token dari ConvertAPI</li>
+            </ol>
+            Setelah itu, Download PDF akan menghasilkan file pixel-perfect sesuai desain template Word Anda.
+            Token API tersimpan aman di server Supabase, tidak pernah terlihat di browser.
           </div>
         </div>
       </div>
@@ -213,6 +287,7 @@ function renderSuratTable(data) {
             <td>
               <div class="act-row">
                 <button class="act-btn" onclick="regenerateSurat(${s.id})" title="Download DOCX">📥</button>
+                <button class="act-btn" onclick="downloadSuratPDF(${s.id})" title="Download PDF">📄</button>
                 <button class="act-btn edit" onclick="openSuratForm(${s.id})" title="Edit">✏️</button>
                 <button class="act-btn" onclick="updateSuratStatus(${s.id},'Sent')"
                   title="Tandai Terkirim" style="color:#22C55E">✓</button>
@@ -228,34 +303,219 @@ function renderSuratTable(data) {
 function switchSuratTab(tab, btn) {
   document.querySelectorAll('#surat-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['list','templates','panduan'].forEach(t=>{
+  ['list','templates','numbering','panduan'].forEach(t=>{
     const el = document.getElementById(`tab-${t}`);
     if(el) el.style.display = t===tab?'block':'none';
   });
   if(tab==='templates') loadLetterTemplates();
+  if(tab==='numbering') loadNumberingSettings();
 }
 
-// ── Auto Nomor ────────────────────────────────────
-async function generateDocNumber(typeCode) {
+// ── Letter Numbering — Departments, Format Config, Dynamic Generation ──
+let letterDepts = [];
+let letterNumberFormat = null;
+
+async function loadLetterNumberingConfig() {
+  try {
+    [letterDepts, letterNumberFormat] = await Promise.all([
+      sbGet('letter_departments','select=*&is_active=eq.true&order=dept_name').catch(()=>[]),
+      sbGet('letter_number_format','select=*&is_active=eq.true&limit=1').then(d=>d?.[0]).catch(()=>null),
+    ]);
+    if (!letterNumberFormat) {
+      letterNumberFormat = { format_template:'{SEQ}/{TYPE}/{DEPT}/{ORG}/{MONTH_ROMAN}/{YEAR}', org_code:'OL', org_city:'Tangerang Selatan', seq_reset_period:'monthly' };
+    }
+  } catch(e) {
+    letterDepts = [];
+    letterNumberFormat = { format_template:'{SEQ}/{TYPE}/{DEPT}/{ORG}/{MONTH_ROMAN}/{YEAR}', org_code:'OL', org_city:'Tangerang Selatan', seq_reset_period:'monthly' };
+  }
+}
+
+const NUMBER_FORMAT_TOKENS = [
+  { token:'{SEQ}',         label:'Nomor urut (3 digit)',     example:'001' },
+  { token:'{SEQ2}',        label:'Nomor urut (2 digit)',     example:'01' },
+  { token:'{SEQ4}',        label:'Nomor urut (4 digit)',     example:'0001' },
+  { token:'{TYPE}',        label:'Kode tipe surat',          example:'SP' },
+  { token:'{DEPT}',        label:'Kode departemen',          example:'OPS' },
+  { token:'{ORG}',         label:'Kode organisasi',          example:'OL' },
+  { token:'{MONTH}',       label:'Bulan (angka)',            example:'6' },
+  { token:'{MONTH_ROMAN}', label:'Bulan (romawi)',           example:'VI' },
+  { token:'{YEAR}',        label:'Tahun (4 digit)',          example:'2026' },
+  { token:'{YEAR_SHORT}',  label:'Tahun (2 digit)',          example:'26' },
+];
+
+async function generateDocNumber(typeCode, deptCode) {
+  if (!letterNumberFormat) await loadLetterNumberingConfig();
   const now = new Date();
   const yr  = now.getFullYear();
   const mo  = now.getMonth()+1;
   const moR = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mo];
+  const fmt = letterNumberFormat.format_template || '{SEQ}/{TYPE}/{DEPT}/{ORG}/{MONTH_ROMAN}/{YEAR}';
+  const resetPeriod = letterNumberFormat.seq_reset_period || 'monthly';
+  // Sequence key depends on reset period: monthly resets every month, yearly resets every year, never = always increments
+  const seqYear  = yr;
+  const seqMonth = resetPeriod === 'monthly' ? mo : (resetPeriod === 'yearly' ? 0 : -1);
+
   try {
-    const ex = await sbGet('letter_sequences',
-      `select=*&year=eq.${yr}&month=eq.${mo}&type_code=eq.${typeCode}`);
+    const filters = [`year=eq.${seqYear}`, `month=eq.${seqMonth}`, `type_code=eq.${typeCode}`,
+      deptCode ? `dept_code=eq.${deptCode}` : `dept_code=is.null`].join('&');
+    const ex = await sbGet('letter_sequences', `select=*&${filters}`);
     let seq = 1;
     if(ex && ex.length > 0){
       seq = (ex[0].last_seq||0) + 1;
       await sbPatch('letter_sequences', ex[0].id, { last_seq: seq });
     } else {
-      await sbPost('letter_sequences', { year:yr, month:mo, type_code:typeCode, last_seq:1 });
+      await sbPost('letter_sequences', { year:seqYear, month:seqMonth, type_code:typeCode, dept_code:deptCode||null, last_seq:1 });
     }
-    return `${String(seq).padStart(3,'0')}/${typeCode}/OL/${moR}/${yr}`;
+    return applyNumberFormat(fmt, { seq, typeCode, deptCode, orgCode: letterNumberFormat.org_code||'OL', month:mo, monthRoman:moR, year:yr });
   } catch(e) {
-    return `${Date.now().toString().slice(-4)}/${typeCode}/OL/${moR}/${yr}`;
+    return applyNumberFormat(fmt, { seq: parseInt(Date.now().toString().slice(-4)), typeCode, deptCode, orgCode: letterNumberFormat.org_code||'OL', month:mo, monthRoman:moR, year:yr });
   }
 }
+
+function applyNumberFormat(template, { seq, typeCode, deptCode, orgCode, month, monthRoman, year }) {
+  return template
+    .replace(/\{SEQ4\}/g, String(seq).padStart(4,'0'))
+    .replace(/\{SEQ2\}/g, String(seq).padStart(2,'0'))
+    .replace(/\{SEQ\}/g,  String(seq).padStart(3,'0'))
+    .replace(/\{TYPE\}/g, typeCode||'')
+    .replace(/\{DEPT\}/g, deptCode||'')
+    .replace(/\{ORG\}/g,  orgCode||'')
+    .replace(/\{MONTH_ROMAN\}/g, monthRoman||'')
+    .replace(/\{MONTH\}/g, String(month||''))
+    .replace(/\{YEAR_SHORT\}/g, String(year||'').slice(-2))
+    .replace(/\{YEAR\}/g, String(year||''))
+    .replace(/\/\/+/g, '/')   // collapse accidental double slashes (e.g. empty DEPT)
+    .replace(/^\/|\/$/g, ''); // trim leading/trailing slash
+}
+
+// ── Pengaturan Nomor — UI logic ───────────────────────────
+async function loadNumberingSettings() {
+  await loadLetterNumberingConfig();
+  const tplInput = document.getElementById('nf-template');
+  const orgInput = document.getElementById('nf-orgcode');
+  const cityInput = document.getElementById('nf-orgcity');
+  const resetSel = document.getElementById('nf-reset');
+  if (tplInput)  tplInput.value  = letterNumberFormat.format_template || '{SEQ}/{TYPE}/{DEPT}/{ORG}/{MONTH_ROMAN}/{YEAR}';
+  if (orgInput)  orgInput.value  = letterNumberFormat.org_code || 'OL';
+  if (cityInput) cityInput.value = letterNumberFormat.org_city || 'Tangerang Selatan';
+  if (resetSel)  resetSel.value  = letterNumberFormat.seq_reset_period || 'monthly';
+  if (tplInput)  tplInput.oninput = updateNumberFormatPreview;
+  updateNumberFormatPreview();
+  renderDeptList();
+}
+
+function addNumberFormatToken(token) {
+  const input = document.getElementById('nf-template');
+  if (!input) return;
+  input.value = input.value ? `${input.value}/${token}` : token;
+  updateNumberFormatPreview();
+}
+
+function updateNumberFormatPreview() {
+  const tpl = document.getElementById('nf-template')?.value || '';
+  const preview = document.getElementById('nf-preview');
+  if (!preview) return;
+  const now = new Date();
+  const moR = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][now.getMonth()+1];
+  preview.textContent = applyNumberFormat(tpl, {
+    seq: 1, typeCode: 'SP', deptCode: 'OPS',
+    orgCode: document.getElementById('nf-orgcode')?.value||'OL',
+    month: now.getMonth()+1, monthRoman: moR, year: now.getFullYear(),
+  }) || '(format kosong)';
+}
+
+async function saveNumberFormat() {
+  const tpl = document.getElementById('nf-template')?.value.trim();
+  if (!tpl) { toast('Format tidak boleh kosong','err'); return; }
+  const payload = {
+    format_template: tpl,
+    org_code:  document.getElementById('nf-orgcode')?.value.trim()||'OL',
+    org_city:  document.getElementById('nf-orgcity')?.value.trim()||'Tangerang Selatan',
+    seq_reset_period: document.getElementById('nf-reset')?.value||'monthly',
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    if (letterNumberFormat?.id) {
+      await sbPatch('letter_number_format', letterNumberFormat.id, payload);
+    } else {
+      await sbPost('letter_number_format', payload);
+    }
+    toast('✅ Format penomoran disimpan','ok');
+    await loadLetterNumberingConfig();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
+// ── Departemen CRUD ────────────────────────────────
+function renderDeptList() {
+  const el = document.getElementById('dept-list'); if (!el) return;
+  if (!letterDepts.length) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:14px;text-align:center">Belum ada departemen — klik "+ Tambah"</div>`;
+    return;
+  }
+  el.innerHTML = letterDepts.map(d=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
+      <div>
+        <span style="font-family:monospace;font-weight:700;color:var(--teal)">${d.dept_code}</span>
+        <span style="color:var(--text3);margin-left:8px">${d.dept_name}</span>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-ghost btn-xs" onclick="openDeptForm(${d.id})">✏️</button>
+        <button class="btn btn-ghost btn-xs" onclick="deleteDept(${d.id})" style="color:#EF4444">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function openDeptForm(id=null) {
+  const d = id ? letterDepts.find(x=>x.id===id) : {};
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">${id?'✏️ Edit':'+ Tambah'} Departemen</div>
+      <button class="modal-close" onclick="closeModalForce()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Kode Departemen *</label>
+      <input type="text" id="df-code" value="${d?.dept_code||''}" placeholder="OPS" style="font-family:monospace;text-transform:uppercase" maxlength="6">
+    </div>
+    <div class="form-group">
+      <label>Nama Departemen *</label>
+      <input type="text" id="df-name" value="${d?.dept_name||''}" placeholder="Operasional">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalForce()">Batal</button>
+      <button class="btn btn-teal" onclick="saveDept(${id||'null'})">💾 Simpan</button>
+    </div>`);
+}
+
+async function saveDept(id) {
+  const code = document.getElementById('df-code').value.trim().toUpperCase();
+  const name = document.getElementById('df-name').value.trim();
+  if (!code || !name) { toast('Kode dan nama wajib diisi','err'); return; }
+  try {
+    if (id) await sbPatch('letter_departments', id, { dept_code:code, dept_name:name });
+    else    await sbPost('letter_departments', { dept_code:code, dept_name:name });
+    toast('✅ Departemen disimpan','ok');
+    closeModalForce();
+    await loadLetterNumberingConfig();
+    renderDeptList();
+  } catch(e) {
+    if (e.message?.includes('duplicate') || e.message?.includes('unique')) {
+      toast('❌ Kode departemen sudah dipakai','err');
+    } else {
+      toast('❌ '+e.message,'err');
+    }
+  }
+}
+
+async function deleteDept(id) {
+  if (!confirm('Hapus departemen ini? Surat yang sudah memakai kode ini tidak akan berubah.')) return;
+  try {
+    await sbPatch('letter_departments', id, { is_active:false });
+    toast('🗑 Departemen dihapus','info');
+    await loadLetterNumberingConfig();
+    renderDeptList();
+  } catch(e) { toast('❌ '+e.message,'err'); }
+}
+
 
 // ── Form Buat / Edit ──────────────────────────────
 async function openSuratForm(id=null) {
@@ -264,6 +524,7 @@ async function openSuratForm(id=null) {
     const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
     s = d[0]||{};
   }
+  await loadLetterNumberingConfig();
 
   // Load templates
   let tmplOpts = '<option value="">-- Pilih Template DOCX --</option>';
@@ -307,6 +568,13 @@ async function openSuratForm(id=null) {
         <label>Tipe Surat *</label>
         <select id="sf-type">
           ${LETTER_TYPES.map(t=>`<option value="${t.key}"${s.letter_type===t.key?' selected':''}>${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Departemen</label>
+        <select id="sf-dept">
+          <option value="">-- Tanpa Kode Departemen --</option>
+          ${letterDepts.map(d=>`<option value="${d.dept_code}"${s.dept_code===d.dept_code?' selected':''}>${d.dept_code} — ${d.dept_name}</option>`).join('')}
         </select>
       </div>
       <div class="form-group">
@@ -429,9 +697,10 @@ async function saveSurat(id) {
 
   const user      = getUserName ? getUserName() : 'User';
   const typeCode  = document.getElementById('sf-type').value;
+  const deptCode  = document.getElementById('sf-dept')?.value || null;
   const docNumber = id
     ? (await sbGet('outgoing_letters',`select=doc_number&id=eq.${id}`))[0]?.doc_number
-    : await generateDocNumber(typeCode);
+    : await generateDocNumber(typeCode, deptCode);
 
   // Upload template baru jika ada
   let fileUrl  = '';
@@ -474,6 +743,7 @@ async function saveSurat(id) {
     doc_number:      docNumber,
     title,
     letter_type:     typeCode,
+    dept_code:       deptCode,
     letter_date:     document.getElementById('sf-date').value,
     lampiran:        document.getElementById('sf-lampiran').value.trim(),
     to_name:         toName,
@@ -517,7 +787,7 @@ async function saveSurat(id) {
 }
 
 // ── Generate DOCX dari template ───────────────────
-async function generateDocx(id, data, templateUrl) {
+async function generateDocx(id, data, templateUrl, mode='download') {
   try {
     toast('⏳ Memuat library DOCX...','info',4000);
     // Load library docxtemplater + pizzip
@@ -557,6 +827,8 @@ async function generateDocx(id, data, templateUrl) {
       ? new Date(data.letter_date).toLocaleDateString('id-ID',
           {day:'numeric',month:'long',year:'numeric'})
       : new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+    if (!letterNumberFormat) await loadLetterNumberingConfig();
+    const dateKotaStr = `${letterNumberFormat?.org_city||ORG.city}, ${dateStr}`;
 
     const now  = new Date();
     const moR  = ['Januari','Februari','Maret','April','Mei','Juni',
@@ -565,6 +837,7 @@ async function generateDocx(id, data, templateUrl) {
     doc.render({
       NO_SURAT:      data.doc_number   || '',
       TANGGAL:       dateStr,
+      TANGGAL_KOTA:  dateKotaStr,
       LAMPIRAN:      data.lampiran     || '-',
       PERIHAL:       data.title        || '',
       NAMA_TUJUAN:   data.to_name      || '',
@@ -583,14 +856,19 @@ async function generateDocx(id, data, templateUrl) {
       mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     });
 
-    // Download
     const fname = `${data.doc_number||'Surat'}_${data.to_name||''}.docx`
       .replace(/[\/\\:*?"<>|]/g,'_');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(output);
-    a.download = fname;
-    a.click();
-    toast('✅ DOCX berhasil didownload!','ok');
+
+    if (mode === 'blob') {
+      return { blob: output, fileName: fname };
+    }
+
+    // Show preview modal with the actual rendered DOCX (via docx-preview library),
+    // plus Download DOCX + Print/Save PDF buttons.
+    // This gives the user a chance to review before downloading, and lets them
+    // save as PDF directly using the browser's print dialog (vector quality,
+    // searchable text, exact layout from their Word template).
+    await showDocxPreviewModal(output, fname);
 
   } catch(e) {
     console.error('[generateDocx] Failed:', e);
@@ -616,6 +894,13 @@ async function generateDocx(id, data, templateUrl) {
       hint = `Template DOCX punya placeholder tidak valid.${brokenTagInfo} Pastikan pakai format [[NO_SURAT]], [[TANGGAL]], [[PERIHAL]], dst (lihat panduan placeholder di tab Panduan).`;
     }
     toast('❌ Gagal generate DOCX: '+hint,'err',9000);
+
+    if (mode === 'blob') {
+      // Called from PDF download flow — don't show the HTML-fallback confirm
+      // dialog (irrelevant there), just propagate the error upward.
+      throw new Error(hint);
+    }
+
     if (confirm('Gagal generate dari template DOCX.\n\nError: ' + hint + '\n\nTampilkan layout cadangan generik sebagai gantinya? (Catatan: ini BUKAN tampilan dari file Word asli Anda, hanya placeholder darurat)')) {
       previewSuratHTMLDirect(data);
     }
@@ -640,7 +925,218 @@ async function regenerateSurat(id) {
   }
 }
 
+// ── Download sebagai PDF (via Supabase Edge Function -> ConvertAPI) ──
+// Menghasilkan PDF pixel-perfect sesuai template Word asli, bukan layout
+// generik. Membutuhkan Edge Function "docx-to-pdf" sudah di-deploy dan
+// secret CONVERTAPI_TOKEN sudah diset di dashboard Supabase.
+async function downloadSuratPDF(id) {
+  toast('⏳ Menyiapkan PDF...','info',3000);
+  try {
+    const d = await sbGet('outgoing_letters',`select=*&id=eq.${id}`);
+    const s = d[0];
+    if (!s) { toast('❌ Surat tidak ditemukan','err'); return; }
+    if (!s.file_url) {
+      toast('⚠️ Surat ini tidak punya template DOCX — tidak bisa diconvert ke PDF pixel-perfect. Gunakan preview HTML generik sebagai alternatif.','warn',6000);
+      return;
+    }
+
+    toast('⏳ Membuat dokumen DOCX...','info',4000);
+    const { blob, fileName } = await generateDocx(id, s, s.file_url, 'blob');
+
+    toast('⏳ Mengonversi ke PDF...','info',8000);
+    const arrayBuf = await blob.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuf);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const fileBase64 = btoa(binary);
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/docx-to-pdf`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileBase64, fileName }),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(()=>({}));
+      throw new Error(errBody.error || `Edge Function error (HTTP ${res.status}). Pastikan function "docx-to-pdf" sudah di-deploy.`);
+    }
+
+    const result = await res.json();
+    if (!result.pdfBase64) throw new Error('Edge Function tidak mengembalikan file PDF.');
+
+    // Convert base64 -> blob -> trigger download
+    const pdfBinary = atob(result.pdfBase64);
+    const pdfBytes = new Uint8Array(pdfBinary.length);
+    for (let i = 0; i < pdfBinary.length; i++) pdfBytes[i] = pdfBinary.charCodeAt(i);
+    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+    const pdfName = fileName.replace(/\.docx$/i, '.pdf');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(pdfBlob);
+    a.download = pdfName;
+    a.click();
+    toast('✅ PDF berhasil didownload!','ok');
+
+  } catch(e) {
+    console.error('[downloadSuratPDF] Failed:', e);
+    let hint = e.message;
+    if (hint?.includes('Failed to fetch') || hint?.includes('404')) {
+      hint = 'Edge Function "docx-to-pdf" belum ter-deploy di Supabase. Lihat tab Panduan untuk cara setup.';
+    }
+    toast('❌ Gagal download PDF: '+hint,'err',8000);
+  }
+}
+
 // ── Load docxtemplater libraries ──────────────────
+// ── DOCX Preview Modal — shows the actual rendered DOCX then offers
+// Download DOCX or Print/Save PDF via browser print dialog ──────────
+
+let _docxPreviewBlobUrl = null; // track for revoke on close
+
+function loadDocxPreviewLibrary() {
+  return new Promise((resolve, reject) => {
+    if (window.docx?.renderAsync) { resolve(); return; }
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Timeout memuat docx-preview library'));
+    }, 10000);
+
+    // JSZip must load first (docx-preview depends on it)
+    function loadJSZip() {
+      if (window.JSZip) { loadDocxPreviewLib(); return; }
+      const s = document.createElement('script');
+      s.src = 'vendor/jszip.min.js';
+      s.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat JSZip dari vendor/')); };
+      s.onload = loadDocxPreviewLib;
+      document.head.appendChild(s);
+    }
+    function loadDocxPreviewLib() {
+      const s = document.createElement('script');
+      s.src = 'vendor/docx-preview.min.js';
+      s.onerror = () => { clearTimeout(timeoutId); reject(new Error('Gagal memuat docx-preview dari vendor/')); };
+      s.onload = () => { clearTimeout(timeoutId); resolve(); };
+      document.head.appendChild(s);
+    }
+    loadJSZip();
+  });
+}
+
+async function showDocxPreviewModal(blob, fileName) {
+  // Open modal immediately with loading state so user sees feedback right away
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-title">📄 Preview Surat — ${fileName}</div>
+      <button class="modal-close" onclick="closeDocxPreviewModal()">✕</button>
+    </div>
+    <div id="docx-preview-toolbar" style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-teal" onclick="downloadCurrentDocx()" id="btn-dl-docx">
+        ⬇️ Download DOCX
+      </button>
+      <button class="btn btn-outline" onclick="printDocxPreview()" id="btn-pdf">
+        🖨 Print / Save PDF
+      </button>
+      <div style="font-size:11px;color:var(--text3);margin-left:auto">
+        Untuk save sebagai PDF: klik Print → pilih "Save as PDF" di printer
+      </div>
+    </div>
+    <div id="docx-preview-container"
+      style="min-height:400px;background:#f5f5f5;border-radius:8px;overflow:auto;padding:20px;display:flex;justify-content:center">
+      <div class="spinner" style="margin-top:80px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeDocxPreviewModal()">Tutup</button>
+    </div>
+  `, 'docx-preview-modal');
+  if (_docxPreviewBlobUrl) URL.revokeObjectURL(_docxPreviewBlobUrl);
+  _docxPreviewBlobUrl = URL.createObjectURL(blob);
+  window.__docxPreviewBlob = blob;
+  window.__docxPreviewFileName = fileName;
+
+  // Load docx-preview library then render
+  try {
+    await loadDocxPreviewLibrary();
+  } catch(e) {
+    document.getElementById('docx-preview-container').innerHTML =
+      `<div class="status-box status-warn" style="margin:20px">
+        ⚠️ Tidak bisa menampilkan preview DOCX (${e.message}).
+        Anda masih bisa <button class="btn btn-teal btn-sm" onclick="downloadCurrentDocx()">⬇️ Download DOCX</button> langsung.
+      </div>`;
+    return;
+  }
+
+  // Render DOCX blob into the preview container
+  const container = document.getElementById('docx-preview-container');
+  if (!container) return;
+  try {
+    container.innerHTML = ''; // clear spinner
+    // docx-preview renders into the container element with full Word-like styling
+    await window.docx.renderAsync(blob, container, null, {
+      className: 'docx-preview-content',
+      inWrapper: true,
+      ignoreWidth: false,
+      ignoreHeight: false,
+      ignoreFonts: false,
+      breakPages: true,
+      useBase64URL: true,
+    });
+    toast('✅ Surat berhasil dirender — siap download atau print sebagai PDF','ok',4000);
+  } catch(e) {
+    container.innerHTML =
+      `<div class="status-box status-warn" style="margin:20px">
+        ⚠️ Preview gagal: ${e.message}.<br>
+        Anda masih bisa <button class="btn btn-teal btn-sm" onclick="downloadCurrentDocx()">⬇️ Download DOCX</button>.
+      </div>`;
+    console.error('[showDocxPreviewModal] renderAsync failed:', e);
+  }
+}
+
+function closeDocxPreviewModal() {
+  if (_docxPreviewBlobUrl) {
+    URL.revokeObjectURL(_docxPreviewBlobUrl);
+    _docxPreviewBlobUrl = null;
+  }
+  window.__docxPreviewBlob = null;
+  closeModalForce();
+}
+
+function downloadCurrentDocx() {
+  const blob     = window.__docxPreviewBlob;
+  const fileName = window.__docxPreviewFileName;
+  if (!blob) { toast('File tidak tersedia','err'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+  a.click();
+  toast('✅ DOCX didownload!','ok');
+}
+
+function printDocxPreview() {
+  // Open a new window with just the docx-preview content + print CSS,
+  // then trigger window.print() so the user can Save as PDF from the browser dialog.
+  const container = document.getElementById('docx-preview-container');
+  if (!container) { toast('Preview belum tersedia','warn'); return; }
+
+  const w = window.open('','_blank','width=900,height=700');
+  if (!w) {
+    toast('⚠️ Popup diblokir — izinkan popup untuk domain ini, lalu coba lagi','warn',5000);
+    return;
+  }
+  // Copy the rendered HTML including all inline styles from docx-preview
+  w.document.write(`
+    <!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>${window.__docxPreviewFileName||'Surat'}</title>
+    <style>
+      @page { size: A4; margin: 0 }
+      body { margin: 0; padding: 0; background: white }
+      .docx-preview-content { width: 100% !important }
+      @media print { button { display: none !important } }
+    </style>
+    </head><body>
+    ${container.innerHTML}
+    <script>window.print()<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
 function loadDocxLibraries() {
   return new Promise((resolve, reject) => {
     if(window.PizZip && window.docxtemplater){ resolve(); return; }
