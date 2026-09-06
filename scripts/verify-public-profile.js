@@ -16,11 +16,12 @@ for (const m of html.matchAll(/(?:src|href)="([^"#:]+)"/g)) {
   assert(web.berkas.some(entry => entry === file || (entry.endsWith('/') && file.startsWith(entry))), `Asset excluded from standalone export ${asset}`);
 }
 assert(!/type="password"|SUPABASE|localStorage|handleSSOLogin|mock_token/i.test(html), 'Public page must not authenticate or store sessions');
-assert.equal((html.match(/<form\b/g)||[]).length, 1, 'Only the local educational calculator form is expected');
+assert.equal((html.match(/<form\b/g)||[]).length, 0, 'Homepage is a concise company introduction');
 const appLinks = [...html.matchAll(/href="(https:\/\/[^"\s]*avahealth\.sbs[^"\s]*)"/g)].map(m => m[1]);
 assert.deepEqual([...new Set(appLinks)].sort(), ['https://apps.avahealth.sbs/', 'https://www.avahealth.sbs/']);
-assert.equal((html.match(/class="brand-card"/g)||[]).length,6);
-assert.equal((html.match(/data-category=/g)||[]).length,8);
-for (const id of ['beranda','tentang','brand','produk','perjalanan','sertifikasi','kontak','jurnal','kalkulator','kemitraan','manufaktur']) assert(ids.includes(id));
+assert((html.match(/<section\b/g)||[]).length <= 4, 'Homepage must stay concise');
+const nav = html.match(/<nav id="navigation"[\s\S]*?<\/nav>/)[0];
+assert(!/href="#|href="portal\.html#/.test(nav), 'Primary navigation must open separate pages');
+for(const file of ['tentang','ekosistem','solusi','jurnal','kontak','kemitraan']) assert(nav.includes(`public/${file}.html`));
 assert.equal(web.masuk,'/portal.html');
-console.log('PASS: anchors, unique IDs, assets/export, 6 brands, 8 categories, single apps login, no public authentication.');
+console.log('PASS: concise homepage, separate menu pages, unique IDs, assets/export, single apps login, no public authentication.');

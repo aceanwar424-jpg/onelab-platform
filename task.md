@@ -69,11 +69,11 @@
 
 ## Konsolidasi Navigasi HIS & Shell Operasional — 5 September 2026
 
-- [ ] Audit read-only kelompok menu referensi.
-- [ ] Admission memuat Admission, Back Office, Queue, dan Queue Outpatient.
-- [ ] Shell navigasi/header operasional diterapkan konsisten pada HIS.
-- [ ] Label tahap yang tidak diperlukan dihapus dan form responsif dipertahankan.
-- [ ] Menu, renderer, keamanan, dan preview lintas kelompok diverifikasi.
+- [x] Audit read-only kelompok menu referensi.
+- [x] Admission memuat Admission, Back Office, Queue, dan Queue Outpatient.
+- [x] Shell navigasi/header operasional diterapkan konsisten pada HIS.
+- [x] Label tahap yang tidak diperlukan dihapus dan form responsif dipertahankan.
+- [x] Menu, renderer, keamanan, dan preview lintas kelompok diverifikasi.
 
 ## Web publik AVA Health — 2026-09-05
 - [x] Audit sumber portal, pemetaan domain, dan perubahan pengguna.
@@ -117,3 +117,11 @@
 - [x] Dokumen konten untuk peninjauan.
 - [x] Validasi 19 halaman dan HTTP preview.
 - [ ] Publikasi produksi (belum dilakukan).
+
+## Multipage & identitas — 2026-09-06
+- [x] Cari PDF termasuk hidden/ignored; pelajari dokumen induk Markdown yang ditemukan.
+- [x] Beranda ringkas dan navigasi ke halaman masing-masing.
+- [x] Profil korporat rinci, Health/Lab bisnis fisik, Care & Wellness inklusif.
+- [x] Validasi 30 halaman, link/aset, regresi kalkulator dan HTTP 200.
+- [ ] Dokumen PDF identitas: menunggu nama/lokasi dari pengguna.
+- [ ] Publikasi produksi: belum dilakukan.

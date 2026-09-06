@@ -62,6 +62,6 @@ function multipage(home,root) {
     const dest=routes[id]||(id.startsWith('brand-')?`public/${id}.html`:null); return dest?`href="${dest}"`:full;
   });}
   for(const file of fs.readdirSync(dir).filter(f=>f.endsWith('.html')))fs.writeFileSync(path.join(dir,file),links(fs.readFileSync(path.join(dir,file),'utf8')));
-  return links(document('portal.html','Accueil'.replace('Accueil','Beranda'),'AVA Health Solution: bisnis fasilitas kesehatan, laboratorium, teknologi serta Care & Wellness.',newHome));
+  return links(document('portal.html','Beranda','AVA Health Solution: bisnis fasilitas kesehatan, laboratorium, teknologi serta Care & Wellness.',newHome));
 }
 module.exports={multipage,routes};

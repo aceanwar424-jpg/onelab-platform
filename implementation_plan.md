@@ -180,17 +180,17 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
 
 ### Urutan implementasi
 
-1. [ ] Audit ulang read-only struktur menu referensi sampai level kelompok dan
+1. [x] Audit ulang read-only struktur menu referensi sampai level kelompok dan
    sub-menu operasional, tanpa membuka data transaksi atau melakukan perubahan.
-2. [ ] Lengkapi konteks Admission dengan empat kelompok kerja: Admission,
+2. [x] Lengkapi konteks Admission dengan empat kelompok kerja: Admission,
    Back Office, Queue, dan Queue Outpatient; koreksi lokasi presentasi menu
    yang masih terpencar tanpa menghapus rute atau mengubah RBAC.
-3. [ ] Terapkan shell navigasi ringkas yang seragam pada domain HIS: rail
+3. [x] Terapkan shell navigasi ringkas yang seragam pada domain HIS: rail
    ikon, panel konteks dua tingkat, dan header operasional tanpa breadcrumb
    atau indikator API yang tidak relevan bagi petugas.
-4. [ ] Rapikan elemen form berulang melalui CSS terlingkup dan hapus label
+4. [x] Rapikan elemen form berulang melalui CSS terlingkup dan hapus label
    tahap yang tidak diperlukan, dengan fallback responsif pada tablet/ponsel.
-5. [ ] Jalankan audit menu, keamanan, sintaks, serta preview klik lintas
+5. [x] Jalankan audit menu, keamanan, sintaks, serta preview klik lintas
    kelompok; catat menu yang hanya bisa diverifikasi sampai level renderer.
 
 ### Implikasi IP & Kepatuhan
