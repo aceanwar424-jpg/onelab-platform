@@ -4271,9 +4271,74 @@ function generateLaasApiKey() {
   alert('API Key LaaS Baru Berhasil Di-generate! Gunakan header Authorization: Bearer ' + newKey);
 }
 
+function updateLoginFormUI(role) {
+  const userLabel = document.getElementById('username-label');
+  const userInput = document.getElementById('username');
+  const corpGroup = document.getElementById('corp-code-group');
+  
+  if (userLabel) {
+    if (role === 'patient') userLabel.textContent = 'No. Rekam Medis / NIK / Email';
+    else if (role === 'member') userLabel.textContent = 'ID Member VIP / Email';
+    else if (role === 'corporate') userLabel.textContent = 'Corporate User ID / NIP';
+    else if (role === 'staff') userLabel.textContent = 'ID Nakes / NIP Staff';
+    else if (role === 'referral') userLabel.textContent = 'Kode Dokter / ID Faskes Referral';
+  }
+
+  if (userInput && (!userInput.value || userInput.value === 'admin@avahealth.sbs' || userInput.value.includes('@'))) {
+    if (role === 'patient') userInput.placeholder = 'Contoh: 88.000841 atau admin@avahealth.sbs';
+    else if (role === 'member') userInput.placeholder = 'Contoh: VIP-880091';
+    else if (role === 'corporate') userInput.placeholder = 'Contoh: corp@avahealth.sbs';
+    else if (role === 'staff') userInput.placeholder = 'Contoh: nakes@avahealth.sbs';
+    else if (role === 'referral') userInput.placeholder = 'Contoh: referral@avahealth.sbs';
+  }
+
+  if (corpGroup) {
+    corpGroup.style.display = (role === 'corporate') ? 'block' : 'none';
+  }
+
+  // Update role pill active highlight styling (Clean White Light Mode)
+  document.querySelectorAll('.role-pill-span').forEach(span => {
+    const r = span.getAttribute('data-role');
+    if (r === role) {
+      span.style.border = '1.5px solid #d4af37';
+      span.style.background = 'linear-gradient(135deg, #fef8e7, #ffffff)';
+      span.style.color = '#0a2342';
+      span.style.boxShadow = '0 3px 10px rgba(212,175,55,0.25)';
+      span.classList.add('active');
+    } else {
+      span.style.border = '1px solid #e2e8f0';
+      span.style.background = '#f8fafc';
+      span.style.color = '#475569';
+      span.style.boxShadow = 'none';
+      span.classList.remove('active');
+    }
+  });
+}
+
+function quickFillDemoUser(username, role, corpCode = '') {
+  const userInput = document.getElementById('username');
+  const corpInput = document.getElementById('login-corp-code');
+  const roleRadios = document.getElementsByName('login-role');
+
+  if (userInput) userInput.value = username;
+  if (corpInput && corpCode) corpInput.value = corpCode;
+
+  if (roleRadios) {
+    for (let radio of roleRadios) {
+      if (radio.value === role) {
+        radio.checked = true;
+        break;
+      }
+    }
+  }
+  updateLoginFormUI(role);
+}
+
 window.toggleAmbientScribeRecording = toggleAmbientScribeRecording;
 window.generateLaasApiKey = generateLaasApiKey;
 window.trackUnifiedOrder = trackUnifiedOrder;
+window.updateLoginFormUI = updateLoginFormUI;
+window.quickFillDemoUser = quickFillDemoUser;
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
