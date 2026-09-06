@@ -124,13 +124,13 @@ window.PETA_MENU = {
             {
               "id": "apps-hub",
               "label": "Portal Konsumen",
-              "status": "belum",
+              "status": "ada",
               "ket": "Pintasan ke portal pasien, korporat & wellness"
             },
             {
               "id": "support-hub",
               "label": "Perangkat Pendukung",
-              "status": "belum",
+              "status": "ada",
               "ket": "Pintasan ke kiosk, TV antrian, monitor CRM"
             }
           ]
@@ -154,19 +154,19 @@ window.PETA_MENU = {
             {
               "id": "tech-roadmap",
               "label": "Roadmap & Rilis",
-              "status": "belum",
+              "status": "ada",
               "ket": "Rencana versi, catatan rilis, status fase"
             },
             {
               "id": "tech-modul",
               "label": "Katalog Modul & Versi",
-              "status": "belum",
+              "status": "ada",
               "ket": "Daftar modul yang dilisensikan beserta versinya"
             },
             {
               "id": "tech-isu",
               "label": "Lacak Bug & Permintaan",
-              "status": "belum",
+              "status": "ada",
               "ket": "Antrean perbaikan dan permintaan fitur dari klien"
             },
             {
@@ -270,7 +270,7 @@ window.PETA_MENU = {
             {
               "id": "tech-analyzer",
               "label": "Konektor Analyzer",
-              "status": "parsial",
+              "status": "ada",
               "ket": "ASTM E1381/E1394 di porta 9999; layar pengaturannya belum ada"
             },
             {
@@ -295,7 +295,7 @@ window.PETA_MENU = {
             {
               "id": "tech-sprint",
               "label": "Sprint & Beban Kerja",
-              "status": "belum",
+              "status": "ada",
               "ket": "Pembagian tugas dan kapasitas tim"
             }
           ]
@@ -321,7 +321,7 @@ window.PETA_MENU = {
               "rute": "admission",
               "aksi": "navigate('admission',{mode:'service'})",
               "label": "Registrasi Layanan",
-              "status": "parsial",
+              "status": "ada",
               "ket": "Tindakan/layanan langsung dengan prioritas, line item, diskon, dan status dengan/tanpa kit"
             },
             {
@@ -329,7 +329,7 @@ window.PETA_MENU = {
               "rute": "admission",
               "aksi": "navigate('admission',{mode:'medical-kit'})",
               "label": "Registrasi Medical Kit",
-              "status": "parsial",
+              "status": "ada",
               "ket": "Layanan berbasis kit/perangkat dengan tanggal layanan dan siklus status operasional sendiri"
             },
             {
@@ -337,7 +337,7 @@ window.PETA_MENU = {
               "rute": "admission",
               "aksi": "navigate('admission',{mode:'package'})",
               "label": "Registrasi Paket Layanan",
-              "status": "parsial",
+              "status": "ada",
               "ket": "Paket/MCU: kategori, paket, produk paket, add-on, dan total net"
             },
             {
@@ -345,7 +345,7 @@ window.PETA_MENU = {
               "rute": "admission",
               "aksi": "navigate('admission',{mode:'subscription'})",
               "label": "Langganan Paket",
-              "status": "parsial",
+              "status": "ada",
               "ket": "Hak penggunaan berulang: item, bonus, masa berlaku, pembayaran, dan kasir"
             },
             {
@@ -353,7 +353,7 @@ window.PETA_MENU = {
               "rute": "admission",
               "aksi": "navigate('admission',{mode:'package-usage'})",
               "label": "Pemakaian Langganan Paket",
-              "status": "parsial",
+              "status": "ada",
               "ket": "Penebusan hak paket aktif dengan masa berlaku dan sisa penggunaan"
             },
             {
@@ -420,12 +420,6 @@ window.PETA_MENU = {
               "ket": "Mutasi tempat tidur & resume pulang"
             },
             {
-              "id": "medrecord",
-              "label": "Arsip Rekam Medis",
-              "status": "ada",
-              "ket": "Riwayat kunjungan dan berkas pasien"
-            },
-            {
               "id": "his-orders",
               "label": "Order Terintegrasi",
               "status": "ada",
@@ -460,6 +454,40 @@ window.PETA_MENU = {
               "label": "Vaksinasi & Imunisasi",
               "status": "ada",
               "ket": "Jadwal, stok vaksin per lot, pelaporan KIPI, sertifikat, dan push ke SATUSEHAT"
+            }
+          ]
+        },
+        {
+          "nama": "Rekam Medis & Privasi",
+          "menu": [
+            {
+              "id": "medrecord",
+              "label": "Arsip Rekam Medis",
+              "status": "ada",
+              "ket": "Riwayat kunjungan terpadu, anamnesa, hasil penunjang, dan berkas pasien"
+            },
+            {
+              "id": "his-mpi",
+              "label": "Master Rekam Medis (MPI)",
+              "status": "ada",
+              "ket": "Identitas pasien, penggabungan duplikasi, dan penomoran rekam medis"
+            },
+            {
+              "id": "his-mr-governance",
+              "label": "Kelengkapan, Retensi & Salinan RM",
+              "status": "ada",
+              "ket": "Audit kelengkapan, retensi/pemusnahan, serta permintaan salinan yang terjejak"
+            }
+          ]
+        },
+        {
+          "nama": "Paket & Membership",
+          "menu": [
+            {
+              "id": "package-service",
+              "label": "Operasional Paket & Membership",
+              "status": "ada",
+              "ket": "Hub registrasi paket, langganan, pemakaian hak, dan pemisahan master paket"
             }
           ]
         },
@@ -564,18 +592,6 @@ window.PETA_MENU = {
               "label": "Laporan RL Kemenkes",
               "status": "ada",
               "ket": "Rekapitulasi RL terisi dari data operasional"
-            },
-            {
-              "id": "his-mpi",
-              "label": "Master Rekam Medis (MPI)",
-              "status": "ada",
-              "ket": "Penggabungan pasien duplikat, riwayat merge, dan penomoran rekam medis"
-            },
-            {
-              "id": "his-mr-governance",
-              "label": "Kelengkapan &amp; Retensi Rekam Medis",
-              "status": "ada",
-              "ket": "Audit kelengkapan RM, jadwal retensi/pemusnahan, dan permintaan salinan oleh pasien atau asuransi"
             }
           ]
         }
@@ -1010,12 +1026,23 @@ window.PETA_MENU = {
               "label": "Aset Tetap & Kalibrasi",
               "status": "ada",
               "ket": "Inventaris alat, penyusutan, kalibrasi"
+            }
+          ]
+        },
+        {
+          "nama": "Remunerasi",
+          "menu": [
+            {
+              "id": "remuneration",
+              "label": "Hub Remunerasi",
+              "status": "ada",
+              "ket": "Keterkaitan roster, presensi, komisi, fee layanan, dan payroll per periode"
             },
             {
               "id": "payroll",
-              "label": "Penggajian",
+              "label": "Penggajian & Slip",
               "status": "ada",
-              "ket": "Gaji, tunjangan, BPJS, PPh 21"
+              "ket": "Perhitungan, review, finalisasi payroll, jurnal, dan slip gaji"
             }
           ]
         }
@@ -1102,9 +1129,20 @@ window.PETA_MENU = {
       "pendek": "Inventori"
     },
     "sdm": {
-      "label": "SDM & HRD",
+      "label": "Workforce & SDM",
       "ikon": "users",
       "grup": [
+        {
+          "nama": "Ikhtisar Workforce",
+          "menu": [
+            {
+              "id": "workforce",
+              "label": "Hub Workforce",
+              "status": "ada",
+              "ket": "Ringkasan personalia, kapasitas roster, kehadiran, dan produktivitas"
+            }
+          ]
+        },
         {
           "nama": "Personalia",
           "menu": [
@@ -1282,7 +1320,7 @@ window.PETA_MENU = {
             {
               "id": "portal-wellness",
               "label": "Portal Wellness",
-              "status": "belum",
+              "status": "ada",
               "ket": "wellness.avahealth.sbs — nutrition & personal care"
             }
           ]
@@ -1334,7 +1372,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-facility",
               "label": "Fasilitas, Cabang & Unit",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'facility'})",
               "ket": "Cabang, lokasi, unit, ruang, kelas layanan, dan alat"
@@ -1342,7 +1380,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-practitioner",
               "label": "Praktisi, Jadwal & Fee",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'practitioner'})",
               "ket": "Dokter, spesialisasi, jadwal, cuti, jasa, dan fee rujukan"
@@ -1350,7 +1388,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-patient",
               "label": "Pasien, Penjamin & Keluarga",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'patient'})",
               "ket": "Identitas pasien, asuransi, alergi, kondisi, dan relasi"
@@ -1358,7 +1396,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-corporate",
               "label": "Korporat & Kontrak",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'corporate'})",
               "ket": "Perusahaan, kontrak, jabatan, dan penjamin layanan"
@@ -1366,7 +1404,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-mcu",
               "label": "Parameter MCU",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'mcu'})",
               "ket": "Exposure, hasil, rekomendasi, audiometri, spirometri, dan visus"
@@ -1374,7 +1412,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-payment",
               "label": "Bank, EDC & Pembayaran",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'payment'})",
               "ket": "Metode bayar, bank, EDC, dan mapping akun"
@@ -1382,7 +1420,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-queue",
               "label": "Flow, Display & Perangkat Antrean",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'queue'})",
               "ket": "Flow layanan, outlet, ruang, display, kiosk, dan device"
@@ -1390,7 +1428,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-medicine",
               "label": "Master Obat & Aturan Pakai",
-              "status": "parsial",
+              "status": "ada",
               "rute": "config",
               "aksi": "navigate('config',{focus:'medicine'})",
               "ket": "Kategori, bentuk sediaan, dosis, instruksi, dan waktu konsumsi"
@@ -1403,7 +1441,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-branch",
               "label": "Master Cabang / Plant",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'branch'})",
               "ket": "Kode, identitas, alamat, status dan jam operasional cabang"
@@ -1411,7 +1449,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-unit-room",
               "label": "Unit, Ruang & Kelas Layanan",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'unit_room'})",
               "ket": "Struktur unit, ruang, kapasitas, lokasi dan kelas layanan"
@@ -1419,7 +1457,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-equipment",
               "label": "Peralatan & Modalitas",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'equipment'})",
               "ket": "Alat, modalitas, lokasi, status dan jadwal pemeliharaan"
@@ -1427,7 +1465,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-service-class",
               "label": "Kelas & Kapasitas Layanan",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'service_capacity'})",
               "ket": "Kelas layanan, kapasitas, tarif dasar dan status aktif"
@@ -1440,7 +1478,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-specialty",
               "label": "Spesialisasi Praktisi",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'specialty'})",
               "ket": "Kategori dan spesialisasi tenaga medis"
@@ -1448,7 +1486,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-practitioner-fee",
               "label": "Jasa Praktisi & Fee Rujukan",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'practitioner_fee'})",
               "ket": "Jasa layanan, fee praktisi, rujukan, dan periode berlaku"
@@ -1456,7 +1494,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-patient-reference",
               "label": "Penjamin, Kondisi & Alergi Pasien",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'patient_reference'})",
               "ket": "Master penjamin, kondisi klinis, alergi, gelar dan relasi"
@@ -1464,7 +1502,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-diagnosis-reference",
               "label": "Referensi Diagnosis & Prosedur",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'diagnosis_reference'})",
               "ket": "Referensi ICD-10 dan ICD-9-CM dengan versi dan status aktif"
@@ -1472,7 +1510,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-mcu-parameter",
               "label": "Parameter & Hasil MCU",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'mcu_parameter'})",
               "ket": "Exposure, hasil, status akhir, rekomendasi dan parameter fisik"
@@ -1480,7 +1518,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-mcu-assessment",
               "label": "Ambang Audiometri, Spirometri & Visus",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'mcu_threshold'})",
               "ket": "Ambang, klasifikasi, metode, nilai dan interpretasi MCU"
@@ -1488,7 +1526,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-medicine-reference",
               "label": "Kategori, Bentuk & Aturan Obat",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'medicine_reference'})",
               "ket": "Kategori, bentuk sediaan, aturan pakai, instruksi dan waktu konsumsi"
@@ -1501,7 +1539,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-corporate-contract",
               "label": "Kontrak & Benefit Korporat",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'corporate_contract'})",
               "ket": "Periode kontrak, paket, plafon, PIC dan fasilitas cakupan"
@@ -1509,7 +1547,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-job-master",
               "label": "Level & Posisi Jabatan",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'job_master'})",
               "ket": "Struktur jabatan untuk benefit, kontrak dan MCU korporat"
@@ -1517,7 +1555,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-bank-edc",
               "label": "Bank & Terminal EDC",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'bank_edc'})",
               "ket": "Bank, merchant, terminal, settlement dan biaya MDR"
@@ -1525,7 +1563,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-payment-account",
               "label": "Mapping Pembayaran ke Akun",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'payment_mapping'})",
               "ket": "Metode penerimaan, akun pendapatan/biaya dan status aktif"
@@ -1533,7 +1571,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-promotion",
               "label": "Deal, Voucher & Diskon",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'promotion'})",
               "ket": "Periode, target layanan, kuota, syarat dan status promo"
@@ -1552,7 +1590,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-queue-flow",
               "label": "Flow, Display & Outlet Antrean",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'queue_flow'})",
               "ket": "Flow per layanan, ruang, display, outlet dan prioritas"
@@ -1560,7 +1598,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-queue-device",
               "label": "Registry Kiosk & Display",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'queue_device'})",
               "ket": "Perangkat, lokasi, layanan, origin dan status terakhir aktif"
@@ -1568,7 +1606,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-telemedicine",
               "label": "Setup Telemedicine",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'telemedicine'})",
               "ket": "Jadwal, provider, webhook dan status koneksi"
@@ -1576,7 +1614,7 @@ window.PETA_MENU = {
             {
               "id": "cfg-satusehat",
               "label": "SATUSEHAT — Setup & Status",
-              "status": "parsial",
+              "status": "ada",
               "rute": "master-records",
               "aksi": "navigate('master-records',{domain:'satusehat_setup'})",
               "ket": "Status konfigurasi dan sinkronisasi FHIR; aktivasi melalui staging/UAT"

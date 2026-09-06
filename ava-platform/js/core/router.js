@@ -267,9 +267,11 @@ async function navigate(page, params={}) {
     case 'ava-corporate':   safeRun('renderAVAHealth', 'corporate');   break;
     case 'ava-portals':     safeRun('renderAVAHealth', 'portals');     break;
     case 'finance':     safeRun('renderFinance', params.tab);      break;
+    case 'remuneration': safeRun('renderRemunerationHub');          break;
     case 'inventory':   safeRun('renderInventory', params.tab||'stock'); break;
     case 'hrd':         safeRun('renderHRD');                    break;
     case 'work-schedule': safeRun('renderWorkSchedule');          break;
+    case 'workforce':   safeRun('renderWorkforceHub');             break;
     case 'shift-calendar':safeRun('renderShiftCalendar');         break;
     case 'tasks':       safeRun('renderTaskManagement');          break;
     case 'wiki':        safeRun('renderWiki');                   break;
@@ -288,7 +290,7 @@ async function navigate(page, params={}) {
     case 'lis-helpdesk':safeRun('renderLisHelpDesk');            break;
     case 'lis-admission':
     case 'lis-regis':
-    case 'order-lab':   safeRun('renderLisAdmission');           break;
+    case 'order-lab':   safeRun('renderLisAdmission', params);   break;
     case 'lisensi':     safeRun('renderLisensi');                break;
     case 'executive_dashboard':
     case 'executive-dashboard': safeRun('renderExecutiveDashboard');     break;
@@ -433,6 +435,7 @@ async function navigate(page, params={}) {
     case 'lis-sample-archive':
     case 'sample-archiving': safeRun('renderSampleArchiving');       break;
     case 'his-orders':  safeRun('renderIntegratedOrders');           break;
+    case 'package-service': safeRun('renderPackageServiceHub');      break;
     // Hasil LIS pada HIS hanya untuk dibaca. Fungsi workflow/otorisasi tetap
     // berada di LIS agar tidak ada dua sumber kebenaran klinis.
     case 'his-clinical-pathology': safeRun('renderHisLisResultViewer', { discipline: 'clinical-pathology' }); break;
@@ -467,6 +470,46 @@ async function navigate(page, params={}) {
     case 'tech-harga':  safeRun('renderTechPricingPlans');           break;
     case 'tenants':     safeRun('renderTenants');                    break;
     case 'db-studio':    safeRun('renderDatabaseStudio');           break;
+    case 'tech-roadmap': safeRun('renderTechRoadmap');               break;
+    case 'tech-modul':   safeRun('renderTechModul');                 break;
+    case 'tech-isu':     safeRun('renderTechIsu');                   break;
+    case 'tech-sprint':  safeRun('renderTechSprint');                break;
+    case 'apps-hub':     safeRun('renderPortalAkses');              break;
+    case 'support-hub':  safeRun('renderSupportive');               break;
+    case 'portal-wellness': safeRun('renderAVAHealth', 'wellness');  break;
+    case 'cfg-facility':
+    case 'cfg-branch':   safeRun('renderMasterRegistry', 'facility');break;
+    case 'cfg-practitioner': safeRun('renderMasterRegistry', 'practitioner'); break;
+    case 'cfg-specialty':safeRun('renderMasterRegistry', 'specialty');break;
+    case 'cfg-practitioner-fee': safeRun('renderMasterRegistry', 'fee'); break;
+    case 'cfg-unit-room':safeRun('renderMasterRegistry', 'unit');    break;
+    case 'cfg-diagnosis-reference': safeRun('renderMasterRegistry', 'icd10'); break;
+    case 'cfg-patient':
+    case 'cfg-patient-reference': safeRun('renderConfigFamily');     break;
+    case 'cfg-corporate':
+    case 'cfg-corporate-contract': safeRun('renderConfigCorporate');  break;
+    case 'cfg-mcu':
+    case 'cfg-mcu-parameter':
+    case 'cfg-mcu-assessment': safeRun('renderMCU');                 break;
+    case 'cfg-payment':
+    case 'cfg-bank-edc': safeRun('renderCashier');                   break;
+    case 'cfg-payment-account': safeRun('renderAccounting');         break;
+    case 'cfg-queue':
+    case 'cfg-queue-flow':
+    case 'cfg-queue-device': safeRun('renderQueueConfig');           break;
+    case 'cfg-medicine':
+    case 'cfg-medicine-reference': safeRun('renderPharmacy');        break;
+    case 'cfg-equipment': safeRun('renderAssets');                   break;
+    case 'cfg-service-class': safeRun('renderConfigPackage');        break;
+    case 'cfg-job-master': safeRun('renderOrgStructure');            break;
+    case 'cfg-promotion': safeRun('renderVoucher');                  break;
+    case 'cfg-telemedicine': safeRun('renderAVAHealth', 'consult');  break;
+    case 'cfg-satusehat': safeRun('renderSatuSehat');                break;
+    case 'admission-service': safeRun('renderAdmission', { tab: 'service' }); break;
+    case 'admission-medical-kit': safeRun('renderAdmission', { tab: 'kit' }); break;
+    case 'admission-package': safeRun('renderAdmission', { tab: 'package' }); break;
+    case 'admission-subscription':
+    case 'admission-package-usage': safeRun('renderSubscription');    break;
     default:
       renderRouterError(page, 'Halaman ini belum tersedia.');
   }

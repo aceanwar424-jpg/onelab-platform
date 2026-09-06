@@ -20,7 +20,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | `lis.avahealth.sbs` | LIS — Laboratorium Diagnostik | Seluruh alur laboratorium: pra-analitik, analitik, pasca-analitik, master data tes, rujukan, dan logistik reagen. | lis |
 | `wellness.avahealth.sbs` | Wellness — Nutrition & Personal Care | Gabungan AVA Nutrition dan AVA Care di bawah satu payung wellness, ditambah Sanctuary. Sebelumnya terpecah tiga subdomain dengan isi yang sama. | wellness, marketing, keuangan, logistik, konfigurasi |
 
-**Total menu terpetakan:** 210 — 🟢 169 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
+**Total menu terpetakan:** 213 — 🟢 172 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
 
 ---
 
@@ -128,13 +128,26 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | 🟢 | EMR SOAP & CPPT | `emr-soap` | Rekam medis elektronik dokter, ICD-10/9CM |
 | 🟢 | Anamnesa & Tanda Vital | `anamnesa` | Keluhan, riwayat, dan pemeriksaan awal |
 | 🟢 | Rawat Inap & Bed Management | `inpatient` | Mutasi tempat tidur & resume pulang |
-| 🟢 | Arsip Rekam Medis | `medrecord` | Riwayat kunjungan dan berkas pasien |
 | 🟢 | Order Terintegrasi | `his-orders` | Satu layar untuk memesan lab, radiologi, obat, dan tindakan sekaligus; order lab langsung membuat order di LIS |
 | 🟢 | Hasil Patologi Klinik (Viewer LIS) | `his-clinical-pathology` | Viewer read-only hasil Patologi Klinik yang sudah dirilis LIS; koreksi dan rilis tetap dilakukan di LIS |
 | 🟢 | Hasil Mikrobiologi (Viewer LIS) | `his-microbiology` | Viewer read-only hasil pewarnaan, kultur, identifikasi, dan sensitivitas yang sudah dirilis LIS |
 | 🟢 | Hasil Patologi Anatomi (Viewer LIS) | `his-anatomical-pathology` | Viewer read-only hasil histopatologi dan sitologi yang sudah dirilis LIS |
 | 🟢 | Tindakan & Prosedur | `his-procedures` | Katalog tindakan, informed consent digital, catatan tindakan, dan biayanya |
 | 🟢 | Vaksinasi & Imunisasi | `his-immunization` | Jadwal, stok vaksin per lot, pelaporan KIPI, sertifikat, dan push ke SATUSEHAT |
+
+**Rekam Medis & Privasi**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Arsip Rekam Medis | `medrecord` | Riwayat kunjungan terpadu, anamnesa, hasil penunjang, dan berkas pasien |
+| 🟢 | Master Rekam Medis (MPI) | `his-mpi` | Identitas pasien, penggabungan duplikasi, dan penomoran rekam medis |
+| 🟢 | Kelengkapan, Retensi & Salinan RM | `his-mr-governance` | Audit kelengkapan, retensi/pemusnahan, serta permintaan salinan yang terjejak |
+
+**Paket & Membership**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Operasional Paket & Membership | `package-service` | Hub registrasi paket, langganan, pemakaian hak, dan pemisahan master paket |
 
 **Gawat Darurat & Keselamatan Pasien**
 
@@ -169,8 +182,6 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | 🟢 | Integrasi SATUSEHAT | `satusehat` | Kirim Patient, Encounter, Condition, Observation ke Kemenkes lewat FHIR R4 |
 | 🟢 | Izin & Kepatuhan Faskes | `compliance-tracker` | Masa berlaku izin operasional dan SIP nakes |
 | 🟢 | Laporan RL Kemenkes | `rl-reports` | Rekapitulasi RL terisi dari data operasional |
-| 🟢 | Master Rekam Medis (MPI) | `his-mpi` | Penggabungan pasien duplikat, riwayat merge, dan penomoran rekam medis |
-| 🟢 | Kelengkapan &amp; Retensi Rekam Medis | `his-mr-governance` | Audit kelengkapan RM, jadwal retensi/pemusnahan, dan permintaan salinan oleh pasien atau asuransi |
 
 ---
 
@@ -326,7 +337,13 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | 🟢 | Buku Besar & Akuntansi | `accounting` | Jurnal otomatis terintegrasi COA |
 | 🟢 | Laporan Laba Rugi | `finance` › finance-report | Pendapatan, HPP, beban, net margin |
 | 🟢 | Aset Tetap & Kalibrasi | `assets` | Inventaris alat, penyusutan, kalibrasi |
-| 🟢 | Penggajian | `payroll` | Gaji, tunjangan, BPJS, PPh 21 |
+
+**Remunerasi**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Hub Remunerasi | `remuneration` | Keterkaitan roster, presensi, komisi, fee layanan, dan payroll per periode |
+| 🟢 | Penggajian & Slip | `payroll` | Perhitungan, review, finalisasi payroll, jurnal, dan slip gaji |
 
 ---
 
@@ -354,9 +371,15 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 
 ---
 
-### SDM & HRD
+### Workforce & SDM
 
 `sdm`
+
+**Ikhtisar Workforce**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Hub Workforce | `workforce` | Ringkasan personalia, kapasitas roster, kehadiran, dan produktivitas |
 
 **Personalia**
 

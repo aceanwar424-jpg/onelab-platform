@@ -10,6 +10,9 @@ let _lisOrderSelectedTests = [];
 let _lisAllProducts = [];
 let _lisSearchQuery = '';
 let _lisCurrentPriority = 'ROUTINE';
+let _lisLinkedVisit = null;
+let _lisPendingCommand = null;
+let _lisSubmitting = false;
 
 // Presets Panel Cepat (AVA Lab)
 const QUICK_PANELS = [
@@ -98,21 +101,18 @@ const CLINICAL_PRESETS = [
   'Trimester 1 ANC'
 ];
 
-async function renderLisAdmission() {
+async function renderLisAdmission(params = {}) {
   const main = document.getElementById('main-content');
   if (!main) return;
 
-  _lisAllProducts = (typeof loadLabProducts === 'function') ? (await loadLabProducts()) : (window.REAL_MASTER_LAB_TESTS || []);
-  if (!_lisAllProducts || !_lisAllProducts.length) {
-    _lisAllProducts = window.REAL_MASTER_LAB_TESTS || [];
+  let catalogUnavailable = false;
+  try {
+    _lisAllProducts = await sbRpc('lis_his_catalog', {});
+    if (!Array.isArray(_lisAllProducts)) throw new Error('Katalog tidak tersedia');
+  } catch(e) {
+    _lisAllProducts = [];
+    catalogUnavailable = true;
   }
-
-  const today = new Date();
-  const dateStr = today.toISOString().slice(2, 10).replace(/-/g, '');
-  const randSeq = String(Math.floor(Math.random() * 900) + 100);
-  const autoBarcode = `L${dateStr}-${randSeq}`;
-  const autoVisit = `WALK-LAB-${dateStr}-${randSeq}`;
-  const autoMR = `RM-${dateStr}-${randSeq}`;
 
   main.innerHTML = `
     <div style="padding:12px 16px; font-family:'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; max-width:1600px; margin:0 auto; font-size:12px; color:var(--text, #1e293b); box-sizing:border-box; overflow-x:hidden;">
@@ -135,24 +135,30 @@ async function renderLisAdmission() {
           <button type="button" class="btn btn-xs" onclick="resetLisAdmissionForm()" style="background:rgba(255,255,255,0.12); color:#cbd5e1; border:1px solid rgba(255,255,255,0.25); font-weight:700; padding:4px 10px;">
             📄 Form Baru
           </button>
-          <button type="button" class="btn btn-xs" onclick="submitFullPageLisOrder('${autoVisit}')" style="background:#10B981; color:#fff; border:1px solid #059669; font-weight:800; padding:4px 14px; box-shadow:0 2px 8px rgba(16,185,129,0.35);">
+          <button type="button" class="btn btn-xs" onclick="submitFullPageLisOrder()" style="background:#10B981; color:#fff; border:1px solid #059669; font-weight:800; padding:4px 14px; box-shadow:0 2px 8px rgba(16,185,129,0.35);">
             💾 Simpan &amp; Barcode (Ctrl+Enter)
           </button>
         </div>
       </div>
 
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">
+        <label for="lis-his-visit">No. kunjungan HIS</label>
+        <input id="lis-his-visit" placeholder="Masukkan nomor kunjungan" style="padding:8px;border:1px solid var(--border);border-radius:6px">
+        <button class="btn btn-outline btn-sm" type="button" onclick="loadLisHisVisit()">Muat Order HIS</button>
+        <span id="lis-his-sync-status" role="status" style="font-size:12px;color:var(--text3)">Registrasi baru · layanan dan tagihan ditautkan ke HIS</span>
+      </div>
       <!-- HORIZONTAL COMPACT DEMOGRAPHIC PANEL (RESPONSIVE GRID) -->
       <div id="lis-adm-header-panel" style="background:var(--bg2, #f1f5f9); border:1px solid var(--border, #cbd5e1); padding:10px 12px; margin-bottom:10px; border-radius:8px;">
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); gap:8px; align-items:end;">
           
           <div>
             <label style="font-size:10px; font-weight:800; color:var(--text3, #64748b); text-transform:uppercase;">Lab No / Accession</label>
-            <input type="text" id="adm-barcode" value="${autoBarcode}" readonly style="width:100%; padding:5px 7px; font-size:11.5px; font-weight:800; font-family:monospace; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; color:#0f766e; box-sizing:border-box;">
+            <input type="text" id="adm-barcode" value="Dibuat saat disimpan" readonly style="width:100%; padding:5px 7px; font-size:11.5px; font-weight:800; font-family:monospace; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; color:#0f766e; box-sizing:border-box;">
           </div>
 
           <div>
             <label style="font-size:10px; font-weight:800; color:var(--text3, #64748b); text-transform:uppercase;">No. RM / PID *</label>
-            <input type="text" id="adm-mr-no" value="${autoMR}" style="width:100%; padding:5px 7px; font-size:11.5px; font-family:monospace; font-weight:700; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; box-sizing:border-box;">
+            <input type="text" id="adm-mr-no" value="" placeholder="No. RM pasien (jika tersedia)" style="width:100%; padding:5px 7px; font-size:11.5px; font-family:monospace; font-weight:700; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; box-sizing:border-box;">
           </div>
 
           <div style="grid-column: span 2;">
@@ -167,7 +173,7 @@ async function renderLisAdmission() {
 
           <div>
             <label style="font-size:10px; font-weight:800; color:var(--text3, #64748b); text-transform:uppercase;">Usia *</label>
-            <input type="text" id="adm-age" value="30 Th" placeholder="30 Th" style="width:100%; padding:5px 7px; font-size:11.5px; font-weight:700; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; box-sizing:border-box;">
+            <input type="text" id="adm-age" value="" placeholder="Usia pasien" style="width:100%; padding:5px 7px; font-size:11.5px; font-weight:700; background:var(--bg, #fff); border:1px solid var(--border, #cbd5e1); border-radius:4px; box-sizing:border-box;">
           </div>
 
           <div>
@@ -289,7 +295,7 @@ async function renderLisAdmission() {
           
           <div style="background:#0B2240; color:#fff; font-weight:800; font-size:11.5px; padding:6px 10px; letter-spacing:0.02em; display:flex; justify-content:space-between; align-items:center;">
             <span>📋 RINGKASAN ORDER (<span id="adm-selected-count">0</span>)</span>
-            <button type="button" onclick="_lisOrderSelectedTests=[]; renderLis5ColumnMatrix();" style="background:none; border:none; color:#f87171; font-size:10.5px; font-weight:700; cursor:pointer;">Reset</button>
+            <button type="button" onclick="if (!_lisPendingCommand && !_lisSubmitting) { _lisOrderSelectedTests=[]; renderLis5ColumnMatrix(); }" style="background:none; border:none; color:#f87171; font-size:10.5px; font-weight:700; cursor:pointer;">Reset</button>
           </div>
 
           <!-- SELECTED TESTS LIST TABLE -->
@@ -308,7 +314,7 @@ async function renderLisAdmission() {
             </div>
             <p style="font-size:12px;color:var(--text3)">Pilihan layanan dikirim ke admisi HIS. Tarif dan pembayaran dikelola di HIS.</p>
 
-            <button type="button" class="btn btn-teal" onclick="submitFullPageLisOrder('${autoVisit}')"
+            <button type="button" class="btn btn-teal" onclick="submitFullPageLisOrder()"
               style="width:100%; font-weight:800; padding:9px; font-size:12.5px; border-radius:5px; background:#10B981; color:#fff; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(16,185,129,0.35);">
               💾 SIMPAN ORDER &amp; CETAK BARCODE
             </button>
@@ -323,15 +329,29 @@ async function renderLisAdmission() {
 
   // Attach Ctrl+Enter Shortcut
   document.onkeydown = function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      submitFullPageLisOrder(autoVisit);
+    if (document.getElementById('lis-his-sync-status') && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      submitFullPageLisOrder();
     }
   };
 
   renderLis5ColumnMatrix();
+  if (catalogUnavailable) document.getElementById('lis-his-sync-status').textContent = 'Katalog HIS belum tersedia. Periksa koneksi atau aktivasi API LIS–HIS.';
+  if (_lisPendingCommand) {
+    document.getElementById('lis-his-sync-status').textContent = 'Ada pengiriman belum selesai. Klik Simpan untuk melanjutkan permintaan yang sama.';
+    lockLisPendingForm(_lisPendingCommand.body);
+  } else if (_lisLinkedVisit) {
+    document.getElementById('lis-his-visit').value = _lisLinkedVisit.visit_number;
+    await loadLisHisVisit();
+  }
+  if (params.visit_number) {
+    document.getElementById('lis-his-visit').value = params.visit_number;
+    await loadLisHisVisit();
+  }
 }
 
 function setLisOrderPriority(p) {
+  if (_lisPendingCommand || _lisSubmitting) return;
   _lisCurrentPriority = p;
   const panel = document.getElementById('lis-adm-header-panel');
   if (!panel) return;
@@ -345,6 +365,7 @@ function setLisOrderPriority(p) {
 }
 
 function appendLisClinicalNote(text) {
+  if (_lisPendingCommand || _lisSubmitting) return;
   const el = document.getElementById('adm-notes');
   if (!el) return;
   if (!el.value.trim()) {
@@ -355,6 +376,7 @@ function appendLisClinicalNote(text) {
 }
 
 function selectLisQuickPanel(panelId) {
+  if (_lisPendingCommand || _lisSubmitting) return;
   const panel = QUICK_PANELS.find(p => p.id === panelId);
   if (!panel) return;
 
@@ -499,6 +521,7 @@ function renderSelectedTable() {
 }
 
 function toggleLisTestSelection(productId, isChecked) {
+  if (_lisPendingCommand || _lisSubmitting) return;
   const prod = _lisAllProducts.find(p => p.id === productId);
   if (!prod) return;
 
@@ -514,11 +537,15 @@ function toggleLisTestSelection(productId, isChecked) {
 }
 
 function removeLisSelectedTest(productId) {
+  if (_lisPendingCommand || _lisSubmitting) return;
   _lisOrderSelectedTests = _lisOrderSelectedTests.filter(t => t.id !== productId);
   renderLis5ColumnMatrix();
 }
 
 function resetLisAdmissionForm() {
+  if (_lisSubmitting) return;
+  _lisLinkedVisit = null;
+  _lisPendingCommand = null;
   _lisOrderSelectedTests = [];
   _lisSearchQuery = '';
   _lisCurrentPriority = 'ROUTINE';
@@ -579,108 +606,86 @@ function getRequiredTubesForTests(tests = []) {
   return Object.values(tubes).sort((a, b) => a.order - b.order);
 }
 
-async function submitFullPageLisOrder(visitNumber) {
-  const patient_name = document.getElementById('adm-patient-name')?.value?.trim();
-  const nik = document.getElementById('adm-nik')?.value?.trim() || null;
-  const mr_no = document.getElementById('adm-mr-no')?.value?.trim() || null;
-  const patient_gender = document.getElementById('adm-gender')?.value || 'L';
-  const ageVal = document.getElementById('adm-age')?.value?.trim() || '30';
-  const doctor = document.getElementById('adm-doctor')?.value?.trim() || 'APS';
-  const priority = _lisCurrentPriority;
-  const baseBarcode = document.getElementById('adm-barcode')?.value?.trim() || `L${Date.now().toString().slice(-8)}`;
-  const notes = document.getElementById('adm-notes')?.value?.trim() || null;
-
-  if (!patient_name) {
-    if (typeof toast === 'function') toast('Nama Pasien wajib diisi', 'err');
-    return;
-  }
-
-  if (!_lisOrderSelectedTests.length) {
-    if (typeof toast === 'function') toast('Pilih minimal 1 parameter pemeriksaan laboratorium', 'err');
-    return;
-  }
-
-  try {
-    // 1. Simpan ke admissions
-    const adm = await sbPost('admissions', {
-      visit_number: visitNumber,
-      patient_name,
-      patient_nik: nik,
-      mr_number: mr_no,
-      patient_gender,
-      patient_age: parseInt(ageVal, 10) || 30,
-      doctor_name: doctor,
-      unit: 'Laboratorium',
-      visit_type: 'Walk-in (APS)',
-      priority,
-      status: 'In Progress',
-      created_at: new Date().toISOString()
-    });
-
-    const admId = Array.isArray(adm) ? adm[0]?.id : adm?.id;
-
-    // 2. Smart Tube Splitting
-    const requiredTubes = getRequiredTubesForTests(_lisOrderSelectedTests);
-    const barcodeLabelsToPrint = [];
-
-    for (const tube of requiredTubes) {
-      const tubeBarcode = `${baseBarcode}-${tube.suffix}`;
-      const tubeTestNames = tube.tests.map(t => t.nama_tes).join(', ');
-
-      const sample = await sbPost('lab_samples', {
-        barcode: tubeBarcode,
-        admission_id: admId || null,
-        visit_number: visitNumber,
-        patient_name,
-        product_name: tubeTestNames,
-        sampel_type: tube.name,
-        volume_ml: 3.0,
-        collected_at: new Date().toISOString(),
-        collected_by: typeof labUser === 'function' ? labUser() : 'Analis',
-        received_at: new Date().toISOString(),
-        status: 'Pending',
-        notes
-      });
-
-      const sampleId = Array.isArray(sample) ? sample[0]?.id : sample?.id;
-
-      // Buat draft analitik per tes di tabung ini
-      for (const test of tube.tests) {
-        if (typeof labCreateDraftResults === 'function') {
-          await labCreateDraftResults(
-            { admission_id: admId, sample_id: sampleId, visit_number: visitNumber, patient_name },
-            test.id,
-            test.nama_tes
-          );
-        }
-      }
-
-      barcodeLabelsToPrint.push({
-        barcode: tubeBarcode,
-        patient_name,
-        product_name: tubeTestNames,
-        visit_number: visitNumber,
-        sample_type: tube.name,
-        mr_number: mr_no
-      });
-    }
-
-    if (typeof toast === 'function') toast(`✅ Order Lab Tersimpan (${requiredTubes.length} Tabung Spesimen)`, 'ok');
-
-    // 3. Print barcode tabung multi-label
-    if (typeof printLabBarcodes === 'function') {
-      setTimeout(() => {
-        printLabBarcodes(barcodeLabelsToPrint);
-      }, 300);
-    }
-
-    // Reset state & navigate to sample list
-    _lisOrderSelectedTests = [];
-    navigate('lab');
-  } catch (e) {
-    if (typeof toast === 'function') toast('❌ ' + e.message, 'err');
+function lockLisPendingForm(body) {
+  const fields = {
+    'adm-patient-name':body.patient_name, 'adm-mr-no':body.mr_number,
+    'adm-nik':body.patient_id_number, 'adm-age':body.patient_age,
+    'adm-gender':body.patient_gender === 'M' ? 'L' : 'P',
+    'adm-doctor':body.doctor_referral, 'adm-notes':body.notes, 'adm-priority':body.priority
+  };
+  for (const [id,value] of Object.entries(fields)) {
+    const el = document.getElementById(id);
+    if (el) { el.value = value ?? ''; el.disabled = true; }
   }
 }
+
+async function loadLisHisVisit() {
+  if (_lisSubmitting || _lisPendingCommand) return;
+  try {
+    const visit = document.getElementById('lis-his-visit')?.value.trim();
+    if (!visit) throw new Error('Masukkan nomor kunjungan HIS');
+    const data = await sbRpc('lis_his_load_visit', { p_visit: visit });
+    if (!data?.id) throw new Error(data?.error || 'Kunjungan tidak tersedia');
+    const missing = data.product_ids.filter(id => !_lisAllProducts.some(p => String(p.id) === String(id)));
+    if (missing.length) throw new Error('Katalog layanan order belum lengkap. Perbarui katalog sebelum mengubah order.');
+    _lisLinkedVisit = data;
+    _lisOrderSelectedTests = _lisAllProducts.filter(p => data.product_ids.some(id => String(id) === String(p.id)));
+    const fields = { 'adm-patient-name':data.patient_name, 'adm-mr-no':data.mr_number,
+      'adm-age':data.patient_age, 'adm-gender':['M','L'].includes(data.patient_gender) ? 'L' : 'P' };
+    for (const [id,value] of Object.entries(fields)) {
+      const el = document.getElementById(id); if (el) { el.value = value ?? ''; el.disabled = true; }
+    }
+    document.getElementById('lis-his-sync-status').textContent = 'Terhubung ke HIS · ' + data.visit_number;
+    renderLis5ColumnMatrix();
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+async function submitFullPageLisOrder() {
+  if (_lisSubmitting) return;
+  const value = id => document.getElementById(id)?.value?.trim() || '';
+  if (!_lisPendingCommand && (!value('adm-patient-name') || !_lisOrderSelectedTests.length)) {
+    toast('Isi nama pasien dan pilih minimal satu pemeriksaan', 'err'); return;
+  }
+  if (!_lisPendingCommand && !_lisLinkedVisit && value('lis-his-visit')) {
+    toast('Klik Muat Order HIS terlebih dahulu agar tidak membuat kunjungan baru', 'err'); return;
+  }
+  _lisSubmitting = true;
+  const status = document.getElementById('lis-his-sync-status');
+  try {
+    // Retain the identical key/body after a timeout. A retry cannot duplicate an admission.
+    if (!_lisPendingCommand) _lisPendingCommand = {
+      id: crypto.randomUUID(),
+      body: {
+        admission_id: _lisLinkedVisit?.id || null,
+        services_snapshot: _lisLinkedVisit?.services_snapshot ?? null,
+        patient_name:value('adm-patient-name'), patient_id_number:value('adm-nik'),
+        mr_number:value('adm-mr-no'), patient_age:parseInt(value('adm-age'),10) || null,
+        patient_gender:value('adm-gender') === 'L' ? 'M' : 'F', doctor_referral:value('adm-doctor'),
+        priority:_lisCurrentPriority, notes:value('adm-notes'),
+        product_ids:_lisOrderSelectedTests.map(p => p.id)
+      },
+      tubes:getRequiredTubesForTests(_lisOrderSelectedTests).map(t => ({name:t.name,product_ids:t.tests.map(p => p.id)}))
+    };
+    if (status) status.textContent = 'Mengirim pilihan layanan ke HIS…';
+    const command = _lisPendingCommand;
+    lockLisPendingForm(command.body);
+    const receipt = await sbRpc('lis_his_submit_order', {p_request_id:command.id,p_body:command.body});
+    if (!receipt?.ok) throw new Error(receipt?.error || 'HIS belum mengonfirmasi penerimaan layanan');
+    if (status) status.textContent = 'Layanan diterima HIS. Menyiapkan sampel…';
+    const prepared = await sbRpc('lis_his_prepare_samples', {p_request_id:command.id,p_tubes:command.tubes});
+    if (!prepared?.samples_prepared) throw new Error(prepared?.error || 'Sampel belum selesai disiapkan');
+    _lisPendingCommand = null;
+    _lisLinkedVisit = null;
+    _lisOrderSelectedTests = [];
+    toast('Order tersimpan. Rincian layanan masuk ke admisi HIS untuk penetapan tagihan.', 'ok');
+    if (prepared.labels?.length && typeof printLabBarcodes === 'function') printLabBarcodes(prepared.labels);
+    navigate('lab');
+  } catch(e) {
+    if (status) status.textContent = 'Sinkronisasi belum selesai. Klik Simpan untuk mengulang permintaan yang sama.';
+    toast(e.message, 'err');
+  } finally { _lisSubmitting = false; }
+}
+window.loadLisHisVisit = loadLisHisVisit;
 
 window.renderLisAdmission = renderLisAdmission;
 window.renderLis5ColumnMatrix = renderLis5ColumnMatrix;

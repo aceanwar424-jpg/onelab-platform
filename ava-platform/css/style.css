@@ -2864,6 +2864,31 @@ body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .table-w
 .clinical-flag.critical { color: #b42318; background: #ffe9e7; }
 .clinical-results-empty { min-height: 220px; padding: 34px 18px; }
 .clinical-results-empty p { max-width: 440px; margin: 5px auto 0; color: var(--text3); font-size: 11.5px; line-height: 1.45; }
+
+/* Hub operasional: navigasi lintas proses, bukan sumber transaksi baru. */
+.ops-hub { max-width: 1320px; margin: 0 auto; }
+.ops-hub-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 2px 2px 12px; border-bottom: 1px solid var(--border); }
+.ops-hub-head > div:first-child > span { display: block; margin-bottom: 4px; color: var(--teal); font-size: 9.5px; font-weight: 800; letter-spacing: .08em; }
+.ops-hub-head h1 { margin: 0; color: var(--navy); font-size: 19px; letter-spacing: -.015em; }
+.ops-hub-head p { max-width: 780px; margin: 4px 0 0; color: var(--text3); font-size: 11.5px; line-height: 1.45; }
+.ops-hub-readonly { flex: 0 0 auto; padding: 7px 9px; color: var(--text2); background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; font-size: 10px; font-weight: 700; }
+.ops-hub-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 168px)); gap: 8px; min-height: 50px; margin: 10px 0; }
+.ops-hub-metric { display: grid; gap: 2px; min-height: 52px; padding: 8px 10px; background: var(--white); border: 1px solid var(--border); border-top: 2px solid var(--teal); border-radius: 8px; }
+.ops-hub-metric strong { color: var(--navy); font-size: 16px; line-height: 1; font-variant-numeric: tabular-nums; }
+.ops-hub-metric span { color: var(--text2); font-size: 10px; font-weight: 700; }
+.ops-hub-metric small { color: var(--text3); font-size: 9px; }
+.ops-hub-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ops-hub-grid section { padding: 11px; background: var(--white); border: 1px solid var(--border); border-radius: 9px; }
+.ops-hub-grid h2 { margin: 0 0 8px; color: var(--navy); font-size: 12px; }
+.ops-hub-actions { display: grid; gap: 6px; }
+.ops-hub-card { display: grid; grid-template-columns: 27px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; padding: 8px; color: var(--text); text-align: left; background: var(--bg2); border: 1px solid transparent; border-radius: 7px; cursor: pointer; }
+.ops-hub-card:hover { background: var(--teal-light); border-color: var(--teal); }
+.ops-hub-icon { display: grid; width: 27px; height: 27px; place-items: center; background: var(--white); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+.ops-hub-card strong, .ops-hub-card small { display: block; }
+.ops-hub-card strong { color: var(--navy); font-size: 11px; }
+.ops-hub-card small { margin-top: 1px; color: var(--text3); font-size: 9.5px; line-height: 1.3; }
+.ops-hub-card > b { color: var(--teal); font-size: 14px; }
+.ops-hub-note { margin-top: 10px; padding: 9px 10px; color: var(--text2); background: var(--bg2); border-left: 3px solid var(--gold); border-radius: 6px; font-size: 10.5px; line-height: 1.45; }
 @media (max-width: 768px) {
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .main-content { padding: 12px; }
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .page-header { align-items: flex-start; flex-direction: column; }
@@ -2875,4 +2900,9 @@ body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .table-w
   .clinical-results-toolbar input { grid-column: 1 / -1; }
   .clinical-results-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .clinical-results-summary > div { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .ops-hub-head { align-items: stretch; flex-direction: column; gap: 8px; }
+  .ops-hub-readonly { width: fit-content; }
+  .ops-hub-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ops-hub-metric { padding: 8px; }
+  .ops-hub-grid { grid-template-columns: 1fr; }
 }

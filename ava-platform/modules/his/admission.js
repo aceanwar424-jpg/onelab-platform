@@ -424,7 +424,7 @@ function renderAdmList(data) {
       <td><div class="admission-patient"><b>${a.patient_name || '—'}</b><span>${a.patient_gender || ''}${a.patient_age ? ' · ' + a.patient_age + ' th' : ''}${a.patient_phone ? ' · ' + a.patient_phone : ''}</span></div></td>
       <td><div class="admission-service">${a.package_name || 'Layanan individual'}<span>${a.services ? 'Layanan telah dipilih' : 'Belum ada layanan'}</span></div></td>
       <td><span class="admission-status" style="--admission-status:${st.color}">${a.status || 'Registered'}</span></td>
-      <td class="admission-billing"><b>${formatCurrency(a.net_amount || 0)}</b><span class="${a.payment_status === 'Paid' ? 'is-paid' : ''}">${a.payment_status || 'Unpaid'}</span></td>
+      <td class="admission-billing"><b>${a.lis_billing_pending ? 'Layanan LIS diperbarui' : formatCurrency(a.net_amount || 0)}</b><span class="${a.payment_status === 'Paid' ? 'is-paid' : ''}">${a.lis_billing_pending ? 'Buka admisi untuk menetapkan tagihan' : (a.payment_status || 'Unpaid')}</span></td>
       <td><div class="act-row admission-actions">
         ${['Registered', 'Anamnesa'].includes(a.status) ? `<button class="btn btn-teal btn-xs" title="Buka Anamnesa" onclick="navigate('anamnesa')" style="padding:2px 6px">${svgIcon('stethoscope', 13, '#fff')} Anamnesa</button>` : ''}
         ${a.package_id ? `<button class="act-btn" title="Cetak Ulang Barcode" onclick="reprintSampleLabels(${a.id})" style="padding:2px">${svgIcon('print', 13, 'var(--teal)')}</button>` : ''}
@@ -893,6 +893,16 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
   } catch (e) { }
   admMasterPackages = pkgs || [];
   const storedServices = parseAdmissionServices(a.services);
+  const lisMissingPrices = [];
+  if (a.lis_billing_pending) {
+    for (const line of storedServices) {
+      if (line.unit_price == null) {
+        const product = admMasterProducts.find(p => String(p.id) === String(line.product_id));
+        if (!product || product.harga_normal == null) lisMissingPrices.push(line.name || line.product_id);
+        else line.unit_price = Number(product.harga_normal);
+      }
+    }
+  }
   const storedContext = getStoredAdmissionContext(storedServices, mode);
 
   // Load existing patient IDs and service lines if editing
@@ -924,6 +934,9 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
       }));
     } catch (e) { }
   }
+  admFormState.lisSnapshot = a.services ?? null;
+  admFormState.lisPending = !!a.lis_billing_pending;
+  admFormState.lisMissingPrices = lisMissingPrices;
   if (!admFormState.patientIds.length && a.patient_id_number) {
     admFormState.patientIds.push({ id_type: a.patient_id_type || 'ID Card Number', id_number: a.patient_id_number, issuer_country: 'Indonesia', is_primary: true });
   }
@@ -1141,6 +1154,7 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
         </div>
         <span>Panel dan paket terurai menjadi komponen agar harga serta antrean dapat ditelusuri.</span>
       </div>
+      ${a.lis_billing_pending ? '<p role="status" style="padding:12px;border:1px solid var(--teal);border-radius:8px">Layanan dari LIS sudah diterima. Tarif diambil dari katalog HIS; periksa diskon dan simpan untuk menetapkan tagihan. Pembayaran dilakukan setelah rekonsiliasi tersimpan.</p>' : ''}
       <div id="af-services-table"></div>
     </div>
 
@@ -1558,6 +1572,16 @@ async function saveAdmission(id) {
   try {
     let admissionId = id;
     if (id) {
+      if (admFormState.lisPending) {
+        if (admFormState.lisMissingPrices?.length) throw new Error('Lengkapi tarif katalog HIS untuk: ' + admFormState.lisMissingPrices.join(', '));
+        if (payload.payment_status !== 'Unpaid') throw new Error('Simpan rekonsiliasi layanan LIS terlebih dahulu, lalu proses pembayaran di HIS.');
+        const finalized = await sbRpc('his_finalize_lis_services', {
+          p_admission_id:id, p_snapshot:admFormState.lisSnapshot, p_bill:payload
+        });
+        if (!finalized?.ok) throw new Error(finalized?.error || 'Rekonsiliasi LIS belum tersimpan');
+        // The RPC owns the service/amount snapshot; a later PATCH must not replace it.
+        for (const key of ['services','gross_amount','total_amount','line_discount','scheme_discount','voucher_discount','discount_amount','net_amount','payment_status']) delete payload[key];
+      }
       await sbPatch('admissions', id, payload); toast('✅ Data diupdate', 'ok');
     } else {
       const created = await sbPost('admissions', payload);

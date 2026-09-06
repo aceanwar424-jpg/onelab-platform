@@ -20,7 +20,7 @@
 // buruk daripada perilaku lama.
 // ═══════════════════════════════════════════════════════════════
 
-const MODUL_VER = '20260906-clinical-results';
+const MODUL_VER = '20260906-ops-hubs-lis-his-sync';
 const _modulDimuat = new Map();   // src → Promise
 
 function muatSkrip(src) {
