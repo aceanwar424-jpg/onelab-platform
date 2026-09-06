@@ -207,15 +207,15 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
 
 ### Urutan implementasi
 
-1. [ ] Petakan ulang enam alur Admission ke data dan kontrak yang sudah ada:
+1. [x] Petakan ulang enam alur Admission ke data dan kontrak yang sudah ada:
    OPD, layanan langsung, medical kit, paket, langganan, dan pemakaian paket.
-2. [ ] Buat tiap alur memiliki konteks layanan, field wajib, validasi pra-simpan,
+2. [x] Buat tiap alur memiliki konteks layanan, field wajib, validasi pra-simpan,
    serta ringkasan transaksi yang berbeda tanpa menambah kolom basis data.
-3. [ ] Rapikan workspace daftar, form, pemilih layanan/paket, pembayaran,
+3. [x] Rapikan workspace daftar, form, pemilih layanan/paket, pembayaran,
    kasir, laporan, dan handoff antrean dengan komponen kompak responsif.
-4. [ ] Tambahkan pemeriksaan konsistensi mode pada UI dan payload, serta jalur
+4. [x] Tambahkan pemeriksaan konsistensi mode pada UI dan payload, serta jalur
    aman bila data master atau layanan pendukung belum tersedia.
-5. [ ] Uji tiap mode hingga renderer/validasi/transisi dapat dicapai tanpa
+5. [x] Uji tiap mode hingga renderer/validasi/transisi dapat dicapai tanpa
    menyimpan transaksi; jalankan audit menu, sintaks, dan keamanan.
 
 ### Implikasi IP & Kepatuhan

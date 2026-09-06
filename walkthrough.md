@@ -460,3 +460,31 @@ Verifikasi: verify-public-profile PASS (beranda ≤4 section, menu membuka halam
 ## Kisah AVA & Founder — 2026-09-06
 OWNED_BY: ava. scripts/public-company-story.js menjadi sumber narasi. Ditambahkan public/founder.html dan public/sejarah.html; Tentang AVA menampilkan ringkasan, ruang foto dan tautan ke cerita lengkap. Foto berupa slot potret 4:5, bukan gambar orang lain atau URL rusak, sesuai permintaan eksplisit. Identitas Ace Anwar sebagai Founder, Owner & CEO mengikuti dokumen dan konfirmasi pemilik. Narasi mengembangkan konteks operasional lab, informatika, mutu, hubungan bisnis fisik dengan AVA Tech, identitas Queen, tahap demo dan arah wellness/produk. Enam bab sejarah adalah tema perjalanan, bukan timeline bertanggal; tidak ada kutipan, pendidikan, capaian atau peristiwa personal rekaan.
 Verifikasi: verify-public-editorial PASS (32 halaman, link/aset/anchor, H1/ID, rebuild deterministik, foto slot dan enam bab); verify-public-profile PASS; regresi kalkulator PASS; generator routing PASS; halaman tentang/founder/sejarah HTTP 200 pada :5186. Belum dipublikasikan. Foto founder dan kronologi bertanggal dapat dilengkapi setelah data pemilik tersedia.
+
+## Audit LIS — 2026-09-06
+Perapihan selesai untuk 24 menu dalam tujuh kelompok, judul topbar, konteks navigasi satu kolom, serta tema LIS khusus. Bukti: `node scripts/bangun-menu.js --periksa` lulus; Node VM memeriksa sintaks script index/router dan merender empat menu sampel; perbandingan HEAD memastikan ID dan metadata selain label tetap sama. Produksi hanya diperiksa hingga halaman login, tanpa akses pasien atau deployment. Audit rinci: docs/AUDIT-LIS-2026-09-06.md. Verifikasi visual setelah login dan transaksi klinis belum dilakukan.
+
+## Penyelesaian End-to-End Admission — 2026-09-06
+
+Enam jalur Admission kini berbagi kontrak `admissions` yang ada, namun tidak lagi
+berbagi konteks operasional secara buta. Form memuat konteks per jalur dan
+validasi pra-simpan: OPD (unit/fasilitas, dokter, waktu), layanan langsung
+(jalur dan waktu layanan), medical kit (tanggal, kode, kesiapan serta penanda
+line-item), paket (kategori dan paket), langganan (periode dan kuota), serta
+pemakaian langganan (referensi hak, tanggal dan kuantitas). Konteks disimpan
+bersama JSON layanan yang sudah digunakan oleh kontrak lama; tidak ada migrasi
+skema, transaksi, atau perubahan basis data produksi.
+
+Tampilan diperpadat dengan blok konteks tiga kolom responsif, toolbar layanan
+ringkas, tabel layanan yang dapat digulir horizontal pada layar sempit, dan
+tab kerja yang tetap berurutan Pasien, Pembayaran, Unit & Layanan/Medical Kit,
+Kasir. Preview lokal tanpa penyimpanan mengonfirmasi form OPD dan Medical Kit,
+termasuk field wajib dan kolom penanda kit. Panel Alur Pasien menampilkan enam
+opsi Admission dengan tujuan masing-masing.
+
+Verifikasi: `node --check` untuk Admission dan lazy loader, pemeriksa struktur
+menu, audit 161 menu hidup, audit keamanan 2.350/2.350, kontrak registry 20
+domain, dan `git diff --check` semuanya lulus. Penegakan saldo/masa berlaku
+langganan secara atomik masih memerlukan ledger klinis server-side dan
+checkpoint perubahan skema; UI tidak mengklaim telah menggantikan kontrol
+otoritatif tersebut.

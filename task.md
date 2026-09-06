@@ -77,10 +77,10 @@
 
 ## Penyelesaian End-to-End Admission — 6 September 2026
 
-- [ ] Petakan kontrak dan field per jenis registrasi.
-- [ ] Bedakan konteks, validasi, dan ringkasan tiap alur Admission.
-- [ ] Rapikan daftar, form, pemilih layanan, pembayaran, kasir, laporan, dan handoff antrean.
-- [ ] Uji renderer serta transisi tanpa menyimpan transaksi.
+- [x] Petakan kontrak dan field per jenis registrasi.
+- [x] Bedakan konteks, validasi, dan ringkasan tiap alur Admission.
+- [x] Rapikan daftar, form, pemilih layanan, pembayaran, kasir, laporan, dan handoff antrean.
+- [x] Uji renderer serta transisi tanpa menyimpan transaksi.
 
 ## Web publik AVA Health — 2026-09-05
 - [x] Audit sumber portal, pemetaan domain, dan perubahan pengguna.
@@ -144,3 +144,5 @@
 - [x] Audit menu sumber dan halaman masuk produksi.
 - [ ] Rapikan kelompok, label, judul navigasi dan tema LIS.
 - [ ] Verifikasi rute, generator, sintaks dan catat keterbatasan audit.
+- [x] Rapikan kelompok, label, judul navigasi dan tema LIS.
+- [x] Verifikasi 24 rute/metadata, generator dan sintaks; dokumentasikan batas audit produksi dan uji visual tertunda.
