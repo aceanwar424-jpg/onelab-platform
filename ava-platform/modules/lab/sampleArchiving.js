@@ -221,13 +221,8 @@ function archiveSpecimen(barcode, data = {}) {
 }
 
 function findArchivedSpecimen(barcode) {
-  const entry = _mockArchiveStore[barcode] || {
-    barcode,
-    freezer_id: 'FREEZER-A (-20°C)',
-    rack_id: 'RACK-03',
-    box_id: 'BOX-SERUM-02',
-    grid_position: 'D4'
-  };
+  const entry = _mockArchiveStore[barcode];
+  if (!entry) return { found:false, entry:null, location_summary:null };
   return {
     found: true,
     entry,

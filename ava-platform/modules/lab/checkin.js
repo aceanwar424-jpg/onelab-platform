@@ -537,6 +537,8 @@ async function confirmRejectSample(id){
 }
 
 async function openWalkinLabModal() {
+  navigate('lis-admission'); return; // Semua order memakai kontrak layanan HIS–LIS.
+
   const prods = await loadLabProducts();
   const prodOptions = (prods || []).map(p => `<option value="${p.id}" data-price="${p.harga_dasar || p.tarif || 0}" data-sample="${p.sampel_type || 'Darah Vena'}" data-name="${p.nama_tes}">${p.kode_internal || 'LAB'} — ${p.nama_tes} (${p.sampel_type || 'Darah'})</option>`).join('');
 
@@ -639,6 +641,8 @@ function onWalkinTestSelected(selectEl) {
 }
 
 async function submitWalkinLabOrder(visitNumber) {
+  navigate('lis-admission'); return; // Semua order memakai kontrak layanan HIS–LIS.
+
   const patient_name = document.getElementById('walkin-name')?.value?.trim();
   const nik = document.getElementById('walkin-nik')?.value?.trim() || null;
   const patient_gender = document.getElementById('walkin-gender')?.value || 'L';

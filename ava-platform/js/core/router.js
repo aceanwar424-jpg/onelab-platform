@@ -424,7 +424,8 @@ async function navigate(page, params={}) {
     case 'lis-kelayakan':
     case 'specimen-verification': safeRun('renderSpecimenVerification'); break;
     case 'lis-analyzer':
-    case 'analyzer-interfacing': safeRun('renderAnalyzerInterfacing'); break;
+    case 'analyzer-interfacing':
+    case 'tech-analyzer': safeRun('renderAnalyzerInterfacing'); break;
     case 'lis-lot-verification':
     case 'lot-verification': safeRun('renderLotVerification');       break;
     case 'lis-pme':

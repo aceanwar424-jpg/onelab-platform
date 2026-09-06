@@ -3,7 +3,7 @@
 // - Validasi teknis (analis)     : Draft → Validated
 // - AI Conclusion generation     : Triggered on validation
 // - Approval klinis (dokter)     : Validated → Approved (Released)
-// - Digital signature on approval: PKI-signed for ISO 15189
+// - Digital signature on approval: Identitas otorisator-signed for ISO 15189
 // - Layout: Sidebar (pasien) | Tengah (grid hasil + bilah aksi) | Kanan (detail/kesimpulan)
 //
 // ── Model aksi (tanpa centang) ────────────────────────────────────────────────
@@ -16,7 +16,7 @@
 
 let _valNotes={};
 
-// Catatan: modul ConclusionEngine/AuditLogger/PKIService di js/core dibangun untuk
+// Catatan: modul ConclusionEngine/AuditLogger/Identitas otorisatorService di js/core dibangun untuk
 // klien supabase-js (this.db.from().select()) yang TIDAK ada di aplikasi ini —
 // aplikasi memakai REST helper (sbGet/sbPost). Karena itu ketiganya tidak pernah
 // berfungsi di sini, dan mereferensikannya justru melempar "supabase is not defined"
@@ -62,7 +62,8 @@ function valPatientsByStatus(targetStatus){
 function valPaneHtml(mode){
   const p=VAL_MODES[mode].prefix;
   return `
-    <div style="display:grid;grid-template-columns:240px 1fr 260px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--white)">
+    <style>.lis-review-grid{display:grid;grid-template-columns:220px minmax(0,1fr) 240px}@media(max-width:1100px){.lis-review-grid{grid-template-columns:190px minmax(0,1fr)}.lis-review-grid>div:last-child{grid-column:1/-1}}@media(max-width:760px){.lis-review-grid{grid-template-columns:minmax(0,1fr)}} </style>
+    <div class="lis-review-grid" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--white)">
       <div id="${p}-worklist" style="border-right:1px solid var(--border);overflow-y:auto;max-height:640px;background:var(--lgray)"></div>
       <div style="display:flex;flex-direction:column;min-width:0">
         <div id="${p}-pbar" style="border-bottom:1px solid var(--border);padding:10px 14px;background:var(--bg)"></div>
@@ -93,7 +94,7 @@ function renderValidationTab(){
       ${toValidate.length?`<button class="btn btn-ghost btn-sm" onclick="validateAllResults()">Validasi Semua Pasien (non-kritis)</button>`:''}
     </div>
     ${patients.length?valPaneHtml('validate')
-      :`<div class="empty-state"><div class="ico">✅</div><h3>Semua hasil sudah divalidasi</h3></div>`}`;
+      :`<div class="empty-state"><div class="ico">✅</div><h3>Tidak ada hasil menunggu verifikasi pada data yang dimuat</h3></div>`}`;
 
   if(patients.length){
     renderValWorklist(patients,'validate');
@@ -330,107 +331,39 @@ function selectValResult(rid, mode='validate'){
 // hasil cetak.
 // ── Validasi seluruh hasil satu pasien ────────────────────────
 // Yang ada hasilnya divalidasi; yang kosong / kritis-belum-dilapor tertahan.
-async function validatePatientResults(admId){
-  const drafts=labResults.filter(r=>r.status==='Draft' && r.result_value && r.admission_id==admId);
-  if(!drafts.length){ toast('Tidak ada hasil untuk divalidasi','warn'); return; }
-
-  const now=new Date().toISOString();
-  let ok=0, held=0;
-
-  for(const r of drafts){
-    if(isCriticalResult(r) && !r.critical_ack_at){ held++; continue; }   // kritis ditahan
-    const note=_valNotes[r.id];
-    const payload={status:'Validated',validated_by:labUser(),validated_at:now,updated_at:now};
-    if(note) payload.notes=note;
-    try{
-      await sbPatch('lab_results',r.id,payload); ok++;
-      if(typeof logActivity==='function')
-        logActivity('validated','lab_results',r.id,`Hasil ${r.item_name||r.product_name||''} divalidasi`,r.patient_name);
-    }catch(e){ console.error('Validation error:',e); }
-  }
-
-  _valNotes={};
-  toast(held ? `✅ ${ok} divalidasi · ${held} kritis tertahan (Lapor dulu di banner)` : `✅ ${ok} hasil tervalidasi`, held?'warn':'ok');
-  await loadLabResults();
-  renderValidationTab(); renderApprovalTab(); renderLabKPI(); renderCriticalBanner();
+let _lisTransitionBusy=false;
+async function lisTransitionBatch(action, admissionId=null) {
+  if(_lisTransitionBusy) return;
+  const from=action==='validate'?'Draft':'Validated';
+  const rows=labResults.filter(r=>r.status===from && (admissionId==null || r.admission_id==admissionId)
+    && r.result_value!=null && String(r.result_value).trim()!=='');
+  if(!rows.length){toast('Tidak ada hasil untuk diproses','warn');return;}
+  _lisTransitionBusy=true;
+  let ok=0,failed=0;
+  try {
+    const groups=new Map();
+    for(const r of rows){const list=groups.get(r.admission_id)||[];list.push(r);groups.set(r.admission_id,list);}
+    for(const [id,group] of groups){
+      try {
+        const result=await sbRpc('lis_transition_results',{p_action:action,p_rows:group.map(r=>({id:r.id,updated_at:r.updated_at??null}))});
+        if(!result?.ok || result.count!==group.length) throw new Error('Konfirmasi transaksi tidak sesuai');
+        ok+=result.count;
+      } catch(e) { failed+=group.length; toast('Kunjungan '+id+': '+e.message,'err'); }
+    }
+    toast(`${ok} hasil ${action==='validate'?'tervalidasi':'diotorisasi dan dirilis'}${failed?' · '+failed+' belum tersimpan':''}`,failed?'warn':'ok');
+    await loadLabResults();
+    renderValidationTab();renderApprovalTab();renderLabKPI();renderCriticalBanner();
+  } finally {_lisTransitionBusy=false;}
 }
-
-// Validasi lintas SEMUA pasien (non-kritis) — kemudahan untuk lab sibuk.
-async function validateAllResults(){
-  const toValidate=labResults.filter(r=>r.status==='Draft'&&r.result_value&&!(isCriticalResult(r)&&!r.critical_ack_at));
-  if(!toValidate.length){ toast('Tidak ada hasil non-kritis untuk divalidasi','warn'); return; }
-  const now=new Date().toISOString();
-  for(const r of toValidate){
-    await sbPatch('lab_results',r.id,{status:'Validated',validated_by:labUser(),validated_at:now,updated_at:now}).catch(()=>{});
-  }
-  toast(`✅ ${toValidate.length} hasil tervalidasi`,'ok');
-  _valNotes={};
-  await loadLabResults();
-  renderValidationTab(); renderApprovalTab(); renderLabKPI();
-}
-
-// ── Approve & rilis seluruh hasil satu pasien ─────────────────
-async function approvePatientResults(admId){
-  const rows=labResults.filter(r=>r.status==='Validated' && r.admission_id==admId);
-  if(!rows.length){ toast('Tidak ada hasil untuk diapprove','warn'); return; }
-
-  // Simpan & konfirmasi kesimpulan panel (bila dokter mengisinya) SEBELUM reload,
-  // selagi textarea masih ada di DOM. Approval oleh dokter = konfirmasi kesimpulan.
-  let conclSaved=false;
-  if(typeof lpiSaveConclusion==='function') conclSaved=await lpiSaveConclusion(admId,{confirm:true});
-
-  const now=new Date().toISOString();
-  let ok=0;
-
-  for(const r of rows){
-    const payload={status:'Approved',approved_by:labUser(),approved_at:now,released_by:labUser(),released_at:now,updated_at:now};
-    try{
-      await sbPatch('lab_results',r.id,payload); ok++;
-      if(typeof logActivity==='function')
-        logActivity('approved','lab_results',r.id,`Hasil ${r.item_name||r.product_name||''} disetujui & dirilis`,r.patient_name);
-    }catch(e){ console.error('Approval error:',e); }
-  }
-
-  // ── Event Bus: Publikasikan event rilis hasil lab (ADR-07 Compliant - metadata only) ──
-  if (window.EventBus && typeof window.EventBus.publish === 'function' && rows.length) {
-    const firstRow = rows[0];
-    window.EventBus.publish('lab.result.released', 'admission', admId, 'LAB', {
-      ava_id: firstRow.ava_id || ('AVA-' + firstRow.mr_number),
-      visit_number: firstRow.visit_number,
-      total_tests: rows.length,
-      released_at: now,
-      status: 'APPROVED_AND_RELEASED'
-    }).catch(err => console.warn('[EventBus publish lab.result.released]', err));
-  }
-
-  toast(`✅ ${ok} hasil approved & rilis${conclSaved?' · kesimpulan dikonfirmasi':''}`,'ok');
-  await loadLabResults();
-  renderApprovalTab(); renderLabKPI();
-}
-
-// Approve lintas SEMUA pasien.
-async function approveAllResults(){
-  const toApprove=labResults.filter(r=>r.status==='Validated');
-  if(!toApprove.length){ toast('Tidak ada hasil untuk diapprove','warn'); return; }
-  const now=new Date().toISOString();
-  let ok=0;
-  for(const r of toApprove){
-    const payload={status:'Approved',approved_by:labUser(),approved_at:now,released_by:labUser(),released_at:now,updated_at:now};
-    try{
-      await sbPatch('lab_results',r.id,payload); ok++;
-      if(typeof logActivity==='function')
-        logActivity('approved','lab_results',r.id,`Hasil ${r.item_name||r.product_name||''} disetujui & dirilis`,r.patient_name);
-    }catch(e){}
-  }
-  toast(`✅ ${ok} hasil approved & rilis`,'ok');
-  await loadLabResults();
-  renderApprovalTab(); renderLabKPI();
-}
+async function validatePatientResults(admId){return lisTransitionBatch('validate',admId);}
+async function validateAllResults(){return lisTransitionBatch('validate');}
+async function approvePatientResults(admId){return lisTransitionBatch('release',admId);}
+async function approveAllResults(){return lisTransitionBatch('release');}
 
 // ── Cetak hasil satu pasien ───────────────────────────────────
 // Validasi → cetak sementara (draf/validated). Approval → cetak final.
 function printPatientResults(admId, mode){
-  const statusSet = mode==='approve' ? ['Validated','Approved','Released'] : ['Draft','Validated','Approved'];
+  const statusSet = mode==='approve' ? ['Approved','Released'] : ['Draft','Validated','Approved'];
   const rows=labResults.filter(r=>r.admission_id==admId && r.result_value && statusSet.includes(r.status));
   if(!rows.length){ toast('Tidak ada hasil untuk dicetak','warn'); return; }
   const p=rows[0]||{};

@@ -16,7 +16,7 @@ function getWorklistPatientsData() {
 
   // 1. Ambil dari labSamples (sampel terdaftar)
   (labSamples || []).forEach(s => {
-    const k = s.admission_id || s.visit_number || s.patient_name;
+    const k = s.admission_id || s.visit_number || ('sample:'+s.id);
     if (!k) return;
     if (!patientMap[k]) {
       patientMap[k] = {
@@ -30,7 +30,8 @@ function getWorklistPatientsData() {
         testsMap: {}
       };
     }
-    const pid = s.product_id || s.product_name;
+    if (!s.product_id && (labResults || []).some(r => String(r.sample_id) === String(s.id) || (r.admission_id && r.admission_id == s.admission_id))) return;
+    const pid = s.product_id || ('sample:'+s.id);
     if (!patientMap[k].testsMap[pid]) {
       patientMap[k].testsMap[pid] = {
         product_id: s.product_id,
@@ -50,7 +51,7 @@ function getWorklistPatientsData() {
 
   // 2. Ambil dari labResults (hasil terdaftar)
   (labResults || []).forEach(r => {
-    const k = r.admission_id || r.visit_number || r.patient_name;
+    const k = r.admission_id || r.visit_number || ('result:'+r.id);
     if (!k) return;
     if (!patientMap[k]) {
       patientMap[k] = {
@@ -84,12 +85,14 @@ function getWorklistPatientsData() {
   const patients = Object.values(patientMap).map(p => {
     const tests = Object.values(p.testsMap).map(t => {
       let status = 'Pending';
-      const results = t.results || [];
-      if (results.some(r => r.status === 'Approved' || r.status === 'Released')) {
+      const results = (t.results || []).filter(r => !['Cancelled','Canceled'].includes(r.status));
+      const sample = (labSamples || []).find(s => String(s.id) === String(t.sample_id));
+      if (sample) { t.barcode = sample.barcode; t.sampel_type = sample.sampel_type; t.sample_status = sample.status; }
+      if (results.length && results.every(r => r.status === 'Approved' || r.status === 'Released')) {
         status = 'Approve';
-      } else if (results.some(r => r.status === 'Validated')) {
+      } else if (results.length && results.every(r => ['Validated','Approved','Released'].includes(r.status))) {
         status = 'Validate';
-      } else if (results.some(r => r.result_value || r.status === 'Draft')) {
+      } else if (results.some(r => r.result_value != null && String(r.result_value).trim() !== '')) {
         status = 'Enter Result';
       } else {
         status = 'Pending';

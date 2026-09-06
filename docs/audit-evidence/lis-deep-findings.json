@@ -1,0 +1,49 @@
+{
+  "scope": "Synthetic local characterization; no production access",
+  "findings": [
+    {
+      "id": "LIS-01",
+      "result": "TAT: zero/empty real response produces a 45-minute median and hardcoded gauge counts."
+    },
+    {
+      "id": "LIS-05a",
+      "result": "QC engine returns PASS for nonnumeric measurement."
+    },
+    {
+      "id": "LIS-05b",
+      "result": "10x produces WARNING in the operational QC evaluator and REJECT in qcEngine."
+    },
+    {
+      "id": "LIS-03a",
+      "result": "A panel containing an empty Draft and one Approved analyte is displayed as Approve."
+    },
+    {
+      "id": "LIS-03b",
+      "result": "A multi-test tube plus its two result products creates three worklist entries, including a composite phantom test."
+    },
+    {
+      "id": "LIS-04a",
+      "result": "Batch validation reports one validated result even when every write fails."
+    },
+    {
+      "id": "LIS-04b",
+      "result": "Release event emitted despite zero successful approval writes."
+    },
+    {
+      "id": "LIS-12",
+      "result": "Exported archive helper reports a default freezer location for an unknown barcode; no main UI caller found."
+    },
+    {
+      "id": "LIS-13",
+      "result": "Simulator parser accepts an empty frame and fabricates an accession; not the production connector parser."
+    },
+    {
+      "id": "LIS-06a",
+      "result": "Autoverify frontend ignores normal_min/normal_max and expects ref_low/ref_high."
+    },
+    {
+      "id": "LIS-06b",
+      "result": "Archived SQL RPC reclassifies a critical Released result as Validated without evaluating QC/rule/status/tenant. Deployment not verified."
+    }
+  ]
+}

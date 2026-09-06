@@ -284,19 +284,22 @@ async function labCreateDraftResults(base, productId, productName){
 }
 
 // ── Loaders utama ────────────────────────────────────────────────
+async function labLoadAll(table) {
+  const rows=[];
+  for(let offset=0;;offset+=500) {
+    const page=await sbGet(table,`select=*&order=id.desc&limit=500&offset=${offset}`);
+    if(!Array.isArray(page)) throw new Error('Respons data laboratorium tidak valid');
+    rows.push(...page);
+    if(page.length<500) return rows;
+  }
+}
 async function loadLabSamples(){
-  try {
-    const data = await sbGet('lab_samples',
-      `select=*&order=created_at.desc&limit=200`);
-    labSamples = Array.isArray(data)?data:[];
-  } catch(e){ labSamples = []; }
+  try { labSamples=await labLoadAll('lab_samples'); }
+  catch(e){ toast('Sampel gagal dimuat. Muat ulang sebelum melanjutkan.','err'); throw e; }
 }
 async function loadLabResults(){
-  try {
-    const data = await sbGet('lab_results',
-      `select=*&order=created_at.desc&limit=300`);
-    labResults = Array.isArray(data)?data:[];
-  } catch(e){ labResults = []; }
+  try { labResults=await labLoadAll('lab_results'); }
+  catch(e){ toast('Hasil gagal dimuat. Muat ulang sebelum melanjutkan.','err'); throw e; }
 }
 
 // ── Gaya padat ala LIS desktop (Sysmex-like), scoped ke #lab-shell ──
@@ -631,7 +634,7 @@ async function saveCriticalNotification(id){
 
   const readback = document.getElementById('cv-readback')?.checked || false;
   if(status==='Berhasil' && !readback){
-    if(!confirm('Read-back belum dicentang. ISO 15189 mensyaratkan penerima mengulang kembali nilainya. Tetap simpan?')) return;
+    toast('Catat read-back sebelum menandai pelaporan berhasil.','warn'); return;
   }
 
   const atLocal = document.getElementById('cv-at').value;
@@ -642,33 +645,13 @@ async function saveCriticalNotification(id){
   ].filter(Boolean).join(' atau ') || null;
 
   try {
-    await sbPost('critical_value_notifications', {
-      result_id: id, sample_id: r.sample_id||null, admission_id: r.admission_id||null,
-      patient_name: r.patient_name||'', test_name: r.product_name||'',
-      result_value: String(r.result_value||''), unit: r.unit||'',
-      critical_range: ambang,
-      notified_by: labUser(), notified_to: to,
-      notified_role: document.getElementById('cv-role').value,
-      method: document.getElementById('cv-method').value,
-      notified_at: notifiedAt,
-      readback: status==='Berhasil' ? readback : false,
-      response: status==='Berhasil' ? (document.getElementById('cv-response').value.trim()||null) : null,
-      attempt_status: status,
-      notes: document.getElementById('cv-notes').value.trim()||null,
-      updated_at: new Date().toISOString(),
-    });
-
-    // Hasil hanya dianggap tuntas bila upaya BERHASIL.
-    // Upaya gagal tetap tercatat, dan hasil tetap muncul di banner.
-    if(status==='Berhasil'){
-      await sbPatch('lab_results', id, {
-        critical_ack_by:   labUser(),
-        critical_ack_at:   new Date().toISOString(),
-        critical_ack_note: `Dilaporkan ke ${to} via ${document.getElementById('cv-method').value}`,
-        critical_notified_at: notifiedAt,
-        critical_notified_by: labUser(),
-      });
-    }
+    const ack=await sbRpc('lis_record_critical',{p_result_id:id,p_body:{
+      notified_to:to,notified_role:document.getElementById('cv-role').value,
+      method:document.getElementById('cv-method').value,notified_at:notifiedAt,
+      readback,attempt_status:status,response:document.getElementById('cv-response').value.trim()||null,
+      notes:document.getElementById('cv-notes').value.trim()||null
+    }});
+    if(!ack?.ok) throw new Error('Pelaporan belum dikonfirmasi server');
 
     if (typeof logActivity==='function')
       logActivity('critical_notify','lab_results',id,
@@ -681,4 +664,11 @@ async function saveCriticalNotification(id){
   } catch(e){
     toast('❌ '+e.message+' — jalankan supabase_fase1_fondasi.sql bila tabel belum ada','err');
   }
+}
+// Riwayat selalu diselesaikan server melalui identitas kunjungan/tenant.
+async function labHistory(admissionId,productId,itemId=null,excludeId=null){
+  if(!admissionId || !productId) return [];
+  const rows=await sbRpc('lis_result_history',{p_admission_id:Number(admissionId),p_product_id:Number(productId),p_item_id:itemId?Number(itemId):null,p_exclude_id:excludeId?Number(excludeId):null});
+  if(!Array.isArray(rows)) throw new Error('Riwayat tidak tersedia');
+  return rows;
 }

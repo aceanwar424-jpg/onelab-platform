@@ -180,38 +180,13 @@ function cvKartu(label, angka, kunci, warna) {
 
 function cvSaring(k) { cvFilter = k; cvGambar(); }
 
-async function cvLapor(id) {
-  const kepada = prompt('Dilaporkan kepada siapa? (nama dokter/perawat penerima)');
-  if (!kepada) return;
-  const oleh = prompt('Dilaporkan oleh (nama petugas lab):',
-    window.currentUsername || '');
-  if (!oleh) return;
-  const cara = prompt('Cara menghubungi (telepon / WhatsApp / langsung):', 'telepon');
-  if (cara === null) return;
-
-  try {
-    await sbPatch('critical_value_notifications', id, {
-      notified_to: kepada, notified_by: oleh, method: cara,
-      notified_at: new Date().toISOString(),
-      attempt_status: 'Tersampaikan',
-      updated_at: new Date().toISOString(),
-    });
-    await renderCriticalValue();
-  } catch (e) { alert('Gagal mencatat pelaporan: ' + e.message); }
+async function cvLapor(id){
+  const row=cvData?.find?.(r=>r.id==id);
+  if(!row?.result_id){toast('Buka hasil pemeriksaan untuk mencatat pelaporan dan read-back.','warn');navigate('lab-result');return;}
+  await loadLabResults();
+  ackCritical(row.result_id);
 }
-
-// Read-back: penerima mengulang kembali nilainya untuk memastikan tidak
-// salah dengar. Dicatat terpisah dari pelaporan karena keduanya memang
-// dua kejadian — dan yang sering terlewat justru yang kedua.
-async function cvReadBack(id) {
-  if (!confirm('Penerima sudah mengulang kembali nilai hasilnya dengan benar?')) return;
-  try {
-    await sbPatch('critical_value_notifications', id, {
-      readback: true, updated_at: new Date().toISOString(),
-    });
-    await renderCriticalValue();
-  } catch (e) { alert('Gagal mencatat read-back: ' + e.message); }
-}
+async function cvReadBack(id){return cvLapor(id);}
 
 function checkCriticalValue(param, val) {
   const p = (param || '').toUpperCase();
@@ -227,14 +202,7 @@ function checkCriticalValue(param, val) {
   return { is_critical: false, type: 'NORMAL' };
 }
 
-function recordCriticalValueLog(data = {}) {
-  return {
-    success: true,
-    is_sla_met: (data.sla_minutes || 0) <= 15,
-    log_id: 'CVL-' + Date.now(),
-    entry: data
-  };
-}
+function recordCriticalValueLog(){return {success:false,error:'Gunakan transaksi pelaporan nilai kritis'};}
 
 window.renderCriticalValue = renderCriticalValue;
 window.cvSaring   = cvSaring;

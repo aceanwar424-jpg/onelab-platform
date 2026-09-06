@@ -21,6 +21,7 @@ async function loadAutoverifyRules() {
 // Menilai satu hasil terhadap aturannya. Alasan TIDAK lolos ikut dikembalikan
 // supaya keputusannya bisa dijelaskan — bukan kotak hitam.
 function autoverifyCheck(r, rule) {
+  if (r.status !== 'Draft') return {pass:false,why:'hanya hasil draft dapat diperiksa'};
   if (!rule || !rule.is_active) return { pass: false, why: 'aturan tidak aktif' };
 
   if (typeof isCriticalResult === 'function' && isCriticalResult(r))
@@ -29,11 +30,11 @@ function autoverifyCheck(r, rule) {
     return { pass: false, why: 'ditandai kritis' };
 
   if (rule.require_in_range) {
-    const v = (r.result_numeric != null) ? r.result_numeric : parseFloat(r.result_value);
-    if (isNaN(v)) return { pass: false, why: 'hasil bukan angka' };
-    if (r.ref_low != null && v < r.ref_low)   return { pass: false, why: 'di bawah rentang rujukan' };
-    if (r.ref_high != null && v > r.ref_high) return { pass: false, why: 'di atas rentang rujukan' };
-    if (r.ref_low == null && r.ref_high == null)
+    const v = (r.result_numeric != null) ? r.result_numeric : Number(r.result_value);
+    if (r.result_value === '' || !Number.isFinite(Number(v))) return { pass: false, why: 'hasil bukan angka' };
+    if ((r.normal_min ?? r.ref_low) != null && v < (r.normal_min ?? r.ref_low))   return { pass: false, why: 'di bawah rentang rujukan' };
+    if ((r.normal_max ?? r.ref_high) != null && v > (r.normal_max ?? r.ref_high)) return { pass: false, why: 'di atas rentang rujukan' };
+    if ((r.normal_min ?? r.ref_low) == null && (r.normal_max ?? r.ref_high) == null)
       return { pass: false, why: 'rentang rujukan belum diatur' };
   }
 
@@ -50,7 +51,7 @@ async function renderAutoverifyPanel(containerId, results) {
 
   if (rules === null) {
     el.innerHTML = '<div class="status-box status-warn" style="margin-bottom:12px">' +
-      'Autoverifikasi belum tersedia — jalankan <code>supabase_fase5_lis.sql</code>.</div>';
+      'Autoverifikasi belum tersedia. Gunakan Verifikasi Teknis.</div>';
     return;
   }
 
@@ -68,33 +69,17 @@ async function renderAutoverifyPanel(containerId, results) {
       align-items:center;gap:10px;flex-wrap:wrap">
       <div style="font-size:12.5px">
         <b>Autoverifikasi</b> — ${aktif} pemeriksaan aktif ·
-        <b style="color:${eligible.length ? '#15803D' : 'var(--gray)'}">${eligible.length}</b> hasil memenuhi syarat
+        <b style="color:${eligible.length ? '#15803D' : 'var(--gray)'}">${eligible.length}</b> kandidat untuk tinjauan teknis
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost btn-sm" onclick="openAutoverifyRules()">Atur Aturan</button>
-        ${eligible.length ? `<button class="btn btn-teal btn-sm" onclick="runAutoverify()">✅ Verifikasi Otomatis (${eligible.length})</button>` : ''}
+        ${false ? `<button class="btn btn-teal btn-sm" onclick="runAutoverify()">✅ Verifikasi Otomatis (${eligible.length})</button>` : ''}
       </div>
     </div>`;
 }
 
 async function runAutoverify() {
-  const list = window._avEligible || [];
-  if (!list.length) { toast('Tidak ada hasil yang memenuhi syarat', 'info'); return; }
-  const konfirmasi = 'Verifikasi otomatis ' + list.length +
-    ' hasil yang seluruhnya dalam rentang rujukan dan tidak kritis?\n\n' +
-    'Setiap kelolosan tercatat di jejak audit untuk ditinjau berkala.';
-  if (!confirm(konfirmasi)) return;
-
-  let ok = 0, lewat = 0;
-  for (const r of list) {
-    const rule = (_avRules || []).find(x => String(x.product_id) === String(r.product_id));
-    const chk = autoverifyCheck(r, rule);
-    if (!chk.pass) { lewat++; continue; }
-    try { await sbRpc('mark_autoverified', { p_result_id: r.id, p_note: chk.why }); ok++; }
-    catch (e) { lewat++; }
-  }
-  toast('✅ ' + ok + ' hasil terverifikasi otomatis' + (lewat ? ' · ' + lewat + ' dilewati' : ''), 'ok');
-  if (typeof labRefresh === 'function') await labRefresh();
+  toast('Autoverifikasi ditahan sampai kebijakan dan penjagaan server selesai divalidasi. Gunakan Verifikasi Teknis.', 'warn');
 }
 
 async function openAutoverifyRules() {

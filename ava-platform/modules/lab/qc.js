@@ -257,41 +257,15 @@ async function saveQCRun(){
 
 // runs: urut dari TERBARU ke terlama (sesuai query renderQCTab)
 function westgardEvaluate(runs) {
-  const z = runs.map(r => r.z_score).filter(v => v != null);
-  if (!z.length) return { label:'—', color:'#94A3B8', rule:null, detail:'Belum ada data QC' };
-
-  const cur = z[0], a = Math.abs(cur);
-
-  // 1-3s — satu titik di luar 3SD → tolak
-  if (a > 3) return { label:'TOLAK', color:'#B91C1C', rule:'1-3s',
-    detail:'Satu titik melewati 3SD. Jangan keluarkan hasil; ulangi QC dan periksa alat.' };
-
-  // 2-2s — dua run berurutan di sisi sama, keduanya >2SD
-  if (z.length >= 2 && Math.abs(z[0]) > 2 && Math.abs(z[1]) > 2 && Math.sign(z[0]) === Math.sign(z[1]))
-    return { label:'TOLAK', color:'#B91C1C', rule:'2-2s',
-      detail:'Dua run berurutan melewati 2SD pada sisi yang sama — indikasi kesalahan sistematis.' };
-
-  // R-4s — selisih dua run berurutan melebihi 4SD (kesalahan acak)
-  if (z.length >= 2 && Math.abs(z[0] - z[1]) > 4)
-    return { label:'TOLAK', color:'#B91C1C', rule:'R-4s',
-      detail:'Rentang antar dua run melebihi 4SD — indikasi kesalahan acak.' };
-
-  // 4-1s — empat run berurutan di sisi sama, semuanya >1SD
-  if (z.length >= 4 && z.slice(0,4).every(v => Math.abs(v) > 1) &&
-      z.slice(0,4).every(v => Math.sign(v) === Math.sign(z[0])))
-    return { label:'PERINGATAN', color:'#B45309', rule:'4-1s',
-      detail:'Empat run berurutan melewati 1SD pada sisi yang sama — mulai bergeser.' };
-
-  // 10x — sepuluh run berurutan pada sisi rata-rata yang sama
-  if (z.length >= 10 && z.slice(0,10).every(v => Math.sign(v) === Math.sign(z[0]) && v !== 0))
-    return { label:'PERINGATAN', color:'#B45309', rule:'10x',
-      detail:'Sepuluh run berurutan pada sisi yang sama — pergeseran sistematis.' };
-
-  // 1-2s — peringatan awal, belum menolak
-  if (a > 2) return { label:'PERINGATAN', color:'#B45309', rule:'1-2s',
-    detail:'Satu titik melewati 2SD. Amati run berikutnya.' };
-
-  return { label:'TERKENDALI', color:'#15803D', rule:null, detail:'QC dalam kendali.' };
+  if(!runs.length) return {label:'BELUM ADA DATA',color:'#64748b',rule:null,detail:'Belum ada data QC'};
+  const current=runs[0];
+  const sameSeries=runs.filter(r=>r.qc_level===current.qc_level && r.lot_id===current.lot_id && r.target===current.target && r.sd===current.sd);
+  const z=r=>r.z_score!=null?Number(r.z_score):
+    (r.measured!=null && r.target!=null && Number(r.sd)>0?(Number(r.measured)-Number(r.target))/Number(r.sd):NaN);
+  const sameRun=current.run_id?runs.filter(r=>r.run_id===current.run_id).map(z):[];
+  const ev=evaluateWestgardZ(sameSeries.slice().reverse().map(z),sameRun);
+  const labels={PASS:'TERKENDALI',WARNING:'PERINGATAN',REJECT:'TOLAK',INVALID:'DATA TIDAK VALID'};
+  return {label:labels[ev.status],color:ev.status==='PASS'?'#15803d':ev.status==='WARNING'?'#b45309':'#b91c1c',rule:ev.triggeredRule,detail:ev.recommendation};
 }
 
 // Grafik kendali sederhana — SVG, tanpa pustaka luar

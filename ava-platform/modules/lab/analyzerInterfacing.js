@@ -265,7 +265,7 @@ function simulateAstmResultTransmission() {
 }
 
 function parseAstmResultFrame(frame = '') {
-  const lines = frame.trim().split('\n');
+  const lines = String(frame).trim().split(/\r\n|\r|\n/);
   let accession_no = null;
   const results = [];
   lines.forEach(l => {
@@ -279,8 +279,8 @@ function parseAstmResultFrame(frame = '') {
     }
   });
   return {
-    success: true,
-    accession_no: accession_no || 'L260830-0001',
+    success: !!accession_no && results.length > 0,
+    accession_no,
     results
   };
 }

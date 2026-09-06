@@ -488,3 +488,74 @@ domain, dan `git diff --check` semuanya lulus. Penegakan saldo/masa berlaku
 langganan secara atomik masih memerlukan ledger klinis server-side dan
 checkpoint perubahan skema; UI tidak mengklaim telah menggantikan kontrol
 otoritatif tersebut.
+
+## Audit dan viewer Pelayanan Klinis — 2026-09-06
+
+Tiga menu baru ditambahkan pada Pelayanan Klinis: Viewer Hasil Patologi
+Klinik, Mikrobiologi, dan Patologi Anatomi. Ketiganya hanya membaca
+`lab_results` yang sudah released/approved (atau mempunyai waktu rilis),
+menampilkan pasien/kunjungan, hasil, satuan, rentang rujukan, flag, waktu
+rilis, dan validator/approver. Tidak tersedia operasi tulis dari HIS.
+
+Menu penunjang yang sebelumnya tercampur dipisah menjadi Dashboard Pemeriksaan
+Penunjang, EKG & Treadmill, Audiometri, dan Spirometri. Uji preview lokal
+memastikan rute viewer Patologi Klinik/Mikrobiologi dirender dengan filter dan
+indikator read-only; Audiometri membuka tipe serta field audiometri secara
+langsung. Tidak ada form yang disimpan.
+
+Verifikasi akhir: struktur menu (210 menu; 169 ada), manifest 180 rute, audit
+167 menu hidup tanpa layar/tabel/RPC/handler/manifest mati, audit keamanan
+2.470/2.470, sintaks modul/router, kontrak registry 20 domain, serta diff
+check lulus. Rincian keputusan ada di `docs/AUDIT-PELAYANAN-KLINIS-2026-09-06.md`.
+
+## Audit struktur operasional referensi HIS — 2026-09-06
+
+Audit baca-saja selesai untuk Finance, Medical Record, Package Service,
+Remuneration, SATUSEHAT, dan Workforce. Hasilnya memisahkan fungsi yang sudah
+ada, yang tersebar lintas domain, dan gap yang memerlukan keputusan data/bisnis
+sebelum dibangun. Tidak ada menu, skema, hasil pasien, transaksi, kredensial,
+atau integrasi produksi yang diubah. Rincian workflow dan prioritas tersedia
+di `docs/AUDIT-STRUKTUR-OPERASIONAL-HIS-2026-09-06.md`.
+
+## Implementasi struktur operasional HIS — 2026-09-06
+
+Navigasi HIS dipadatkan tanpa mengaburkan pemisahan tanggung jawab: Arsip,
+MPI, dan governance rekam medis berada dalam **Rekam Medis & Privasi**;
+operasional pasien paket berada dalam **Paket & Membership**; payroll dipisah
+sebagai **Remunerasi** dari pembukuan; Workforce diberi hub tersendiri. Ikon
+pada sidebar rail untuk kelompok baru telah ditambahkan sehingga rail tetap
+mini, konsisten, dan dapat dipindai cepat.
+
+Tiga hub baru tersedia dan seluruhnya memakai data baca-saja yang telah ada:
+Paket & Membership mengarahkan ke registrasi, langganan, pemakaian hak, master
+paket, serta paket korporat; Hub Remunerasi menyatukan roster, presensi,
+karyawan, payroll, komisi, dan fee home care; Workforce menyatukan personalia,
+struktur, roster, presensi, kalender shift, serta tugas. Mereka memberi
+urutan kerja dan batas kontrol, bukan pintasan yang melewati proses approval.
+
+Verifikasi: pemeriksa struktur menu lulus dengan 213 menu aktif, audit 210
+menu aktif bersih dari layar/tabel/RPC/handler/manifest mati, audit keamanan
+modul 2.970/2.970 lulus, serta `node --check` hub dan router lulus.
+Preview lokal mengonfirmasi rail berikon dan rute `#package-service`,
+`#remuneration`, serta `#workforce` dirender tanpa penyimpanan data. Rute
+lama `tech-analyzer` yang sebelumnya tidak memiliki handler juga kini diarahkan
+ke layar Interfacing Analyzer yang sudah ada dan lolos uji preview lokal.
+
+Batas yang disengaja: ledger entitlement paket yang atomik, period closing
+payroll/remunerasi, dan pengiriman/retry SATUSEHAT memerlukan tabel/RPC atau
+integrasi eksternal. Tidak ada migrasi, finalisasi payroll, ataupun pengiriman
+SATUSEHAT dilakukan; tahap tersebut menunggu checkpoint pemilik DB/integrasi.
+
+## LIS–HIS: layanan tanpa harga di LIS — 2026-09-06
+Implementasi: branding AVA LAB; harga per tes/preset/total dihapus; API katalog tanpa harga, muat kunjungan HIS, registrasi/sinkron layanan, sampel idempotent, dan rekonsiliasi tagihan khusus HIS. Migrasi 0051 menjaga tenant/peran, audit permintaan, snapshot layanan dan blok pembayaran sebelum rekonsiliasi. Penerimaan order berbayar tanpa perubahan layanan tetap diperbolehkan.
+Bukti: `node scripts/verify-lis-his-sync.cjs` mengeksekusi migrasi dan RPC aktual pada PostgreSQL PGlite terisolasi dengan data sintetis; create/retry, add-on, sample retry, panel analit, role/tenant/anon, konflik, pembatalan klinis dan penetapan tagihan lulus. Browser CUA preview lokal: AVA LAB/Permintaan Pemeriksaan terlihat, checkbox tes bekerja, ringkasan hanya Kode/Pemeriksaan tanpa harga. Preview sintetis sementara sudah dihapus.
+Batas: tidak menerapkan migrasi ke produksi. Pemetaan tenant admisi historis perlu diverifikasi sebelum aktivasi; uji kompatibilitas skema/RLS aktual harus dilakukan di staging. Detail kontrak dan langkah aktivasi: docs/LIS-HIS-SERVICE-SYNC.md.
+# Bukti audit mendalam LIS — 2026-09-06
+
+- Sumber: `C:\Users\acean\Downloads\2020_HCLAB-LIS_Brochure.pdf`, 12 halaman diekstrak dan dirender; montage diperiksa. Hasil kerja sementara berada di `tmp/pdfs/lis-audit/`.
+- Laporan: [AUDIT-LIS-MENDALAM-2026-09-06.md](docs/AUDIT-LIS-MENDALAM-2026-09-06.md), berisi prioritas, provenance, matriks brosur, rancangan menu/alur dan acceptance.
+- `node scripts/audit-lis-deep.cjs`: 11 kasus OBSERVED; ini reproduksi cacat, bukan acceptance pass. Bukti terstruktur: `docs/audit-evidence/lis-deep-findings.json`.
+- `node --check scripts/audit-lis-deep.cjs`: lulus.
+- `node scripts/verify-lis-his-sync.cjs`: PASS PostgreSQL (tenant/RBAC/katalog/retry/panel/konflik/billing) dan PASS frontend (payload klinis/retry/ack barcode/tanpa harga).
+- Audit ini menambah dokumentasi dan fixture lokal. Tidak mengubah kode klinis, master data, DB produksi atau mengaktifkan migrasi. SQL arsip, helper tanpa pemanggil dan simulator ditandai terpisah dari jalur runtime utama.
+- Belum diverifikasi: seluruh UI dengan login/peran di staging, viewport lintas perangkat, RLS/RPC produksi yang terpasang, perangkat analyzer nyata dan distribusi hasil nyata.

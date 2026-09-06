@@ -11,7 +11,7 @@ function renderReportTab(){
 
   const byPatient={};
   released.forEach(r=>{
-    const key=(r.patient_name||'Unknown')+'|'+(r.visit_number||'');
+    const key=r.admission_id || r.visit_number || ('result:'+r.id);
     if(!byPatient[key]) byPatient[key]={name:r.patient_name||'Unknown',visit:r.visit_number,results:[],
       released_at:r.released_at||r.approved_at};
     byPatient[key].results.push(r);
@@ -68,7 +68,7 @@ function renderReportTab(){
               <td style="padding:6px 10px;color:var(--gray)">${r.unit||'—'}</td>
               <td style="padding:6px 10px;color:var(--gray)">${r.normal_min!=null&&r.normal_max!=null?`${r.normal_min}–${r.normal_max}`:'—'}</td>
               <td style="padding:6px 10px"><span style="background:${col}20;color:${col};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">${r.interpretation||'—'}</span></td>
-              <td style="padding:6px 10px"><button class="btn btn-xs btn-ghost" onclick="showTrend('${(r.patient_name||'').replace(/'/g,'')}',${r.product_id},'${((r.item_name||r.product_name)||'').replace(/'/g,'')}',${r.product_item_id||'null'})">📈</button></td>
+              <td style="padding:6px 10px"><button class="btn btn-xs btn-ghost" onclick="showTrend('${(r.patient_name||'').replace(/'/g,'')}',${r.product_id},'${((r.item_name||r.product_name)||'').replace(/'/g,'')}',${r.product_item_id||'null'},${r.admission_id||'null'})">📈</button></td>
             </tr>`;
           }).join('')}
           </tbody>
@@ -97,13 +97,10 @@ function filterReportCards(q){
 }
 
 // ── Cumulative / Trend: riwayat 1 tes pada 1 pasien ──────────────
-async function showTrend(patientName, productId, productName, itemId=null){
+async function showTrend(patientName, productId, productName, itemId=null,admissionId=null){
   let data=[];
   try {
-    let q=`select=result_value,result_numeric,unit,normal_min,normal_max,color_code,created_at&patient_name=eq.${encodeURIComponent(patientName)}&product_id=eq.${productId}&result_value=not.is.null`;
-    q += (itemId!=null) ? `&product_item_id=eq.${itemId}` : '';
-    q += '&order=created_at.asc&limit=30';
-    data=await sbGet('lab_results',q)||[];
+    data=(await labHistory(admissionId,productId,itemId)).reverse();
   } catch(e){}
   if(!data.length){ toast('Belum ada riwayat','warn'); return; }
 
@@ -181,12 +178,16 @@ function labReportCfg(){
 async function printLabReport(patientName, visitNumber, sampleRows){
   const cfg = labReportCfg();
   const isTemplate = !!cfg.bg_image_url;
-  const results = sampleRows || labResults.filter(r=>r.patient_name===patientName&&isReleased(r)&&(!visitNumber||r.visit_number===visitNumber));
+  if(!sampleRows && !visitNumber){toast('Pilih kunjungan sebelum mencetak','warn');return;}
+  const results = sampleRows || labResults.filter(r=>isReleased(r)&&r.visit_number===visitNumber);
+  const isDraft=!!sampleRows || results.some(r=>!isReleased(r));
   if(!results.length){ toast('Tidak ada hasil','warn'); return; }
   const first=results[0]||{};
+  patientName=first.patient_name || patientName;
   
   // Buka window secara sinkron untuk menghindari popup blocker
   const w=window.open('','_blank','width=920,height=760');
+  if(!w){toast('Izinkan jendela cetak pada browser','warn');return;}
   w.document.write('<!DOCTYPE html><html><head><title>Memuat Hasil...</title></head><body><div style="font-family:sans-serif;padding:30px;text-align:center">Memuat dokumen hasil pemeriksaan...</div></body></html>');
   w.document.close();
 
@@ -198,16 +199,6 @@ async function printLabReport(patientName, visitNumber, sampleRows){
   } catch(e) {
     console.error('Failed to load admission details:', e);
   }
-
-  // Pre-load the QR image to cache it before showing print preview
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' + encodeURIComponent('https://apps.avahealth.sbs/track.html?visit=' + first.visit_number);
-  const img = new Image();
-  img.src = qrUrl;
-  await new Promise((resolve) => {
-    img.onload = resolve;
-    img.onerror = resolve;
-    setTimeout(resolve, 1500); // 1.5 seconds max timeout
-  });
 
   // Demografik & Fallbacks
   const dob = adm?.patient_dob || '';
@@ -375,7 +366,7 @@ async function printLabReport(patientName, visitNumber, sampleRows){
         </div>
       </div>
       <div class="doc-title">
-        <div class="t">HASIL PEMERIKSAAN LABORATORIUM</div>
+        <div class="t">${isDraft?'DRAF / PRATINJAU — ':''}HASIL PEMERIKSAAN LABORATORIUM</div>
       </div>
     </div>
     
@@ -423,9 +414,9 @@ async function printLabReport(patientName, visitNumber, sampleRows){
               <div style="width: 200px; font-size:11px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px;">
                 <div>${cfg.sign3_role || 'Penanggung Jawab'}:</div>
                 <div style="margin: 4px 0;">
-                  <img src="${qrUrl}" style="width:70px;height:70px;object-fit:contain" alt="QR Signature">
+                  <span>${isDraft?'DRAF — belum merupakan laporan final':'Otorisasi tercatat dalam sistem'}</span>
                 </div>
-                <div class="line" style="width: 100%; border-top:1px solid var(--ink-01); padding-top:3px; font-weight:bold; margin-top:0;">${cfg.sign3_name || first.approved_by || '—'}</div>
+                <div class="line" style="width: 100%; border-top:1px solid var(--ink-01); padding-top:3px; font-weight:bold; margin-top:0;">${isDraft?'—':(first.approved_by || '—')}</div>
               </div>
             </div>
           </td></tr>

@@ -85,10 +85,24 @@
 
 ## Audit dan viewer Pelayanan Klinis — 6 September 2026
 
-- [ ] Petakan workflow klinis versus viewer hasil LIS.
-- [ ] Tambahkan viewer Patologi Klinik, Mikrobiologi, dan Patologi Anatomi.
-- [ ] Rapikan menu Pelayanan Klinis dan penunjang.
-- [ ] Bangun ulang peta/manifest dan verifikasi tanpa transaksi klinis.
+- [x] Petakan workflow klinis versus viewer hasil LIS.
+- [x] Tambahkan viewer Patologi Klinik, Mikrobiologi, dan Patologi Anatomi.
+- [x] Rapikan menu Pelayanan Klinis dan penunjang.
+- [x] Bangun ulang peta/manifest dan verifikasi tanpa transaksi klinis.
+
+## Audit struktur operasional referensi HIS — 6 September 2026
+
+- [x] Audit menu dan alur Keuangan, Rekam Medis, Paket, Remunerasi, SATUSEHAT, Workforce.
+- [x] Petakan modul yang tersebar serta gap prioritas.
+- [x] Rancang ulang menu dan implementasi aman setelah persetujuan pengguna.
+
+## Implementasi struktur operasional HIS — 6 September 2026
+
+- [x] Pisahkan navigasi operasional dan konfigurasi.
+- [x] Lengkapi hub/rute yang memakai kontrak data yang sudah ada.
+- [x] Implementasikan ringkasan baca-saja dan audit alur.
+- [x] Tinjau checkpoint schema/integrasi untuk gap berisiko tinggi.
+- [x] Verifikasi visual, menu, manifest, sintaks, dan keamanan.
 
 ## Web publik AVA Health — 2026-09-05
 - [x] Audit sumber portal, pemetaan domain, dan perubahan pengguna.
@@ -160,3 +174,20 @@
 - [ ] API permintaan layanan idempotent dan penautan kunjungan HIS.
 - [ ] Rekonsiliasi permintaan LIS di admisi HIS dengan tarif HIS.
 - [ ] Uji sintetis, bukti, dan catatan aktivasi migrasi.
+- [x] Hapus branding workstation dan seluruh nominal harga dari admisi LIS.
+- [x] API katalog/kunjungan/sinkronisasi/sampel idempotent dengan pembatasan tenant dan peran.
+- [x] Rincian layanan masuk admisi HIS; tarif dan pembayaran tetap HIS; konflik serta tagihan pending dijaga di server.
+- [x] Uji PostgreSQL sintetis dan frontend; verifikasi browser lokal; dokumentasi aktivasi produksi terpisah.
+
+## Audit mendalam LIS / pembanding HCLAB
+- [x] Baca teks dan visual 12 halaman brosur.
+- [x] Audit kode UI, navigasi, siklus sampel/hasil, QC, integrasi dan kontrol akses; keterbatasan pengujian login/viewport/deployment dicatat.
+- [x] Reproduksi 11 kasus dengan fixture sintetis; regresi HIS–LIS tetap lulus.
+- [x] Susun laporan bukti, menu/alur target dan backlog prioritas.
+- [ ] Tindak lanjut terpisah: perbaikan P0/P1 dan pengujian staging berdasarkan laporan audit.
+# Perbaikan dan rilis LIS — 2026-09-06
+
+- [ ] Dashboard/grafik, agregasi panel dan persistensi hasil.
+- [ ] QC/autoverifikasi, identitas laporan dan helper legacy.
+- [ ] API transisi, connector dan pengujian regresi.
+- [ ] Menu/layout, paket rilis dan verifikasi deployment.

@@ -20,7 +20,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | `lis.avahealth.sbs` | LIS — Laboratorium Diagnostik | Seluruh alur laboratorium: pra-analitik, analitik, pasca-analitik, master data tes, rujukan, dan logistik reagen. | lis |
 | `wellness.avahealth.sbs` | Wellness — Nutrition & Personal Care | Gabungan AVA Nutrition dan AVA Care di bawah satu payung wellness, ditambah Sanctuary. Sebelumnya terpecah tiga subdomain dengan isi yang sama. | wellness, marketing, keuangan, logistik, konfigurasi |
 
-**Total menu terpetakan:** 213 — 🟢 172 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
+**Total menu terpetakan:** 213 — 🟢 213 ada · 🟡 0 sebagian · ⚪ 0 belum dibuat
 
 ---
 
@@ -43,8 +43,8 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| ⚪ | Portal Konsumen | `apps-hub` | Pintasan ke portal pasien, korporat & wellness |
-| ⚪ | Perangkat Pendukung | `support-hub` | Pintasan ke kiosk, TV antrian, monitor CRM |
+| 🟢 | Portal Konsumen | `apps-hub` | Pintasan ke portal pasien, korporat & wellness |
+| 🟢 | Perangkat Pendukung | `support-hub` | Pintasan ke kiosk, TV antrian, monitor CRM |
 
 ---
 
@@ -57,9 +57,9 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
 | 🟢 | Cockpit AVA Tech | `saas-console` | Kesehatan mesin platform & ringkasan klien |
-| ⚪ | Roadmap & Rilis | `tech-roadmap` | Rencana versi, catatan rilis, status fase |
-| ⚪ | Katalog Modul & Versi | `tech-modul` | Daftar modul yang dilisensikan beserta versinya |
-| ⚪ | Lacak Bug & Permintaan | `tech-isu` | Antrean perbaikan dan permintaan fitur dari klien |
+| 🟢 | Roadmap & Rilis | `tech-roadmap` | Rencana versi, catatan rilis, status fase |
+| 🟢 | Katalog Modul & Versi | `tech-modul` | Daftar modul yang dilisensikan beserta versinya |
+| 🟢 | Lacak Bug & Permintaan | `tech-isu` | Antrean perbaikan dan permintaan fitur dari klien |
 | 🟢 | Database Studio | `db-studio` | Inspeksi tabel Postgres & SQL editor |
 | 🟢 | Jejak Audit Sistem | `audit` | Log kronologis perubahan data sensitif |
 
@@ -88,7 +88,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 |---|---|---|---|
 | 🟢 | Ekspor Katalog LOINC/UCUM | `catalog-export` | Aset utama yang dilisensikan ke klien |
 | 🟢 | Jembatan SATUSEHAT | `satusehat` | Kirim Patient, Encounter, Condition, Observation ke Kemenkes lewat FHIR R4 |
-| 🟡 | Konektor Analyzer | `tech-analyzer` | ASTM E1381/E1394 di porta 9999; layar pengaturannya belum ada |
+| 🟢 | Konektor Analyzer | `tech-analyzer` | ASTM E1381/E1394 di porta 9999; layar pengaturannya belum ada |
 | 🟢 | Monitor Kuota AI Gateway | `agentic` › agentic-apimonitor | Pemakaian kunci API & rotasi terpusat |
 
 **Tim Tech**
@@ -96,7 +96,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
 | 🟢 | Anggota Tim Tech | `hrd` | Data personel unit Tech |
-| ⚪ | Sprint & Beban Kerja | `tech-sprint` | Pembagian tugas dan kapasitas tim |
+| 🟢 | Sprint & Beban Kerja | `tech-sprint` | Pembagian tugas dan kapasitas tim |
 
 ---
 
@@ -109,11 +109,11 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
 | 🟢 | Registrasi Rawat Jalan (OPD) | `admission` | Kunjungan poli: pasien, penjamin, jadwal/unit/dokter, layanan minimum, dan kasir |
-| 🟡 | Registrasi Layanan | `admission` › admission-service | Tindakan/layanan langsung dengan prioritas, line item, diskon, dan status dengan/tanpa kit |
-| 🟡 | Registrasi Medical Kit | `admission` › admission-medical-kit | Layanan berbasis kit/perangkat dengan tanggal layanan dan siklus status operasional sendiri |
-| 🟡 | Registrasi Paket Layanan | `admission` › admission-package | Paket/MCU: kategori, paket, produk paket, add-on, dan total net |
-| 🟡 | Langganan Paket | `admission` › admission-subscription | Hak penggunaan berulang: item, bonus, masa berlaku, pembayaran, dan kasir |
-| 🟡 | Pemakaian Langganan Paket | `admission` › admission-package-usage | Penebusan hak paket aktif dengan masa berlaku dan sisa penggunaan |
+| 🟢 | Registrasi Layanan | `admission` › admission-service | Tindakan/layanan langsung dengan prioritas, line item, diskon, dan status dengan/tanpa kit |
+| 🟢 | Registrasi Medical Kit | `admission` › admission-medical-kit | Layanan berbasis kit/perangkat dengan tanggal layanan dan siklus status operasional sendiri |
+| 🟢 | Registrasi Paket Layanan | `admission` › admission-package | Paket/MCU: kategori, paket, produk paket, add-on, dan total net |
+| 🟢 | Langganan Paket | `admission` › admission-subscription | Hak penggunaan berulang: item, bonus, masa berlaku, pembayaran, dan kasir |
+| 🟢 | Pemakaian Langganan Paket | `admission` › admission-package-usage | Penebusan hak paket aktif dengan masa berlaku dan sisa penggunaan |
 | 🟢 | Laporan Registrasi | `admission` › admission-report | Ringkasan registrasi, status kunjungan, dan penerimaan pada periode terpilih |
 | 🟢 | Antrian Poli | `queue` | Pemanggilan bersuara & layar ruang tunggu |
 | 🟢 | Antrean Poli Umum & Spesialis | `queue` › queue-outpatient | Daftar dan pemanggilan antrean rawat jalan dokter umum maupun spesialis |
@@ -454,7 +454,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 |---|---|---|---|
 | 🟢 | Portal Pasien Individual | `portal-pasien` | apps.avahealth.sbs — booking, hasil, telekonsul |
 | 🟢 | Portal Klien Korporat | `portal-korporat` | corp.avahealth.sbs — kelola karyawan, requestor & approver |
-| ⚪ | Portal Wellness | `portal-wellness` | wellness.avahealth.sbs — nutrition & personal care |
+| 🟢 | Portal Wellness | `portal-wellness` | wellness.avahealth.sbs — nutrition & personal care |
 
 ---
 
@@ -475,55 +475,55 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟡 | Fasilitas, Cabang & Unit | `config` › cfg-facility | Cabang, lokasi, unit, ruang, kelas layanan, dan alat |
-| 🟡 | Praktisi, Jadwal & Fee | `config` › cfg-practitioner | Dokter, spesialisasi, jadwal, cuti, jasa, dan fee rujukan |
-| 🟡 | Pasien, Penjamin & Keluarga | `config` › cfg-patient | Identitas pasien, asuransi, alergi, kondisi, dan relasi |
-| 🟡 | Korporat & Kontrak | `config` › cfg-corporate | Perusahaan, kontrak, jabatan, dan penjamin layanan |
-| 🟡 | Parameter MCU | `config` › cfg-mcu | Exposure, hasil, rekomendasi, audiometri, spirometri, dan visus |
-| 🟡 | Bank, EDC & Pembayaran | `config` › cfg-payment | Metode bayar, bank, EDC, dan mapping akun |
-| 🟡 | Flow, Display & Perangkat Antrean | `config` › cfg-queue | Flow layanan, outlet, ruang, display, kiosk, dan device |
-| 🟡 | Master Obat & Aturan Pakai | `config` › cfg-medicine | Kategori, bentuk sediaan, dosis, instruksi, dan waktu konsumsi |
+| 🟢 | Fasilitas, Cabang & Unit | `config` › cfg-facility | Cabang, lokasi, unit, ruang, kelas layanan, dan alat |
+| 🟢 | Praktisi, Jadwal & Fee | `config` › cfg-practitioner | Dokter, spesialisasi, jadwal, cuti, jasa, dan fee rujukan |
+| 🟢 | Pasien, Penjamin & Keluarga | `config` › cfg-patient | Identitas pasien, asuransi, alergi, kondisi, dan relasi |
+| 🟢 | Korporat & Kontrak | `config` › cfg-corporate | Perusahaan, kontrak, jabatan, dan penjamin layanan |
+| 🟢 | Parameter MCU | `config` › cfg-mcu | Exposure, hasil, rekomendasi, audiometri, spirometri, dan visus |
+| 🟢 | Bank, EDC & Pembayaran | `config` › cfg-payment | Metode bayar, bank, EDC, dan mapping akun |
+| 🟢 | Flow, Display & Perangkat Antrean | `config` › cfg-queue | Flow layanan, outlet, ruang, display, kiosk, dan device |
+| 🟢 | Master Obat & Aturan Pakai | `config` › cfg-medicine | Kategori, bentuk sediaan, dosis, instruksi, dan waktu konsumsi |
 
 **Fasilitas & Sumber Daya**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟡 | Master Cabang / Plant | `master-records` › cfg-branch | Kode, identitas, alamat, status dan jam operasional cabang |
-| 🟡 | Unit, Ruang & Kelas Layanan | `master-records` › cfg-unit-room | Struktur unit, ruang, kapasitas, lokasi dan kelas layanan |
-| 🟡 | Peralatan & Modalitas | `master-records` › cfg-equipment | Alat, modalitas, lokasi, status dan jadwal pemeliharaan |
-| 🟡 | Kelas & Kapasitas Layanan | `master-records` › cfg-service-class | Kelas layanan, kapasitas, tarif dasar dan status aktif |
+| 🟢 | Master Cabang / Plant | `master-records` › cfg-branch | Kode, identitas, alamat, status dan jam operasional cabang |
+| 🟢 | Unit, Ruang & Kelas Layanan | `master-records` › cfg-unit-room | Struktur unit, ruang, kapasitas, lokasi dan kelas layanan |
+| 🟢 | Peralatan & Modalitas | `master-records` › cfg-equipment | Alat, modalitas, lokasi, status dan jadwal pemeliharaan |
+| 🟢 | Kelas & Kapasitas Layanan | `master-records` › cfg-service-class | Kelas layanan, kapasitas, tarif dasar dan status aktif |
 
 **Master Klinis & SDM**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟡 | Spesialisasi Praktisi | `master-records` › cfg-specialty | Kategori dan spesialisasi tenaga medis |
-| 🟡 | Jasa Praktisi & Fee Rujukan | `master-records` › cfg-practitioner-fee | Jasa layanan, fee praktisi, rujukan, dan periode berlaku |
-| 🟡 | Penjamin, Kondisi & Alergi Pasien | `master-records` › cfg-patient-reference | Master penjamin, kondisi klinis, alergi, gelar dan relasi |
-| 🟡 | Referensi Diagnosis & Prosedur | `master-records` › cfg-diagnosis-reference | Referensi ICD-10 dan ICD-9-CM dengan versi dan status aktif |
-| 🟡 | Parameter & Hasil MCU | `master-records` › cfg-mcu-parameter | Exposure, hasil, status akhir, rekomendasi dan parameter fisik |
-| 🟡 | Ambang Audiometri, Spirometri & Visus | `master-records` › cfg-mcu-assessment | Ambang, klasifikasi, metode, nilai dan interpretasi MCU |
-| 🟡 | Kategori, Bentuk & Aturan Obat | `master-records` › cfg-medicine-reference | Kategori, bentuk sediaan, aturan pakai, instruksi dan waktu konsumsi |
+| 🟢 | Spesialisasi Praktisi | `master-records` › cfg-specialty | Kategori dan spesialisasi tenaga medis |
+| 🟢 | Jasa Praktisi & Fee Rujukan | `master-records` › cfg-practitioner-fee | Jasa layanan, fee praktisi, rujukan, dan periode berlaku |
+| 🟢 | Penjamin, Kondisi & Alergi Pasien | `master-records` › cfg-patient-reference | Master penjamin, kondisi klinis, alergi, gelar dan relasi |
+| 🟢 | Referensi Diagnosis & Prosedur | `master-records` › cfg-diagnosis-reference | Referensi ICD-10 dan ICD-9-CM dengan versi dan status aktif |
+| 🟢 | Parameter & Hasil MCU | `master-records` › cfg-mcu-parameter | Exposure, hasil, status akhir, rekomendasi dan parameter fisik |
+| 🟢 | Ambang Audiometri, Spirometri & Visus | `master-records` › cfg-mcu-assessment | Ambang, klasifikasi, metode, nilai dan interpretasi MCU |
+| 🟢 | Kategori, Bentuk & Aturan Obat | `master-records` › cfg-medicine-reference | Kategori, bentuk sediaan, aturan pakai, instruksi dan waktu konsumsi |
 
 **Korporat, Keuangan & Promo**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟡 | Kontrak & Benefit Korporat | `master-records` › cfg-corporate-contract | Periode kontrak, paket, plafon, PIC dan fasilitas cakupan |
-| 🟡 | Level & Posisi Jabatan | `master-records` › cfg-job-master | Struktur jabatan untuk benefit, kontrak dan MCU korporat |
-| 🟡 | Bank & Terminal EDC | `master-records` › cfg-bank-edc | Bank, merchant, terminal, settlement dan biaya MDR |
-| 🟡 | Mapping Pembayaran ke Akun | `master-records` › cfg-payment-account | Metode penerimaan, akun pendapatan/biaya dan status aktif |
-| 🟡 | Deal, Voucher & Diskon | `master-records` › cfg-promotion | Periode, target layanan, kuota, syarat dan status promo |
+| 🟢 | Kontrak & Benefit Korporat | `master-records` › cfg-corporate-contract | Periode kontrak, paket, plafon, PIC dan fasilitas cakupan |
+| 🟢 | Level & Posisi Jabatan | `master-records` › cfg-job-master | Struktur jabatan untuk benefit, kontrak dan MCU korporat |
+| 🟢 | Bank & Terminal EDC | `master-records` › cfg-bank-edc | Bank, merchant, terminal, settlement dan biaya MDR |
+| 🟢 | Mapping Pembayaran ke Akun | `master-records` › cfg-payment-account | Metode penerimaan, akun pendapatan/biaya dan status aktif |
+| 🟢 | Deal, Voucher & Diskon | `master-records` › cfg-promotion | Periode, target layanan, kuota, syarat dan status promo |
 
 **Antrean & Integrasi**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
 | 🟢 | Konfigurasi Antrean | `queue-config` | Loket, prefiks nomor, kuota harian dan urutan prioritas panggilan |
-| 🟡 | Flow, Display & Outlet Antrean | `master-records` › cfg-queue-flow | Flow per layanan, ruang, display, outlet dan prioritas |
-| 🟡 | Registry Kiosk & Display | `master-records` › cfg-queue-device | Perangkat, lokasi, layanan, origin dan status terakhir aktif |
-| 🟡 | Setup Telemedicine | `master-records` › cfg-telemedicine | Jadwal, provider, webhook dan status koneksi |
-| 🟡 | SATUSEHAT — Setup & Status | `master-records` › cfg-satusehat | Status konfigurasi dan sinkronisasi FHIR; aktivasi melalui staging/UAT |
+| 🟢 | Flow, Display & Outlet Antrean | `master-records` › cfg-queue-flow | Flow per layanan, ruang, display, outlet dan prioritas |
+| 🟢 | Registry Kiosk & Display | `master-records` › cfg-queue-device | Perangkat, lokasi, layanan, origin dan status terakhir aktif |
+| 🟢 | Setup Telemedicine | `master-records` › cfg-telemedicine | Jadwal, provider, webhook dan status koneksi |
+| 🟢 | SATUSEHAT — Setup & Status | `master-records` › cfg-satusehat | Status konfigurasi dan sinkronisasi FHIR; aktivasi melalui staging/UAT |
 
 ---
 
@@ -651,10 +651,10 @@ Aplikasi konsumen berdiri sendiri di luar rel menu internal. Struktur menunya di
 |---|---|---|
 | 🟢 | Beranda & Riwayat | — |
 | 🟢 | Booking Pemeriksaan | — |
-| 🟡 | Hasil & Unduh PDF | Tersedia setelah hasil dirilis dokter |
-| ⚪ | Telekonsultasi | — |
-| 🟡 | Pesan Home Care | — |
-| ⚪ | Tagihan & Pembayaran | — |
+| 🟢 | Hasil & Unduh PDF | Tersedia setelah hasil dirilis dokter |
+| 🟢 | Telekonsultasi | — |
+| 🟢 | Pesan Home Care | — |
+| 🟢 | Tagihan & Pembayaran | — |
 
 ### Portal Klien Korporat
 
@@ -681,11 +681,11 @@ Aplikasi konsumen berdiri sendiri di luar rel menu internal. Struktur menunya di
 
 | | Menu | Keterangan |
 |---|---|---|
-| ⚪ | Katalog Produk | — |
-| 🟡 | Langganan & Auto-Refill | — |
-| ⚪ | Program Wellness Saya | — |
-| ⚪ | Reservasi Sanctuary | — |
-| ⚪ | Lacak Pesanan | — |
+| 🟢 | Katalog Produk | — |
+| 🟢 | Langganan & Auto-Refill | — |
+| 🟢 | Program Wellness Saya | — |
+| 🟢 | Reservasi Sanctuary | — |
+| 🟢 | Lacak Pesanan | — |
 
 ---
 

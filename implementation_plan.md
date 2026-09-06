@@ -232,14 +232,14 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
 
 ### Urutan implementasi
 
-1. [ ] Petakan menu referensi layanan ke kelompok HIS yang tepat dan tandai
+1. [x] Petakan menu referensi layanan ke kelompok HIS yang tepat dan tandai
    mana yang menjadi workflow klinis serta mana yang hanya viewer hasil LIS.
-2. [ ] Tambahkan viewer hasil read-only untuk Patologi Klinik, Mikrobiologi,
+2. [x] Tambahkan viewer hasil read-only untuk Patologi Klinik, Mikrobiologi,
    dan Patologi Anatomi, dengan filter, status rilis, nilai rujukan, flag,
    serta jejak waktu sinkronisasi.
-3. [ ] Rapikan menu Pelayanan Klinis dan layar penunjang agar Audiometri,
+3. [x] Rapikan menu Pelayanan Klinis dan layar penunjang agar Audiometri,
    Spirometri, EKG/Treadmill, radiologi, dan hasil LIS tidak tercampur.
-4. [ ] Bangun ulang peta menu/manifest dan uji rute, responsivitas, serta
+4. [x] Bangun ulang peta menu/manifest dan uji rute, responsivitas, serta
    audit menu hidup tanpa membuat atau mengubah hasil pasien.
 
 ### Implikasi IP & Kepatuhan
@@ -250,6 +250,50 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
   klinis produksi. Penyambungan API/LIS nyata tetap memerlukan checkpoint
   pemilik integrasi dan aturan otorisasi hasil.
 - Nama bidang bersifat generik dan parameterized; data uji tetap kosong/lokal.
+
+## Audit struktur operasional referensi HIS — 6 September 2026
+
+### Urutan audit
+
+1. [x] Inventarisasi menu Keuangan, Rekam Medis, Paket Layanan, Remunerasi,
+   SATUSEHAT, dan Workforce terhadap rute serta modul AVA saat ini.
+2. [x] Petakan alur lintas modul, pemilik proses, sumber data, dan batas
+   antara konfigurasi dengan operasi.
+3. [x] Catat kesenjangan menu, risiko duplikasi alur, dan prioritas desain.
+4. [ ] Setelah persetujuan pemilik, rancang pengelompokan menu dan implementasi
+   bertahap tanpa mengubah data atau integrasi produksi.
+
+### Implikasi IP & Kepatuhan
+
+- Audit hanya membaca struktur menu, rute, dan kode lokal. Tidak membuka,
+  membuat, mengubah, atau menyalin data pasien, transaksi, kredensial, atau
+  konfigurasi eksternal.
+- Perubahan pada payroll, remunerasi, rekam medis, maupun SATUSEHAT bersifat
+  berdampak tinggi dan akan memerlukan checkpoint bisnis/DB sebelum implementasi.
+
+## Implementasi struktur operasional HIS — 6 September 2026
+
+### Urutan implementasi
+
+1. [x] Pisahkan menu operasional dari konfigurasi untuk Rekam Medis, Paket &
+   Membership, Keuangan & Remunerasi, Workforce, serta Integrasi SATUSEHAT.
+2. [x] Lengkapi hub navigasi dan rute yang dapat memakai kontrak data yang
+   sudah ada; perbaiki label, tujuan, dan tab agar tidak ada menu tumpang tindih.
+3. [x] Implementasikan dashboard/reminder read-only untuk gap yang tidak
+   memerlukan skema baru dan audit kembali tiap rute.
+4. [x] Tinjau kebutuhan tabel/RPC baru untuk entitlement paket, period closing
+   remunerasi, dan antrean retry SATUSEHAT; berhenti untuk checkpoint sebelum
+   migrasi atau koneksi eksternal.
+5. [x] Uji visual serta audit syntax/menu/manifest/keamanan tanpa transaksi.
+
+### Implikasi IP & Kepatuhan
+
+- Penyempurnaan UI, rute, dan laporan baca-saja tidak mengubah data klinis.
+- Ledger entitlement paket, payroll/remunerasi, dan integrasi SATUSEHAT
+  berpotensi mengubah skema atau mengirim data eksternal. Implementasi
+  otoritatifnya hanya dilakukan setelah checkpoint pemilik database/integrasi.
+- Tidak ada data pasien nyata dipakai untuk uji. Konfigurasi dan contoh harus
+  generik/parameterized agar tidak mengikat ke satu fasilitas.
 
 ## Perombakan web publik AVA Health — 2026-09-05
 Rencana: (1) audit portal dan routing (≤1 jam), (2) bangun profil publik responsif, detail brand, katalog, sejarah, sertifikasi, kontak (≤1 jam), (3) validasi tautan/aset/routing dan preview (≤1 jam).
@@ -286,3 +330,15 @@ OWNED_BY: ava. Perubahan presentasi aplikasi sendiri, tanpa pemindahan aset ke p
 Rencana: (1) telusuri kontrak admisi/layanan dan hapus harga/branding workstation (≤1 jam); (2) buat API transaksi layanan klinis dan antrean rekonsiliasi HIS dengan identitas order, deduplikasi, dan konflik versi (≤1 jam); (3) tampilkan perubahan LIS pada admisi HIS, gunakan perhitungan HIS saat penetapan tagihan, uji sintetis dan dokumentasikan deployment (≤1 jam).
 ### Implikasi IP & Kepatuhan
 OWNED_BY: ava. Pengguna mengotorisasi sinkronisasi skema HIS/LIS; implementasi migrasi lokal dan kontrak API boleh dikerjakan. Tidak menjalankan migrasi/menulis DB produksi. LIS mengirim ID layanan tanpa nominal pembayaran; HIS tetap menentukan harga/diskon dan status pembayaran. Tidak mengubah kunci master tes, hasil tervalidasi atau transaksi sudah dibayar. Perubahan layanan dikirim sebagai permintaan teraudit ke HIS, bukan menimpa tagihan final. Data pengujian sintetis; API wajib autentikasi, pembatasan tenant dan idempotensi.
+
+## Audit mendalam LIS berbasis brosur — 2026-09-06
+Rencana: baca 12 halaman brosur beserta visual (≤1 jam), audit modul/UI/status/API dan reproduksi temuan menggunakan data sintetis (≤1 jam), tulis matriks gap/prioritas/menu/alur target dan kriteria penerimaan (≤1 jam).
+### Implikasi IP & Kepatuhan
+OWNED_BY: ava untuk hasil audit; brosur Sysmex adalah referensi pihak ketiga, bukan materi untuk disalin ke produk. Gunakan kemampuan dan prinsip alur sebagai pembanding, tanpa menyalin merek, tampilan, screenshot, atau klaim instalasi. Audit tidak menyatakan sertifikasi atau kesetaraan produk. Tidak mengubah proses klinis, data master, DB produksi, atau menjalankan pengiriman data pasien. Prioritas perubahan didasarkan pada bukti kode dan uji sintetis; status deployment dicatat terpisah.
+# Perbaikan dan rilis LIS — 2026-09-06
+
+Rencana per irisan ≤1 jam: (1) benahi kebenaran dashboard/grafik/status panel dan pesan simpan; (2) satukan evaluator QC serta tutup autoverifikasi tidak aman; (3) perbaiki identitas riwayat, laporan dan helper/entry lama; (4) perkuat API transisi hasil dan connector, uji sintetis; (5) rapikan menu/responsivitas, jalankan release checks dan periksa target deployment; (6) rilis artefak yang lolos, dokumentasikan bukti dan batas operasional.
+
+## Implikasi IP & Kepatuhan
+
+OWNED_BY: ava. Pengguna secara eksplisit meminta implementasi dan release setelah audit. Otorisasi ini mencakup perbaikan aplikasi dan persiapan/deployment rilis pada target proyek yang terbukti; tidak mencakup mengarang SOP klinis, mengubah nilai master, memindahkan data pasien atau mengaktifkan fitur belum tervalidasi. Perubahan operasional diuji dengan data sintetis. Autoverifikasi tetap ditahan jika penjagaan server belum tervalidasi. Tidak menyalin aset brosur. Hindari mengikutsertakan perubahan task lain pada rilis; status deployment dan pengujian alat dilaporkan apa adanya.

@@ -7,7 +7,7 @@ const WESTGARD_RULES = [
   { code: '1-2s', name: 'Aturan Peringatan (Warning Rule)', type: 'WARNING', desc: '1 nilai QC melebihi 2 SD. Tandai untuk pengamatan.' },
   { code: '1-3s', name: 'Aturan Penolakan (Rejection Rule)', type: 'REJECT', desc: '1 nilai QC melebihi 3 SD. Hasil batch LAB HARUS DITOLAK.' },
   { code: '2-2s', name: 'Kesalahan Sistematik (Systematic Error)', type: 'REJECT', desc: '2 nilai QC berturut-turut melebihi 2 SD pada arah yang sama.' },
-  { code: 'R-4s', name: 'Kesalahan Acak (Random Error)', type: 'REJECT', desc: 'Perbedaan antara 2 nilai QC berturut-turut melebihi 4 SD.' },
+  { code: 'R-4s', name: 'Kesalahan Acak (Random Error)', type: 'REJECT', desc: 'Rentang dua level dalam run yang sama melebihi 4 SD.' },
   { code: '4-1s', name: 'Tren Sistematik (Maintenance Needed)', type: 'WARNING', desc: '4 nilai QC berturut-turut melebihi 1 SD pada arah yang sama.' },
   { code: '10x',  name: 'Pergeseran Mean (Shift Error)', type: 'REJECT', desc: '10 nilai QC berturut-turut berada di satu sisi nilai Mean.' },
 ];
@@ -19,85 +19,30 @@ const WESTGARD_RULES = [
  * @param {number} sd - Standar Deviasi (SD)
  * @param {Array<number>} previousValues - Riwayat nilai QC sebelumnya (kronologis)
  */
-function evaluateWestgardRules(val, targetMean, sd, previousValues = []) {
-  if (!sd || sd <= 0) return { status: 'INVALID', message: 'SD harus lebih besar dari 0' };
-
-  const zScore = (val - targetMean) / sd;
-  const absZ = Math.abs(zScore);
-  const allValues = [...previousValues, val];
-  const allZScores = allValues.map(v => (v - targetMean) / sd);
-
-  let status = 'PASS';
-  let triggeredRule = null;
-  let recommendation = 'Hasil QC Normal. Batch tes laboratorium dapat diloloskan.';
-
-  // 1. Rule 1-3s (Rejection: Random / Large Error)
-  if (absZ > 3.0) {
-    status = 'REJECT';
-    triggeredRule = '1-3s';
-    recommendation = '🚫 REJECT BATCH! Nilai QC menyimpang > 3 SD (Kesalahan Acak / Gross Error). Hentikan analisis, periksa reagen dan kalibrasi ulang instrumen.';
-  }
-  // 2. Rule 2-2s (Rejection: Systematic Error)
-  else if (allZScores.length >= 2) {
-    const prevZ = allZScores[allZScores.length - 2];
-    if ((zScore > 2.0 && prevZ > 2.0) || (zScore < -2.0 && prevZ < -2.0)) {
-      status = 'REJECT';
-      triggeredRule = '2-2s';
-      recommendation = '🚫 REJECT BATCH! 2 nilai QC berturut-turut melebihi 2 SD pada arah yang sama (Kesalahan Sistematik). Periksa lot reagen atau stabilitas suhu inkubator.';
-    }
-  }
-
-  // 3. Rule R-4s (Rejection: Random Error across run)
-  if (status === 'PASS' && allZScores.length >= 2) {
-    const prevZ = allZScores[allZScores.length - 2];
-    if (Math.abs(zScore - prevZ) >= 4.0) {
-      status = 'REJECT';
-      triggeredRule = 'R-4s';
-      recommendation = '🚫 REJECT BATCH! Rentang antara 2 nilai QC berturut-turut melebihi 4 SD (Kesalahan Acak Ekstrem). Ulangi tes QC dengan vial kontrol baru.';
-    }
-  }
-
-  // 4. Rule 4-1s (Warning / Maintenance: Systematic Trend)
-  if (status === 'PASS' && allZScores.length >= 4) {
-    const last4 = allZScores.slice(-4);
-    const allPos1s = last4.every(z => z > 1.0);
-    const allNeg1s = last4.every(z => z < -1.0);
-    if (allPos1s || allNeg1s) {
-      status = 'WARNING';
-      triggeredRule = '4-1s';
-      recommendation = '⚡ PERINGATAN: 4 nilai berturut-turut melebihi 1 SD pada sisi yang sama (Tren Sistematik). Lakukan maintenance preventif pada probe / fotometer.';
-    }
-  }
-
-  // 5. Rule 10x (Rejection / Shift: Bias Shift)
-  if (status === 'PASS' && allZScores.length >= 10) {
-    const last10 = allZScores.slice(-10);
-    const allAboveMean = last10.every(z => z > 0);
-    const allBelowMean = last10.every(z => z < 0);
-    if (allAboveMean || allBelowMean) {
-      status = 'REJECT';
-      triggeredRule = '10x';
-      recommendation = '🚫 REJECT BATCH! 10 nilai berturut-turut berada di satu sisi mean (Pergeseran Sistematik / Shift). Kalibrasi ulang diperlukan sebelum rilis hasil pasien.';
-    }
-  }
-
-  // 6. Rule 1-2s (Warning: Single deviation)
-  if (status === 'PASS' && absZ > 2.0) {
-    status = 'WARNING';
-    triggeredRule = '1-2s';
-    recommendation = '⚡ PERINGATAN: 1 nilai QC melebihi 2 SD. Amati hasil tes kontrol berikutnya dengan seksama.';
-  }
-
-  return {
-    val,
-    targetMean,
-    sd,
-    zScore: parseFloat(zScore.toFixed(2)),
-    status,
-    triggeredRule,
-    recommendation,
-    evaluatedAt: new Date().toISOString()
-  };
+// One evaluator; chronology is oldest to newest. R-4s requires explicit same-run levels.
+function evaluateWestgardZ(zScores, sameRunZ=[]) {
+  if(!zScores.length || [...zScores,...sameRunZ].some(v=>typeof v!=='number'||!Number.isFinite(v)))
+    return {status:'INVALID',triggeredRule:null,recommendation:'Data QC tidak valid; tinjau input.'};
+  const z=zScores.at(-1),same=(n,t)=>zScores.length>=n &&
+    (zScores.slice(-n).every(v=>v>t)||zScores.slice(-n).every(v=>v < -t));
+  let rule=null,status='PASS';
+  if(Math.abs(z)>3) rule='1-3s';
+  else if(same(2,2)) rule='2-2s';
+  else if(sameRunZ.length>=2 && Math.max(...sameRunZ)>2 && Math.min(...sameRunZ)<-2 && Math.max(...sameRunZ)-Math.min(...sameRunZ)>4) rule='R-4s';
+  else if(same(10,0)) rule='10x';
+  if(rule) status='REJECT';
+  else if(same(4,1)){rule='4-1s';status='WARNING';}
+  else if(Math.abs(z)>2){rule='1-2s';status='WARNING';}
+  return {status,triggeredRule:rule,zScore:z,ruleVersion:'ava-qc-1.1',
+    recommendation:status==='PASS'?'Tidak ada pelanggaran aturan terpilih. Tinjau kelengkapan QC sesuai SOP.':
+      status==='REJECT'?'Pelanggaran '+rule+'. Tahan dan tinjau QC sesuai SOP.':'Peringatan '+rule+'. Tinjau QC sesuai SOP.'};
+}
+function evaluateWestgardRules(val,targetMean,sd,previousValues=[],sameRunValues=[]) {
+  const values=[val,targetMean,sd,...previousValues,...sameRunValues];
+  if(values.some(v=>v==null||v===''||typeof v==='boolean'||!Number.isFinite(Number(v))) || Number(sd)<=0)
+    return {status:'INVALID',message:'Nilai, target dan SD harus berupa angka; SD harus positif'};
+  return {...evaluateWestgardZ([...previousValues,val].map(v=>(Number(v)-Number(targetMean))/Number(sd)),
+    sameRunValues.map(v=>(Number(v)-Number(targetMean))/Number(sd))),val,targetMean,sd};
 }
 
 /**
@@ -143,6 +88,7 @@ function calculateSigmaMetrics(teaPct, biasPct, cvPct) {
 if (typeof window !== 'undefined') {
   window.westgardQcEngine = {
     WESTGARD_RULES,
+    evaluateWestgardZ,
     evaluateWestgardRules,
     calculateSigmaMetrics
   };
@@ -151,6 +97,7 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     WESTGARD_RULES,
+    evaluateWestgardZ,
     evaluateWestgardRules,
     calculateSigmaMetrics
   };

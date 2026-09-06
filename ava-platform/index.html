@@ -9,7 +9,7 @@
      query pertama. Hanya petunjuk browser — tidak mengubah perilaku apa pun. -->
 <link rel="preconnect" href="https://rmyqzyfvlmjxtatpctks.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://rmyqzyfvlmjxtatpctks.supabase.co">
-<link rel="stylesheet" href="css/style.css?v=20260906-clinical-services">
+<link rel="stylesheet" href="css/style.css?v=20260906-ops-hubs-lis-his-sync">
 <link rel="stylesheet" href="css/dashboard.css?v=20260719s">
 <link rel="stylesheet" href="css/lis-workspace.css?v=20260906">
 <!-- Hanya URL dan anon key per-deployment; bukan secret server. -->
@@ -222,7 +222,7 @@
 <!-- Struktur menu: dibangkitkan dari config/menu.json oleh
      scripts/bangun-menu.js. Wajib dimuat sebelum skrip yang
      menyusun FLYOUT_MENUS di bawah. -->
-<script defer src="js/core/peta-menu.js?v=20260906-clinical-services"></script>
+<script defer src="js/core/peta-menu.js?v=20260906-ops-hubs-lis-his-sync"></script>
 <script defer src="js/core/icons.js?v=20260721g"></script>
 <script defer src="js/core/api.js?v=20260719s"></script>
 <script defer src="js/core/utils.js?v=20260723b"></script>
@@ -959,6 +959,7 @@ function gambarRail(ruang) {
     'Pengaturan & Bantuan': '⚙️',
     'Alur Pasien': '🏥', 'Pelayanan Klinis': '🩺',
     'Fasilitas & Antrean': '🎟️', 'Master Klinis': '🗂️',
+    'Rekam Medis & Privasi': '🗃️', 'Paket & Membership': '🎫',
     'Administrasi & Kepatuhan': '⚖️', 'Operasional Klinik': '📊',
     'Bisnis & Korporat': '🤝', 'Keuangan & Penagihan': '💳',
     'Administrasi Sistem': '⚙️', 'Pra-Analitik & Sampling': '🩸',
@@ -975,7 +976,9 @@ function gambarRail(ruang) {
     'Pengembangan Sistem': '💻', 'Klien & Lisensi': '🔐',
     'Komersial Sistem': '💰', 'Interoperabilitas': '🌐',
     'Orkestrasi Multi-Agent': '🤖', 'Pengaturan Platform Tech': '🛠️',
-    'SDM Tech': '👥', 'Pemasaran Tech': '📣', 'Keuangan Tech': '💵'
+    'SDM Tech': '👥', 'Pemasaran Tech': '📣', 'Keuangan Tech': '💵',
+    'Ikhtisar Workforce': '👥', 'Administrasi Tenaga Kerja': '🧑‍💼',
+    'Jadwal & Kehadiran': '🗓️', 'Remunerasi': '💰'
   };
 
   // HIS memakai tiga tingkat yang lebih ringkas: domain kerja → layanan → modul.

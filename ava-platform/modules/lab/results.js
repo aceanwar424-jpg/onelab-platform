@@ -178,24 +178,6 @@ async function resPickRow(rid){
       <div id="dilution-badge-${rid}" style="font-size:10px;color:var(--teal);font-weight:750"></div>
     </div>
 
-    <!-- SYSMEX SCATTERGRAM & HISTOGRAM VISUALIZER (HCLAB STANDARD) -->
-    <div style="background:#0b1329; color:#fff; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #1e293b;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:10.5px; font-weight:800; color:#38bdf8; letter-spacing:0.04em;">📈 ANALYZER GRAPHIC (SCAT/HIST)</span>
-        <span style="font-size:9.5px; color:#94a3b8; font-family:monospace;">SYSMEX XN-SERIES</span>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <div style="background:#020617; border:1px solid #1e293b; border-radius:4px; padding:4px; text-align:center;">
-          <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">WBC DIFF 2D-SCAT</div>
-          <canvas id="sysmex-scat-${rid}" width="100" height="70" style="width:100%; height:70px;"></canvas>
-        </div>
-        <div style="background:#020617; border:1px solid #1e293b; border-radius:4px; padding:4px; text-align:center;">
-          <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">RBC/PLT HISTOGRAM</div>
-          <canvas id="sysmex-hist-${rid}" width="100" height="70" style="width:100%; height:70px;"></canvas>
-        </div>
-      </div>
-    </div>
-
     <!-- CATATAN & PRESETS -->
     <label style="font-size:11px;color:var(--gray);font-weight:700">Catatan Analis / Flebotomi</label>
     <input list="res-note-presets" id="res-note-input"
@@ -214,15 +196,8 @@ async function resPickRow(rid){
     </div>
   `;
 
-  // Draw Sysmex Scattergram & Histogram Simulation
-  setTimeout(() => {
-    drawSysmexScattergram(`sysmex-scat-${rid}`);
-    drawSysmexHistogram(`sysmex-hist-${rid}`);
-  }, 50);
-
   try {
-    const prev=await sbGet('lab_results',
-      `select=result_value,unit,created_at&patient_name=eq.${encodeURIComponent(r.patient_name||'')}&product_id=eq.${r.product_id}${r.product_item_id?`&product_item_id=eq.${r.product_item_id}`:''}&result_value=not.is.null&status=in.(Approved,Released,Validated)&order=created_at.desc&limit=1`).catch(()=>[]);
+    const prev=await labHistory(r.admission_id,r.product_id,r.product_item_id,r.id);
     const p=prev?.[0];
     const box=document.getElementById('res-prevbox');
     if(box) box.innerHTML= p?`Hasil sebelumnya: <strong>${p.result_value} ${p.unit||''}</strong> <span style="color:var(--text4)">(${new Date(p.created_at).toLocaleDateString('id-ID')})</span>`:'Belum ada riwayat sebelumnya.';
@@ -532,8 +507,9 @@ function interpretResult(val){
 async function showDeltaCheck(patientName, productId, excludeId=null){
   const box=document.getElementById('rf-delta-box'); if(!box) return;
   try {
-    const prev=await sbGet('lab_results',
-      `select=result_value,result_numeric,unit,created_at&patient_name=eq.${encodeURIComponent(patientName)}&product_id=eq.${productId}&result_value=not.is.null&order=created_at.desc&limit=1`);
+    const current=labResults.find(r=>r.id==excludeId);
+    const admissionId=current?.admission_id || document.getElementById('rf-adm')?.value;
+    const prev=await labHistory(admissionId,productId,current?.product_item_id,excludeId);
     const p=(prev||[]).find(x=>true);
     if(!p){ box.innerHTML=''; return; }
     box.innerHTML=`
@@ -593,91 +569,5 @@ async function saveLabResult(id){
   } catch(e){ toast('❌ '+e.message,'err'); }
 }
 
-// ── Sysmex 2D WBC Scattergram Simulation Renderer ─────────────────────────
-function drawSysmexScattergram(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas || !canvas.getContext) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
 
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(0, 0, w, h);
 
-  // Grid lines
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  for (let x = 15; x < w; x += 15) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-  for (let y = 15; y < h; y += 15) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-  ctx.stroke();
-
-  // Clusters: Lymphocytes (Blue), Monocytes (Green), Neutrophils (Cyan), Eosinophils (Red)
-  const drawCluster = (cx, cy, rx, ry, count, color) => {
-    ctx.fillStyle = color;
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.random();
-      const px = cx + Math.cos(angle) * rx * dist;
-      const py = cy + Math.sin(angle) * ry * dist;
-      ctx.fillRect(px, py, 1.2, 1.2);
-    }
-  };
-
-  drawCluster(25, 45, 12, 10, 45, '#38bdf8'); // Lymphocytes (Cyan)
-  drawCluster(45, 32, 10, 8, 30, '#4ade80');  // Monocytes (Green)
-  drawCluster(68, 22, 18, 12, 120, '#a855f7'); // Neutrophils (Purple)
-  drawCluster(75, 48, 8, 6, 20, '#f87171');   // Eosinophils (Red)
-  drawCluster(15, 60, 6, 4, 15, '#fbbf24');   // Debris / Platelets (Yellow)
-}
-
-// ── Sysmex RBC / PLT Volume Distribution Histogram ─────────────────────────
-function drawSysmexHistogram(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas || !canvas.getContext) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(0, 0, w, h);
-
-  // Grid lines
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  for (let x = 15; x < w; x += 15) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-  for (let y = 15; y < h; y += 15) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-  ctx.stroke();
-
-  // Draw Gaussian Curves (PLT on left, RBC on right)
-  // PLT Curve (Orange)
-  ctx.strokeStyle = '#f59e0b';
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  for (let x = 5; x < 35; x++) {
-    const norm = Math.exp(-Math.pow((x - 18) / 6, 2));
-    const y = (h - 6) - norm * (h * 0.45);
-    if (x === 5) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  // RBC Curve (Crimson/Red)
-  ctx.strokeStyle = '#ef4444';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  for (let x = 30; x < w - 5; x++) {
-    const norm = Math.exp(-Math.pow((x - 65) / 16, 2));
-    const y = (h - 6) - norm * (h * 0.75);
-    if (x === 30) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  // Baseline
-  ctx.strokeStyle = '#64748b';
-  ctx.beginPath();
-  ctx.moveTo(0, h - 5);
-  ctx.lineTo(w, h - 5);
-  ctx.stroke();
-}
-
-window.drawSysmexScattergram = drawSysmexScattergram;
-window.drawSysmexHistogram = drawSysmexHistogram;
