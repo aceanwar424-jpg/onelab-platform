@@ -228,6 +228,29 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
   keputusan bisnis/DB tetap diberi validasi UI. Perubahan aturan otoritatif
   atau migrasi tabel memerlukan checkpoint pemilik database.
 
+## Audit dan viewer Pelayanan Klinis — 6 September 2026
+
+### Urutan implementasi
+
+1. [ ] Petakan menu referensi layanan ke kelompok HIS yang tepat dan tandai
+   mana yang menjadi workflow klinis serta mana yang hanya viewer hasil LIS.
+2. [ ] Tambahkan viewer hasil read-only untuk Patologi Klinik, Mikrobiologi,
+   dan Patologi Anatomi, dengan filter, status rilis, nilai rujukan, flag,
+   serta jejak waktu sinkronisasi.
+3. [ ] Rapikan menu Pelayanan Klinis dan layar penunjang agar Audiometri,
+   Spirometri, EKG/Treadmill, radiologi, dan hasil LIS tidak tercampur.
+4. [ ] Bangun ulang peta menu/manifest dan uji rute, responsivitas, serta
+   audit menu hidup tanpa membuat atau mengubah hasil pasien.
+
+### Implikasi IP & Kepatuhan
+
+- Viewer HIS hanya membaca hasil yang telah dirilis oleh LIS. Tidak ada input,
+  koreksi, validasi, persetujuan, atau pelepasan hasil dari sisi HIS.
+- Tidak ada perubahan skema, koneksi LIS, konfigurasi perangkat, maupun data
+  klinis produksi. Penyambungan API/LIS nyata tetap memerlukan checkpoint
+  pemilik integrasi dan aturan otorisasi hasil.
+- Nama bidang bersifat generik dan parameterized; data uji tetap kosong/lokal.
+
 ## Perombakan web publik AVA Health — 2026-09-05
 Rencana: (1) audit portal dan routing (≤1 jam), (2) bangun profil publik responsif, detail brand, katalog, sejarah, sertifikasi, kontak (≤1 jam), (3) validasi tautan/aset/routing dan preview (≤1 jam).
 Arah visual: editorial kesehatan, putih dan navy, aksen emerald, tipografi besar, enam brand sebagai portofolio bisnis. Pertahankan stack statis dan deployment Vercel yang ada.
@@ -258,3 +281,8 @@ OWNED_BY: ava. Founder/Owner/CEO: Ace Anwar sesuai dokumen induk dan instruksi p
 Rencana: audit navigasi dan akses produksi (≤1 jam), rapikan label/pengelompokan serta tema khusus LIS (≤1 jam), periksa rute, generator, dan sintaks (≤1 jam).
 ### Implikasi IP & Kepatuhan
 OWNED_BY: ava. Perubahan presentasi aplikasi sendiri, tanpa pemindahan aset ke produk generik. Tidak mengubah ID menu, RBAC, skema, nilai rujukan, aturan QC, validasi klinis atau integrasi produksi. Akses produksi berhenti pada halaman login; pengujian kode lokal tanpa data pasien. Istilah klinis penting dipertahankan; rincian teknis tetap ada dalam deskripsi dan konfigurasi.
+
+## LIS → HIS: pemilihan layanan dan tagihan — 2026-09-06
+Rencana: (1) telusuri kontrak admisi/layanan dan hapus harga/branding workstation (≤1 jam); (2) buat API transaksi layanan klinis dan antrean rekonsiliasi HIS dengan identitas order, deduplikasi, dan konflik versi (≤1 jam); (3) tampilkan perubahan LIS pada admisi HIS, gunakan perhitungan HIS saat penetapan tagihan, uji sintetis dan dokumentasikan deployment (≤1 jam).
+### Implikasi IP & Kepatuhan
+OWNED_BY: ava. Pengguna mengotorisasi sinkronisasi skema HIS/LIS; implementasi migrasi lokal dan kontrak API boleh dikerjakan. Tidak menjalankan migrasi/menulis DB produksi. LIS mengirim ID layanan tanpa nominal pembayaran; HIS tetap menentukan harga/diskon dan status pembayaran. Tidak mengubah kunci master tes, hasil tervalidasi atau transaksi sudah dibayar. Perubahan layanan dikirim sebagai permintaan teraudit ke HIS, bukan menimpa tagihan final. Data pengujian sintetis; API wajib autentikasi, pembatasan tenant dan idempotensi.

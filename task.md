@@ -82,6 +82,13 @@
 - [x] Rapikan daftar, form, pemilih layanan, pembayaran, kasir, laporan, dan handoff antrean.
 - [x] Uji renderer serta transisi tanpa menyimpan transaksi.
 
+## Audit dan viewer Pelayanan Klinis — 6 September 2026
+
+- [ ] Petakan workflow klinis versus viewer hasil LIS.
+- [ ] Tambahkan viewer Patologi Klinik, Mikrobiologi, dan Patologi Anatomi.
+- [ ] Rapikan menu Pelayanan Klinis dan penunjang.
+- [ ] Bangun ulang peta/manifest dan verifikasi tanpa transaksi klinis.
+
 ## Web publik AVA Health — 2026-09-05
 - [x] Audit sumber portal, pemetaan domain, dan perubahan pengguna.
 - [ ] Rombak portal menjadi profil perusahaan dengan detail brand dan katalog publik.
@@ -146,3 +153,9 @@
 - [ ] Verifikasi rute, generator, sintaks dan catat keterbatasan audit.
 - [x] Rapikan kelompok, label, judul navigasi dan tema LIS.
 - [x] Verifikasi 24 rute/metadata, generator dan sintaks; dokumentasikan batas audit produksi dan uji visual tertunda.
+
+## Sinkronisasi layanan LIS–HIS
+- [ ] Hapus branding workstation dan harga admisi LIS.
+- [ ] API permintaan layanan idempotent dan penautan kunjungan HIS.
+- [ ] Rekonsiliasi permintaan LIS di admisi HIS dengan tarif HIS.
+- [ ] Uji sintetis, bukti, dan catatan aktivasi migrasi.

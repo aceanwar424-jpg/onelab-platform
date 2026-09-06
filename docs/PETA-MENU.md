@@ -20,7 +20,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | `lis.avahealth.sbs` | LIS — Laboratorium Diagnostik | Seluruh alur laboratorium: pra-analitik, analitik, pasca-analitik, master data tes, rujukan, dan logistik reagen. | lis |
 | `wellness.avahealth.sbs` | Wellness — Nutrition & Personal Care | Gabungan AVA Nutrition dan AVA Care di bawah satu payung wellness, ditambah Sanctuary. Sebelumnya terpecah tiga subdomain dengan isi yang sama. | wellness, marketing, keuangan, logistik, konfigurasi |
 
-**Total menu terpetakan:** 204 — 🟢 163 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
+**Total menu terpetakan:** 207 — 🟢 166 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
 
 ---
 
@@ -130,6 +130,9 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | 🟢 | Rawat Inap & Bed Management | `inpatient` | Mutasi tempat tidur & resume pulang |
 | 🟢 | Arsip Rekam Medis | `medrecord` | Riwayat kunjungan dan berkas pasien |
 | 🟢 | Order Terintegrasi | `his-orders` | Satu layar untuk memesan lab, radiologi, obat, dan tindakan sekaligus; order lab langsung membuat order di LIS |
+| 🟢 | Hasil Patologi Klinik (Viewer LIS) | `his-clinical-pathology` | Viewer read-only hasil Patologi Klinik yang sudah dirilis LIS; koreksi dan rilis tetap dilakukan di LIS |
+| 🟢 | Hasil Mikrobiologi (Viewer LIS) | `his-microbiology` | Viewer read-only hasil pewarnaan, kultur, identifikasi, dan sensitivitas yang sudah dirilis LIS |
+| 🟢 | Hasil Patologi Anatomi (Viewer LIS) | `his-anatomical-pathology` | Viewer read-only hasil histopatologi dan sitologi yang sudah dirilis LIS |
 | 🟢 | Tindakan & Prosedur | `his-procedures` | Katalog tindakan, informed consent digital, catatan tindakan, dan biayanya |
 | 🟢 | Vaksinasi & Imunisasi | `his-immunization` | Jadwal, stok vaksin per lot, pelaporan KIPI, sertifikat, dan push ke SATUSEHAT |
 

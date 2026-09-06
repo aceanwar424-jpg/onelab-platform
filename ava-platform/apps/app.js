@@ -410,6 +410,8 @@ function renderSidebarMenu() {
     const subCorpMcu = `
       <a class="sidebar-link active" onclick="showView('corporate-view', 'Home MCU')">${I.home}<span>Dasbor Kesehatan Korporat</span></a>
       <a class="sidebar-link" onclick="showView('ava-corp-burnout-view', 'Corporate Health Index')">${I.result}<span>🏢 Burnout &amp; Health Index</span></a>
+      <a class="sidebar-link" onclick="showView('corporate-analytics-view', 'Analytics Epidemiologi')">${I.result}<span>📊 Analytics Epidemiologi &amp; E-Hasil</span></a>
+      <a class="sidebar-link" onclick="showView('corporate-onsite-schedule-view', 'Jadwal Mobile MCU')">${I.home}<span>🚌 Live Mobile Lab Bus On-Site</span></a>
       <a class="sidebar-link" onclick="showView('corporate-employees-view', 'Master Employee')">${I.users}<span>Master Data Karyawan</span></a>
       ${canRequest ? `<a class="sidebar-link" onclick="showView('book-examination-view', 'Book Examination')">${I.book}<span>Order MCU Massal (Maker)</span></a>` : ''}
       ${canApprove ? `<a class="sidebar-link" onclick="showView('examination-approval-view', 'Examination Approval')">${I.approve}<span>Approval MCU Batch (Approver)</span></a>` : ''}
@@ -428,6 +430,8 @@ function renderSidebarMenu() {
   } else if (currentRole === 'staff') {
     const subNakes = `
       <a class="sidebar-link active" onclick="showView('staff-homecare-view', 'Tugas Home Care')">${I.home}<span>Jadwal Visit Hari Ini</span></a>
+      <a class="sidebar-link" onclick="showView('staff-custody-view', 'Serah Terima Spesimen')">${I.package}<span>📦 Serah Terima Spesimen (Custody Log)</span></a>
+      <a class="sidebar-link" onclick="showView('staff-coldchain-check-view', 'Pre-Departure Check')">${I.device}<span>❄️ Kalibrasi Pre-Departure Cold-Chain</span></a>
       <a class="sidebar-link" onclick="showView('ava-iso-audit-view', 'Audit Mutu ISO 15189')">${I.result}<span>📜 Continuous ISO 15189 Audit</span></a>
       <a class="sidebar-link" onclick="showView('ava-laas-api-view', 'LaaS API Portal')">${I.device}<span>🌐 LaaS Open API Portal</span></a>
       <a class="sidebar-link" onclick="openPhlebotomyModal()">${I.result}<span>Audit Sampling ISO 15189</span></a>
@@ -443,6 +447,8 @@ function renderSidebarMenu() {
   } else if (currentRole === 'referral') {
     const subRefRujukan = `
       <a class="sidebar-link active" onclick="showView('referral-view', 'Faskes Referral')">${I.dashboard}<span>Dasbor &amp; Riwayat Rujukan</span></a>
+      <a class="sidebar-link" onclick="showView('referral-catalog-view', 'Katalog Tes &amp; Tarif LIS')">${I.lab}<span>🧪 Katalog Tes &amp; Tarif LIS (530+)</span></a>
+      <a class="sidebar-link" onclick="showView('referral-lab-results-view', 'Hasil Lab E-Rujukan')">${I.result}<span>📋 E-Hasil Lab Pasien Rujukan</span></a>
       <a class="sidebar-link" onclick="showView('ava-ambient-scribe-view', 'Ambient AI Clinical Scribe')">${I.consult}<span>🎙️ Ambient AI Scribe Dokter</span></a>
       <a class="sidebar-link" onclick="openReferralForm()">${I.filePlus}<span>Buat Rujukan Baru (FPP)</span></a>
       <a class="sidebar-link" onclick="showView('referral-view', 'Chat Patologi')">${I.consult}<span>Peer-to-Peer Chat Patologi</span></a>
@@ -458,6 +464,12 @@ function renderSidebarMenu() {
     ].join('');
   }
 }
+
+function updateSidebarNav() {
+  renderSidebarMenu();
+}
+window.updateSidebarNav = updateSidebarNav;
+window.renderSidebarMenu = renderSidebarMenu;
 
 function updateStaffStatus(status) {
   const el = document.getElementById('staff-task-status');

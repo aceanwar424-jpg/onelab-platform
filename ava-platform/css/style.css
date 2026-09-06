@@ -2821,9 +2821,58 @@ body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .form-gr
 }
 body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .table-wrap table th { padding-top: 8px; padding-bottom: 8px; font-size: 10px; }
 body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .table-wrap table td { padding-top: 8px; padding-bottom: 8px; font-size: 11.5px; }
+
+/* ══════════════════════════════════════════════════════════════
+   VIEWER HASIL LIS DI HIS — read-only, ringkas, dan nyaman ditinjau
+══════════════════════════════════════════════════════════════ */
+.clinical-results-viewer { max-width: 1440px; margin: 0 auto; color: var(--text); }
+.clinical-results-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 2px 2px 12px; border-bottom: 1px solid var(--border); }
+.clinical-results-eyebrow { margin-bottom: 4px; color: var(--viewer-accent); font-size: 9.5px; font-weight: 800; letter-spacing: .08em; }
+.clinical-results-head h1 { margin: 0; color: var(--navy); font-size: 19px; line-height: 1.2; letter-spacing: -.015em; }
+.clinical-results-head p { max-width: 720px; margin: 4px 0 0; color: var(--text3); font-size: 11.5px; line-height: 1.45; }
+.clinical-results-readonly { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 7px 9px; color: var(--text2); background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; }
+.clinical-results-readonly > span { display: grid; width: 25px; height: 25px; place-items: center; color: var(--viewer-accent); background: color-mix(in srgb, var(--viewer-accent) 12%, white); border-radius: 6px; font-size: 12px; }
+.clinical-results-readonly strong, .clinical-results-readonly small { display: block; }
+.clinical-results-readonly strong { color: var(--navy); font-size: 10.5px; }
+.clinical-results-readonly small { margin-top: 1px; color: var(--text3); font-size: 9.5px; }
+.clinical-results-notice { display: flex; align-items: flex-start; gap: 7px; margin: 10px 0; padding: 8px 10px; color: var(--text2); background: color-mix(in srgb, var(--viewer-accent) 8%, white); border: 1px solid color-mix(in srgb, var(--viewer-accent) 25%, white); border-left: 3px solid var(--viewer-accent); border-radius: 7px; font-size: 10.5px; line-height: 1.4; }
+.clinical-results-notice > span:first-child { color: var(--viewer-accent); font-weight: 800; }
+.clinical-results-toolbar { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(160px, .3fr) minmax(160px, .3fr); gap: 8px; margin-bottom: 9px; }
+.clinical-results-toolbar input, .clinical-results-toolbar select { min-width: 0; height: 34px; padding: 7px 9px; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 7px; font-size: 11.5px; }
+.clinical-results-toolbar input:focus, .clinical-results-toolbar select:focus { outline: 2px solid color-mix(in srgb, var(--viewer-accent) 25%, transparent); border-color: var(--viewer-accent); }
+.clinical-results-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 145px)); gap: 8px; margin-bottom: 9px; }
+.clinical-results-summary > div { display: flex; align-items: baseline; gap: 5px; min-height: 42px; padding: 8px 10px; background: var(--white); border: 1px solid var(--border); border-top: 2px solid var(--viewer-accent); border-radius: 7px; }
+.clinical-results-summary strong { color: var(--navy); font-size: 17px; line-height: 1; }
+.clinical-results-summary span { color: var(--text3); font-size: 10px; }
+.clinical-results-summary .has-critical { border-top-color: var(--danger-strong); }
+.clinical-results-summary .has-critical strong { color: var(--danger-strong); }
+.clinical-results-skeleton { display: block; height: 42px; background: linear-gradient(90deg, var(--bg2), var(--white), var(--bg2)); border-radius: 7px; }
+.clinical-results-table-wrap { overflow-x: auto; background: var(--white); border: 1px solid var(--border); border-radius: 9px; }
+.clinical-results-table { width: 100%; min-width: 940px; border-collapse: collapse; }
+.clinical-results-table th { padding: 8px 10px; color: var(--text3); background: var(--bg2); border-bottom: 1px solid var(--border); font-size: 9.5px; font-weight: 800; letter-spacing: .045em; text-align: left; text-transform: uppercase; }
+.clinical-results-table td { padding: 9px 10px; border-bottom: 1px solid var(--bg2); color: var(--text2); font-size: 11px; line-height: 1.35; vertical-align: middle; }
+.clinical-results-table tbody tr:last-child td { border-bottom: 0; }
+.clinical-results-table tbody tr:hover { background: color-mix(in srgb, var(--viewer-accent) 4%, white); }
+.clinical-results-table .critical-row { background: var(--danger-soft); }
+.clinical-results-table strong, .clinical-results-table small { display: block; }
+.clinical-results-table strong { color: var(--navy); font-size: 11.5px; }
+.clinical-results-table small { margin-top: 2px; color: var(--text3); font-size: 9.5px; }
+.clinical-result-value strong { color: var(--viewer-accent); font-size: 12px; }
+.clinical-flag { display: inline-flex; padding: 3px 6px; border-radius: 5px; font-size: 9.5px; font-weight: 800; white-space: nowrap; }
+.clinical-flag.normal { color: #147a57; background: #eaf8ef; }
+.clinical-flag.flagged { color: #a65e00; background: #fff4db; }
+.clinical-flag.critical { color: #b42318; background: #ffe9e7; }
+.clinical-results-empty { min-height: 220px; padding: 34px 18px; }
+.clinical-results-empty p { max-width: 440px; margin: 5px auto 0; color: var(--text3); font-size: 11.5px; line-height: 1.45; }
 @media (max-width: 768px) {
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .main-content { padding: 12px; }
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .page-header { align-items: flex-start; flex-direction: column; }
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .page-header .btn-row,
   body.his-workspace-page:not(.kiosk-mode):not(.admission-workspace-page) .page-header > div:last-child { width: 100%; }
+  .clinical-results-head { align-items: stretch; flex-direction: column; gap: 9px; }
+  .clinical-results-readonly { width: fit-content; }
+  .clinical-results-toolbar { grid-template-columns: 1fr 1fr; }
+  .clinical-results-toolbar input { grid-column: 1 / -1; }
+  .clinical-results-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .clinical-results-summary > div { align-items: flex-start; flex-direction: column; gap: 2px; }
 }

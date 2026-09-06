@@ -431,6 +431,11 @@ async function navigate(page, params={}) {
     case 'lis-sample-archive':
     case 'sample-archiving': safeRun('renderSampleArchiving');       break;
     case 'his-orders':  safeRun('renderIntegratedOrders');           break;
+    // Hasil LIS pada HIS hanya untuk dibaca. Fungsi workflow/otorisasi tetap
+    // berada di LIS agar tidak ada dua sumber kebenaran klinis.
+    case 'his-clinical-pathology': safeRun('renderHisLisResultViewer', { discipline: 'clinical-pathology' }); break;
+    case 'his-microbiology': safeRun('renderHisLisResultViewer', { discipline: 'microbiology' }); break;
+    case 'his-anatomical-pathology': safeRun('renderHisLisResultViewer', { discipline: 'anatomical-pathology' }); break;
     case 'rad-ekspertise': safeRun('renderRadiologyExpertise');      break;
     case 'his-mpi':     safeRun('renderMpiManagement');              break;
 

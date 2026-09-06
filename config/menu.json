@@ -449,6 +449,24 @@
               "ket": "Satu layar untuk memesan lab, radiologi, obat, dan tindakan sekaligus; order lab langsung membuat order di LIS"
             },
             {
+              "id": "his-clinical-pathology",
+              "label": "Hasil Patologi Klinik (Viewer LIS)",
+              "status": "ada",
+              "ket": "Viewer read-only hasil Patologi Klinik yang sudah dirilis LIS; koreksi dan rilis tetap dilakukan di LIS"
+            },
+            {
+              "id": "his-microbiology",
+              "label": "Hasil Mikrobiologi (Viewer LIS)",
+              "status": "ada",
+              "ket": "Viewer read-only hasil pewarnaan, kultur, identifikasi, dan sensitivitas yang sudah dirilis LIS"
+            },
+            {
+              "id": "his-anatomical-pathology",
+              "label": "Hasil Patologi Anatomi (Viewer LIS)",
+              "status": "ada",
+              "ket": "Viewer read-only hasil histopatologi dan sitologi yang sudah dirilis LIS"
+            },
+            {
               "id": "his-procedures",
               "label": "Tindakan & Prosedur",
               "status": "ada",

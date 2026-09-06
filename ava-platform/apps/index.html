@@ -2228,8 +2228,6 @@
             </div>
           </div>
         </div>
-      </div>
-
       <!-- ──────── VIEW: LAAS API DEVELOPER PORTAL ──────── -->
       <div id="ava-laas-api-view" class="view-panel">
         <div class="section-title" style="margin-bottom: 16px; color:#0f2963;">🌐 Lab-as-a-Service (LaaS) API Portal</div>
@@ -2248,6 +2246,190 @@
             • <code>POST https://api.avahealth.sbs/v1/laas/orders</code> — Buat Order Lab Rujukan (FHIR JSON)<br>
             • <code>GET https://api.avahealth.sbs/v1/laas/results/{order_id}</code> — Ambil Hasil Lab (LOINC/UCUM)
           </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: CORPORATE ANALYTICS & E-HASIL EPIDEMIOLOGI ──────── -->
+      <div id="corporate-analytics-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963; display:flex; justify-content:space-between; align-items:center;">
+          <span>📊 Analytics Epidemiologi &amp; Sertifikat Fit-to-Work Massal</span>
+          <button class="btn btn-sm btn-teal" onclick="alert('Mengunduh Paket Sertifikat Fit-to-Work Massal (ZIP/PDF)...')" style="font-size:11px;">📥 Unduh Zip Fit-to-Work Massal</button>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-bottom:20px;">
+          <div class="glass-card" style="padding:16px; background:#ffffff; border-left:4px solid #10b981;">
+            <span style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase;">TOTAL KARYAWAN MCU</span>
+            <div style="font-size:22px; font-weight:900; color:#0f2963; margin-top:2px;">1.250 <small style="font-size:10px; color:#64748b;">Orang</small></div>
+            <span style="font-size:9.5px; color:#10b981; font-weight:600;">100% Selesai Diperiksa</span>
+          </div>
+          <div class="glass-card" style="padding:16px; background:#ffffff; border-left:4px solid #059669;">
+            <span style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase;">FIT TO WORK</span>
+            <div style="font-size:22px; font-weight:900; color:#059669; margin-top:2px;">1.062 <small style="font-size:10px; color:#64748b;">(85%)</small></div>
+            <span style="font-size:9.5px; color:#059669; font-weight:600;">Kondisi Prima &amp; Sehat</span>
+          </div>
+          <div class="glass-card" style="padding:16px; background:#ffffff; border-left:4px solid #d97706;">
+            <span style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase;">FIT WITH NOTE</span>
+            <div style="font-size:22px; font-weight:900; color:#d97706; margin-top:2px;">150 <small style="font-size:10px; color:#64748b;">(12%)</small></div>
+            <span style="font-size:9.5px; color:#d97706; font-weight:600;">Pantauan Gaya Hidup</span>
+          </div>
+          <div class="glass-card" style="padding:16px; background:#ffffff; border-left:4px solid #dc2626;">
+            <span style="font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase;">UNFIT / PERLU EVALUASI</span>
+            <div style="font-size:22px; font-weight:900; color:#dc2626; margin-top:2px;">38 <small style="font-size:10px; color:#64748b;">(3%)</small></div>
+            <span style="font-size:9.5px; color:#dc2626; font-weight:600;">Rujukan Dokter Spesialis</span>
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border);">
+          <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">Profil Risiko Kesehatan Populasi Karyawan (Occupational Health ISO 45001)</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div style="background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0;">
+              <span style="font-size:12px; font-weight:700; color:#0f2963;">🩺 Risiko Hipertensi &amp; Vaskular</span>
+              <div style="margin-top:8px; font-size:11.5px; color:#475569;">Terdapat 14.2% karyawan dengan tekanan darah Sistolik &gt; 130 mmHg. Direkomendasikan program pengurangan garam &amp; senam sehat.</div>
+            </div>
+            <div style="background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0;">
+              <span style="font-size:12px; font-weight:700; color:#0f2963;">🧪 Risiko Prediabetes &amp; Sindrom Metabolik</span>
+              <div style="margin-top:8px; font-size:11.5px; color:#475569;">9.8% karyawan memiliki Glukosa Puasa &gt; 100 mg/dL. Program catering sehat Queen Nutri direkomendasikan.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: JADWAL MOBILE MCU ON-SITE ──────── -->
+      <div id="corporate-onsite-schedule-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963;">🚌 Live Mobile Lab Bus &amp; On-Site MCU Schedule</div>
+        
+        <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin:0;">Jadwal On-Site MCU Kantor Pusat (CV Gaya Bunga Prima)</h4>
+              <p style="font-size:11px; color:#64748b; margin-top:2px;">Lokasi: Gedung Menara Gading Lt. 4, Jakarta Selatan &bull; Tim Armada: Bus Mobile MCU #02 AVA</p>
+            </div>
+            <span class="badge badge-fit" style="font-size:11px; padding:6px 12px;">🚌 Mobile Lab En-Route (Sesuai Jadwal)</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0;">
+            <div>
+              <span style="font-size:10px; color:#64748b; font-weight:700;">TANGGAL PELAKSANAAN</span>
+              <div style="font-size:14px; font-weight:800; color:#0f2963; margin-top:2px;">Senin, 14 September 2026</div>
+            </div>
+            <div>
+              <span style="font-size:10px; color:#64748b; font-weight:700;">KUOTA TERDAFTAR</span>
+              <div style="font-size:14px; font-weight:800; color:#0f766e; margin-top:2px;">200 Karyawan (100% Quota Filled)</div>
+            </div>
+            <div>
+              <span style="font-size:10px; color:#64748b; font-weight:700;">TIM NAKES ON-SITE</span>
+              <div style="font-size:14px; font-weight:800; color:#0f2963; margin-top:2px;">8 Perawat + 2 Dokter Sp.PK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: KATALOG TES & TARIF RUJUKAN LIS ──────── -->
+      <div id="referral-catalog-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963; display:flex; justify-content:space-between; align-items:center;">
+          <span>🧪 Katalog Pemeriksaan &amp; Tarif Rujukan LIS AVA (530+ LOINC/UCUM)</span>
+          <button class="btn btn-sm btn-teal" onclick="openReferralForm()" style="font-size:11px;">+ Buat FPP Rujukan Baru</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:14px;">
+          <div class="glass-card" style="padding:16px; background:#ffffff; border:1px solid var(--border);">
+            <span style="font-size:9.5px; font-weight:800; color:#0f766e; background:#ccfbf1; padding:2px 7px; border-radius:4px;">LOINC 2345-7 &bull; KIMIA KLINIK</span>
+            <h5 style="font-size:13.5px; font-weight:800; color:#0f2963; margin:8px 0 4px 0;">Glukosa Puasa (Fasting Glucose)</h5>
+            <p style="font-size:10.5px; color:#64748b; margin:0 0 10px 0;">Wadah: NaF (Abu-abu) &bull; Stabilitas Cold-Chain: 2-8°C (7 Hari)</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:#0f2963; font-size:14px;">Rp 49.000</strong>
+              <span style="font-size:10px; color:#10b981; font-weight:700;">Komisi Dokter: Rp 10.000</span>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding:16px; background:#ffffff; border:1px solid var(--border);">
+            <span style="font-size:9.5px; font-weight:800; color:#0f766e; background:#ccfbf1; padding:2px 7px; border-radius:4px;">LOINC 2093-3 &bull; KIMIA KLINIK</span>
+            <h5 style="font-size:13.5px; font-weight:800; color:#0f2963; margin:8px 0 4px 0;">Kolesterol Total (Total Cholesterol)</h5>
+            <p style="font-size:10.5px; color:#64748b; margin:0 0 10px 0;">Wadah: Serum (Merah/Kuning) &bull; Stabilitas Cold-Chain: 2-8°C (5 Hari)</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:#0f2963; font-size:14px;">Rp 79.000</strong>
+              <span style="font-size:10px; color:#10b981; font-weight:700;">Komisi Dokter: Rp 15.000</span>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding:16px; background:#ffffff; border:1px solid var(--border);">
+            <span style="font-size:9.5px; font-weight:800; color:#0284c7; background:#e0f2fe; padding:2px 7px; border-radius:4px;">LOINC 4548-4 &bull; ENDOKRINOLOGI</span>
+            <h5 style="font-size:13.5px; font-weight:800; color:#0f2963; margin:8px 0 4px 0;">Hemoglobin A1c (HbA1c)</h5>
+            <p style="font-size:10.5px; color:#64748b; margin:0 0 10px 0;">Wadah: EDTA (Ungu) &bull; Stabilitas Cold-Chain: 2-8°C (3 Hari)</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:#0f2963; font-size:14px;">Rp 209.000</strong>
+              <span style="font-size:10px; color:#10b981; font-weight:700;">Komisi Dokter: Rp 40.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: HASIL LAB E-RUJUKAN PASIEN ──────── -->
+      <div id="referral-lab-results-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963;">📋 E-Hasil Lab Pasien Rujukan (Verifikasi Sp.PK)</div>
+        
+        <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h5 style="font-size:14px; font-weight:800; color:#0f2963; margin:0;">Pasien: Budi Santoso &bull; RM-12948</h5>
+              <p style="font-size:11px; color:#64748b; margin-top:2px;">FPP No: #REF-2026-0041 &bull; Dokter Pengirim: dr. Ace Darojatun, Sp.PD</p>
+            </div>
+            <button class="btn btn-sm btn-teal" onclick="alert('Mengunduh Sertifikat PDF E-Hasil Lab Terverifikasi...')" style="font-size:11px;">📄 Unduh Sertifikat PDF E-Hasil</button>
+          </div>
+
+          <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; font-size:11.5px; color:#334155; line-height:1.5;">
+            <strong>Ringkasan AI Bio-Interpreter:</strong> Pasien mengalami elevasi kolesterol total (215 mg/dL) dan prediabetes ringan (Glukosa Puasa 108 mg/dL). Seluruh hasil telah diverifikasi oleh dr. Ahmad Subarjo, Sp.PK dengan TTD Digital QR Valid.
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: SERAH TERIMA SPESIMEN KE LAB (CHAIN-OF-CUSTODY) ──────── -->
+      <div id="staff-custody-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963;">📦 Serah Terima Spesimen ke Lab (Chain-of-Custody Log ISO 15189)</div>
+        
+        <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border);">
+          <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">Formulir Digital Handover Spesimen (Flebotomis ➔ Analis Lab)</h4>
+          
+          <form onsubmit="event.preventDefault(); alert('Serah Terima Spesimen Berhasil Dicatat dalam Chain-of-Custody ISO 15189!');">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px;">
+              <div class="input-group" style="margin:0;">
+                <label style="font-size:11px; font-weight:700; color:#475569;">No. Barcode Cooler Box Transport</label>
+                <input type="text" value="BOX-COLD-2026-0906" readonly style="background:#f8fafc; font-weight:700;">
+              </div>
+              <div class="input-group" style="margin:0;">
+                <label style="font-size:11px; font-weight:700; color:#475569;">Suhu Saat Diterima di Lab (°C)</label>
+                <input type="text" value="4.1 °C (Valid 2-8°C)" readonly style="background:#f8fafc; color:#059669; font-weight:700;">
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:16px;">
+              <div class="input-group" style="margin:0;">
+                <label style="font-size:11px; font-weight:700; color:#475569;">Petugas Flebotomis (Pengirim)</label>
+                <input type="text" value="Perawat Siti Nakes, S.Kep" readonly style="background:#f8fafc;">
+              </div>
+              <div class="input-group" style="margin:0;">
+                <label style="font-size:11px; font-weight:700; color:#475569;">Analis / ATLM Penerima di Lab</label>
+                <input type="text" value="Ahmad Subarjo, A.Md.AK" required style="background:#ffffff;">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-teal" style="width:100%; padding:12px; font-size:13px; font-weight:800;">✍️ Konfirmasi Handover &amp; Simpan Log Audit</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: VERIFIKASI TELEMETRI COLD-CHAIN BOX ──────── -->
+      <div id="staff-coldchain-check-view" class="view-panel">
+        <div class="section-title" style="margin-bottom:16px; color:#0f2963;">❄️ Verifikasi &amp; Kalibrasi Pre-Departure Cold-Chain Box</div>
+        
+        <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border);">
+          <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">Checklist Pra-Keberangkatan Flebotomi Lapangan (Klausul 7.2 ISO 15189)</h4>
+          
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#0f172a; cursor:pointer;"><input type="checkbox" checked> Sensor Suhu Digital Berfungsi &amp; Terkalibrasi (Suhu Awal: 3.5°C)</label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#0f172a; cursor:pointer;"><input type="checkbox" checked> Segel Kunci Digital NFC Aktif &amp; Baterai 98%</label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#0f172a; cursor:pointer;"><input type="checkbox" checked> Ice Gel Pack Medis Tersusun Sesuai SOP Cold-Chain (2-8°C)</label>
+          </div>
+
+          <button class="btn btn-teal" onclick="alert('Kalibrasi & Check Pre-Departure Valid! Armada Siap Berangkat.')" style="width:100%; padding:12px; font-size:13px; font-weight:800;">✅ Konfirmasi Armada Cold-Chain Siap En-Route</button>
         </div>
       </div>
 
