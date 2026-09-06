@@ -259,8 +259,8 @@ const AIGateway = {
   // ── VISUAL MONITOR UI MODAL & TOPBAR BADGE ──────────────────────────
   updateTopbarBadge() {
     // Status kunci adalah telemetri internal, bukan informasi operasional
-    // pengguna. Hapus badge lama bila ada; monitor tetap tersedia melalui
-    // area pengaturan untuk administrator yang berwenang.
+    // pengguna. Hapus badge lama bila ada; monitor tetap terpisah sebagai
+    // fungsi administratif dan tidak muncul di shell operasional.
     document.getElementById('topbar-ai-monitor')?.remove();
   },
 

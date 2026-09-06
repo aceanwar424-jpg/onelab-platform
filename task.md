@@ -125,3 +125,10 @@
 - [x] Validasi 30 halaman, link/aset, regresi kalkulator dan HTTP 200.
 - [ ] Dokumen PDF identitas: menunggu nama/lokasi dari pengguna.
 - [ ] Publikasi produksi: belum dilakukan.
+
+## Kisah AVA dan founder — 2026-09-06
+- [x] Halaman Founder, Owner & CEO dengan ruang foto potret yang disengaja.
+- [x] Halaman Cerita & Perjalanan dengan enam bab tematik, tanpa tahun rekaan.
+- [x] Ringkasan serta tautan di Tentang AVA; struktur multipage tetap terjaga.
+- [x] Validasi 32 halaman, link, ID/H1, rebuild deterministik, kalkulator dan HTTP.
+- [ ] Foto founder: akan diberikan pengguna.

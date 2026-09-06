@@ -430,3 +430,33 @@ Bukti: verify-public-profile PASS; verify-public-editorial PASS untuk 19 halaman
 OWNED_BY: ava. Beranda dipadatkan menjadi pengantar dan tiga jalur utama. Menu membuka dokumen HTML tersendiri: Tentang AVA, Unit Bisnis, Solusi Sistem, Kemitraan, Insight, dan Kontak. Halaman kalkulator, sertifikasi, demo, model biaya, portofolio, dan investasi terpisah. Link internal lama dipetakan ke halaman tujuan pada build.
 Identitas diringkas dari AVA HEALTH SOLUTION THE FUTURE.md (Volume 3.0, 2026) serta AVA-DOC-ARCH-2026-V5_Arsitektur_Sistem_6_Unit_Usaha.md, dengan instruksi terbaru pemilik sebagai acuan tertinggi: faskes/lab milik sendiri adalah bisnis fisik; Care & Wellness untuk semua kalangan, Sanctuary sebagai bagian payung tersebut. Profil tentang memuat identitas, visi, tujuh misi, enam nilai, pimpinan dan arah perjalanan. Tidak menyalin formula R&D, HPP, harga privat, proyeksi internal, atau nomor izin yang belum ada. PDF dicari termasuk hidden/ignored, tidak ditemukan; lokasi diminta secara asynchronous. Tidak mengaku telah membaca PDF.
 Verifikasi: verify-public-profile PASS (beranda ≤4 section, menu membuka halaman, tanpa form login); verify-public-editorial PASS (30 halaman, semua target/anchor, satu H1 per halaman, rebuild deterministik, bisnis fisik dan inklusivitas Care); regresi kalkulator PASS; generator routing --periksa PASS. HTTP 200 untuk 30 halaman dan JS kalkulator. Pencarian narasi lama hanya menemukan pernyataan eksplisit Sanctuary tidak dibatasi perempuan. Tidak ada pengujian visual browser atau deploy produksi pada pekerjaan ini.
+
+## Konsolidasi navigasi dan shell HIS — 2026-09-06
+
+- Audit read-only pada referensi menu Admission dikonsolidasikan menjadi empat
+  kelompok operasional: **Admission** (enam jenis registrasi), **Back Office**
+  (laporan registrasi), **Queue** (antrean, konsol, dan kiosk), serta **Queue
+  Outpatient** (antrean poli umum/spesialis). Jadwal dan perjanjian diletakkan
+  sebagai layanan tersendiri pada Alur Pasien; konfigurasi flow/loket/perangkat
+  ditempatkan pada Administrasi Sistem, terpisah dari operasi loket.
+- Rail HIS tetap hanya berupa ikon. Saat domain dibuka, panel konteks dua kolom
+  menampilkan kelompok layanan di kiri dan modul di kanan. Tidak ada label
+  visual “tahap” pada form maupun status progres pada kartu navigasi.
+- Seluruh layar HIS non-kiosk memakai shell ringkas yang sama: breadcrumb
+  teknis, subnav horizontal, dan badge API key disembunyikan; strip atas hanya
+  menyimpan tanggal, tema, notifikasi, dan profil. Header halaman, toolbar,
+  tab, form, kartu, dan tabel dipadatkan secara terlingkup.
+- Preview lokal tanpa simpan data membuktikan: panel Alur Pasien menampilkan
+  empat kelompok; Back Office membuka laporan Admission; Queue Outpatient
+  membuka antrean poli dengan filter Dokter aktif; `+ Registrasi` membuka
+  workspace penuh dengan bagian Pasien, Pembayaran, Unit & Layanan, serta
+  Kasir tanpa tulisan tahap.
+- Verifikasi akhir: `bangun-menu.js --periksa`, manifest 175 rute, audit 161
+  menu berstatus ada (layar/tabel/RPC/handler/manifest bersih), audit keamanan
+  2.350/2.350, kontrak registry 20 domain, sintaks router/admission/clinicflow/
+  aiGateway/lazy dan skrip inline index semuanya lulus. Tidak ada transaksi,
+  konfigurasi produksi, atau data pasien yang dibuat/diubah selama verifikasi.
+
+## Kisah AVA & Founder — 2026-09-06
+OWNED_BY: ava. scripts/public-company-story.js menjadi sumber narasi. Ditambahkan public/founder.html dan public/sejarah.html; Tentang AVA menampilkan ringkasan, ruang foto dan tautan ke cerita lengkap. Foto berupa slot potret 4:5, bukan gambar orang lain atau URL rusak, sesuai permintaan eksplisit. Identitas Ace Anwar sebagai Founder, Owner & CEO mengikuti dokumen dan konfirmasi pemilik. Narasi mengembangkan konteks operasional lab, informatika, mutu, hubungan bisnis fisik dengan AVA Tech, identitas Queen, tahap demo dan arah wellness/produk. Enam bab sejarah adalah tema perjalanan, bukan timeline bertanggal; tidak ada kutipan, pendidikan, capaian atau peristiwa personal rekaan.
+Verifikasi: verify-public-editorial PASS (32 halaman, link/aset/anchor, H1/ID, rebuild deterministik, foto slot dan enam bab); verify-public-profile PASS; regresi kalkulator PASS; generator routing PASS; halaman tentang/founder/sejarah HTTP 200 pada :5186. Belum dipublikasikan. Foto founder dan kronologi bertanggal dapat dilengkapi setelah data pemilik tersedia.

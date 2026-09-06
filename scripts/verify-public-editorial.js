@@ -17,7 +17,7 @@ for(const bad of [{height:0},{weight:-1},{weight:NaN},{age:19},{age:79},{age:20.
 assert.equal(calculate({...input,factor:1.8}).maintenance,3114);
 console.log('PASS: independent calorie examples, BMI boundary classifications, activity factor, excluded and invalid inputs.');
 const files = ['portal.html',...fs.readdirSync(path.join(platform,'public')).filter(f=>f.endsWith('.html')).map(f=>'public/'+f)];
-assert.equal(files.length,30);
+assert.equal(files.length,32);
 const read = file => fs.readFileSync(path.join(platform,file),'utf8');
 const lookup = new Map(files.map(file=>[file,read(file)]));
 const home = lookup.get('portal.html');
@@ -55,4 +55,7 @@ const before = digest(); execFileSync(process.execPath,['scripts/build-public-pr
 assert(lookup.get('public/tentang.html').includes('bisnis fisik fasilitas kesehatan dan laboratorium sendiri'));
 assert(lookup.get('public/brand-care.html').includes('perempuan dan laki-laki'));
 assert(lookup.get('public/brand-care.html').includes('Queen Sanctuary'));
-console.log('PASS: 30 pages, all local targets/anchors, one H1, physical businesses, inclusive Care & Wellness, 7 sourced articles, deterministic rebuild.');
+assert(lookup.get('public/founder.html').includes('founder-photo-slot'));
+assert(lookup.get('public/founder.html').includes('Founder, Owner & CEO'));
+assert.equal((lookup.get('public/sejarah.html').match(/class="story-chapter"/g)||[]).length,6);
+console.log('PASS: 32 pages, all local targets/anchors, one H1, founder photo slot, 6 story chapters, physical businesses, inclusive Care & Wellness, sourced articles, deterministic rebuild.');
