@@ -39,12 +39,13 @@
 - [x] Migrasi `0050` menegakkan tenant isolation, role write gate, versioning, audit append-only, dan sinkronisasi perangkat antrean.
 - [x] Preflight, runbook, katalog migrasi, serta pemeriksa kontrak 20 menu/domain tersedia.
 - [x] Peta menu dan manifest dibangkitkan ulang; audit menu, audit keamanan, dan uji antrean lulus.
-- [ ] Tambahkan `<select id="role-switcher-select">` pada `.sidebar-user-card` di `index.html`.
-- [ ] Buat fungsi `switchActiveRole(newRole)` di `app.js` untuk alih role real-time tanpa logout.
-- [ ] Tambahkan toggle sub-role Korporat (Maker vs Approver) pada `corporate-view`.
-- [ ] Perbarui `renderSidebarMenu()` dan styling di `style.css` agar dropdown role switcher responsif.
-- [ ] Verifikasi sintaks dan uji alih role lintas 5 mode (Pasien, Member, Corporate, Nakes, Referral).
-- [ ] Dokumentasikan bukti pengujian pada `walkthrough.md`.
+- [x] Tambahkan `<select id="role-switcher-select">` pada `.sidebar-user-card` di `index.html`.
+- [x] Buat fungsi `switchActiveRole(newRole)` di `app.js` untuk alih role real-time tanpa logout.
+- [x] Tambahkan toggle sub-role Korporat (Maker vs Approver) pada `corporate-view`.
+- [x] Perbarui `renderSidebarMenu()` dan styling di `style.css` agar dropdown role switcher responsif.
+- [x] Verifikasi sintaks dan uji alih role lintas 5 mode (Pasien, Member, Corporate, Nakes, Referral).
+- [x] Dokumentasikan bukti pengujian pada `walkthrough.md`.
+- [x] Audit final 47 view panels & Arsitektur 5 Pilar Navigasi 7 Modul Wellness dengan Wearable Device Sync (100% Pass).
 
 - [x] Audit referensi Admission read-only hingga variasi registrasi, Back Office, Queue, dan Queue Outpatient.
 - [x] Dokumentasikan batas proses rawat jalan, layanan, medical kit, paket, langganan, dan pemakaian langganan.
