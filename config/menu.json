@@ -1826,9 +1826,27 @@
           "menu": [
             {
               "id": "supportive",
-              "label": "EKG, Treadmill, Audiometri & Spirometri",
+              "label": "Dashboard Pemeriksaan Penunjang",
               "status": "ada",
-              "ket": "Satu layar input untuk keempat pemeriksaan, lengkap dengan interpretasi terstruktur"
+              "ket": "Ringkasan kerja EKG, treadmill, audiometri, dan spirometri dengan interpretasi terstruktur"
+            },
+            {
+              "id": "ekg-treadmill",
+              "label": "EKG & Treadmill",
+              "status": "ada",
+              "ket": "Input dan tinjau pemeriksaan elektrokardiografi serta uji latih jantung"
+            },
+            {
+              "id": "audiometry",
+              "label": "Audiometri",
+              "status": "ada",
+              "ket": "Input ambang pendengaran, PTA, klasifikasi telinga kanan-kiri, dan rekomendasi"
+            },
+            {
+              "id": "spirometry",
+              "label": "Spirometri",
+              "status": "ada",
+              "ket": "Input fungsi paru, pola gangguan, grafik pendukung, dan interpretasi"
             },
             {
               "id": "sm-usg",

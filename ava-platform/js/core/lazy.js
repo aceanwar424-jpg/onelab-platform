@@ -20,7 +20,7 @@
 // buruk daripada perilaku lama.
 // ═══════════════════════════════════════════════════════════════
 
-const MODUL_VER = '20260906-admission-flow';
+const MODUL_VER = '20260906-clinical-results';
 const _modulDimuat = new Map();   // src → Promise
 
 function muatSkrip(src) {

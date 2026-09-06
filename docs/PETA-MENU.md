@@ -20,7 +20,7 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 | `lis.avahealth.sbs` | LIS — Laboratorium Diagnostik | Seluruh alur laboratorium: pra-analitik, analitik, pasca-analitik, master data tes, rujukan, dan logistik reagen. | lis |
 | `wellness.avahealth.sbs` | Wellness — Nutrition & Personal Care | Gabungan AVA Nutrition dan AVA Care di bawah satu payung wellness, ditambah Sanctuary. Sebelumnya terpecah tiga subdomain dengan isi yang sama. | wellness, marketing, keuangan, logistik, konfigurasi |
 
-**Total menu terpetakan:** 207 — 🟢 166 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
+**Total menu terpetakan:** 210 — 🟢 169 ada · 🟡 34 sebagian · ⚪ 7 belum dibuat
 
 ---
 
@@ -600,7 +600,10 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟢 | EKG, Treadmill, Audiometri & Spirometri | `supportive` | Satu layar input untuk keempat pemeriksaan, lengkap dengan interpretasi terstruktur |
+| 🟢 | Dashboard Pemeriksaan Penunjang | `supportive` | Ringkasan kerja EKG, treadmill, audiometri, dan spirometri dengan interpretasi terstruktur |
+| 🟢 | EKG & Treadmill | `ekg-treadmill` | Input dan tinjau pemeriksaan elektrokardiografi serta uji latih jantung |
+| 🟢 | Audiometri | `audiometry` | Input ambang pendengaran, PTA, klasifikasi telinga kanan-kiri, dan rekomendasi |
+| 🟢 | Spirometri | `spirometry` | Input fungsi paru, pola gangguan, grafik pendukung, dan interpretasi |
 | 🟢 | USG Non-Radiologi | `sm-usg` | USG yang dikerjakan dokter poli sendiri (obgyn, abdomen) di luar alur radiologi |
 
 **Rehabilitasi & Tindakan**

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// MODULE: ORDER ENTRY & ADMISI LABORATORIUM (SYSMEX HCLAB PRO MAX WORKSTATION)
+// MODULE: ORDER ENTRY & ADMISI LABORATORIUM (AVA LAB WORKSPACE)
 // Desain Responsif Ergonomis Tinggi:
 // - Zero Horizontal Overflow pada semua resolusi layar (Desktop & Laptop)
 // - Responsive Multi-Discipline Matrix (Hematology, Chemistry, Immunology, Urine/Micro)
@@ -11,7 +11,7 @@ let _lisAllProducts = [];
 let _lisSearchQuery = '';
 let _lisCurrentPriority = 'ROUTINE';
 
-// Presets Panel Cepat (Sysmex HCLAB Quick Mode)
+// Presets Panel Cepat (AVA Lab)
 const QUICK_PANELS = [
   {
     id: 'PANEL_CBC',
@@ -19,7 +19,6 @@ const QUICK_PANELS = [
     code: 'FBC',
     color: '#8B5CF6',
     tube: '🟣 EDTA',
-    price: 95000,
     tests: ['Hematologi Lengkap (CBC)', 'Laju Endap Darah (LED / Westergren)']
   },
   {
@@ -28,7 +27,6 @@ const QUICK_PANELS = [
     code: 'DM-PROF',
     color: '#0EA5E9',
     tube: '🟡 Serum + 🟣 EDTA',
-    price: 210000,
     tests: ['Glukosa Darah Puasa (GDP)', 'Glukosa Darah 2 Jam PP (GD2PP)', 'HbA1c (Kromatografi HPLC Terstandar NGSP)']
   },
   {
@@ -37,7 +35,6 @@ const QUICK_PANELS = [
     code: 'LIPID',
     color: '#F59E0B',
     tube: '🟡 Serum',
-    price: 185000,
     tests: ['Kolesterol Total', 'Trigliserida', 'Kolesterol HDL', 'Kolesterol LDL Direct']
   },
   {
@@ -46,7 +43,6 @@ const QUICK_PANELS = [
     code: 'LFT',
     color: '#10B981',
     tube: '🟡 Serum',
-    price: 195000,
     tests: ['SGOT / AST (Aspartate Aminotransferase)', 'SGPT / ALT (Alanine Aminotransferase)', 'Bilirubin Total', 'Bilirubin Direk']
   },
   {
@@ -55,7 +51,6 @@ const QUICK_PANELS = [
     code: 'RFT',
     color: '#3B82F6',
     tube: '🟡 Serum',
-    price: 155000,
     tests: ['Ureum Darah', 'Kreatinin Darah + eGFR (CKD-EPI)', 'Asam Urat (Uric Acid)']
   },
   {
@@ -64,7 +59,6 @@ const QUICK_PANELS = [
     code: 'LYTES',
     color: '#EC4899',
     tube: '🟡 Serum',
-    price: 175000,
     tests: ['Elektrolit Serum (Na, K, Cl)']
   },
   {
@@ -73,7 +67,6 @@ const QUICK_PANELS = [
     code: 'FEVER',
     color: '#EF4444',
     tube: '🟣 EDTA + 🟡 Serum',
-    price: 285000,
     tests: ['Hematologi Lengkap (CBC)', 'Dengue NS1 Antigen Rapid', 'Widal Slide Test', 'Urin Rutin Lengkap (Automated Strip + Sedimen)']
   },
   {
@@ -82,7 +75,6 @@ const QUICK_PANELS = [
     code: 'HEPA',
     color: '#6366F1',
     tube: '🟡 Serum',
-    price: 220000,
     tests: ['HBsAg Kualitatif Rapid', 'Anti-HCV Rapid', 'SGOT / AST (Aspartate Aminotransferase)', 'SGPT / ALT (Alanine Aminotransferase)']
   },
   {
@@ -91,7 +83,6 @@ const QUICK_PANELS = [
     code: 'PREMARITAL',
     color: '#14B8A6',
     tube: '🟣 EDTA + 🟡 Serum + ⚪ Urin',
-    price: 495000,
     tests: ['Hematologi Lengkap (CBC)', 'Golongan Darah ABO & Rhesus', 'HBsAg Kualitatif Rapid', 'Anti-HIV Kualitatif Rapid (3 Metode)', 'VDRL / RPR Sifilis', 'Urin Rutin Lengkap (Automated Strip + Sedimen)']
   }
 ];
@@ -134,8 +125,8 @@ async function renderLisAdmission() {
           </button>
           <div>
             <div style="font-weight:800; font-size:13.5px; letter-spacing:0.02em; display:flex; align-items:center; gap:8px;">
-              <span>SYSMEX HCLAB</span>
-              <span style="font-size:10.5px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.15); padding:1px 6px; border-radius:3px;">Order Entry Pro Max</span>
+              <span>AVA LAB</span>
+              <span style="font-size:10.5px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.15); padding:1px 6px; border-radius:3px;">Permintaan Pemeriksaan</span>
             </div>
           </div>
         </div>
@@ -315,11 +306,7 @@ async function renderLisAdmission() {
             <div id="adm-tube-reqs" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px; min-height:42px;">
               <span style="color:var(--text3, #94a3b8); font-size:11px;">Belum ada tes yang dipilih.</span>
             </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border, #cbd5e1); padding-top:8px; margin-bottom:10px;">
-              <span style="font-size:11px; font-weight:700; color:var(--text3, #475569);">Estimasi Total Tarif:</span>
-              <span id="adm-total-price" style="font-size:16px; font-weight:900; color:#10B981;">Rp 0</span>
-            </div>
+            <p style="font-size:12px;color:var(--text3)">Pilihan layanan dikirim ke admisi HIS. Tarif dan pembayaran dikelola di HIS.</p>
 
             <button type="button" class="btn btn-teal" onclick="submitFullPageLisOrder('${autoVisit}')"
               style="width:100%; font-weight:800; padding:9px; font-size:12.5px; border-radius:5px; background:#10B981; color:#fff; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(16,185,129,0.35);">
@@ -437,7 +424,6 @@ function renderColumnItems(containerId, countId, prods) {
 
   container.innerHTML = prods.map(p => {
     const isChecked = _lisOrderSelectedTests.some(t => t.id === p.id);
-    const price = p.harga_dasar || p.tarif || 0;
     
     return `
       <div onclick="toggleLisTestSelection(${p.id}, ${!isChecked})"
@@ -450,9 +436,6 @@ function renderColumnItems(containerId, countId, prods) {
             ${p.nama_tes}
           </span>
         </div>
-        <span style="font-size:10px; font-weight:750; color:#059669; white-space:nowrap; margin-left:4px; flex-shrink:0;">
-          Rp ${Number(price).toLocaleString('id-ID')}
-        </span>
       </div>
     `;
   }).join('');
@@ -461,7 +444,6 @@ function renderColumnItems(containerId, countId, prods) {
 function renderSelectedTable() {
   const container = document.getElementById('adm-selected-table-container');
   const countEl = document.getElementById('adm-selected-count');
-  const priceEl = document.getElementById('adm-total-price');
   const tubeEl = document.getElementById('adm-tube-reqs');
 
   if (!container) return;
@@ -475,17 +457,9 @@ function renderSelectedTable() {
         Pilih parameter pada matriks disiplin di samping
       </div>
     `;
-    if (priceEl) priceEl.textContent = 'Rp 0';
     if (tubeEl) tubeEl.innerHTML = `<span style="color:var(--text3, #94a3b8); font-size:11px;">Belum ada spesimen tabung terpilih.</span>`;
     return;
   }
-
-  let totalPrice = 0;
-  _lisOrderSelectedTests.forEach(t => {
-    totalPrice += Number(t.harga_dasar || t.tarif || 0);
-  });
-
-  if (priceEl) priceEl.textContent = `Rp ${Number(totalPrice).toLocaleString('id-ID')}`;
 
   container.innerHTML = `
     <table style="width:100%; border-collapse:collapse; font-size:11px;">
@@ -493,18 +467,15 @@ function renderSelectedTable() {
         <tr style="background:var(--bg2, #f1f5f9); color:var(--text2, #475569); font-weight:800; text-align:left; border-bottom:1px solid var(--border, #cbd5e1);">
           <th style="padding:4px 6px;">Kode</th>
           <th style="padding:4px 6px;">Pemeriksaan</th>
-          <th style="padding:4px 6px; text-align:right;">Tarif</th>
           <th style="padding:4px 4px; text-align:center; width:20px;"></th>
         </tr>
       </thead>
       <tbody>
         ${_lisOrderSelectedTests.map(t => {
-          const price = t.harga_dasar || t.tarif || 0;
           return `
             <tr style="border-bottom:1px solid var(--border, #f1f5f9);">
               <td style="padding:4px 6px; font-family:monospace; font-weight:700; color:#0284c7;">${t.kode_internal || 'LAB'}</td>
               <td style="padding:4px 6px; font-weight:600; color:var(--text, #1e293b);">${t.nama_tes}</td>
-              <td style="padding:4px 6px; text-align:right; font-weight:700; color:#059669;">Rp ${Number(price).toLocaleString('id-ID')}</td>
               <td style="padding:4px 4px; text-align:center;">
                 <button type="button" onclick="removeLisSelectedTest(${t.id})" style="background:none; border:none; color:#ef4444; font-weight:900; cursor:pointer; font-size:12px;">&times;</button>
               </td>

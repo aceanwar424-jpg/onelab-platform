@@ -115,6 +115,12 @@
                 <div style="font-size:11.5px; font-weight:800; color:#db2777; display:flex; align-items:center; gap:5px;">🩺 Staff Nakes Flebotomi</div>
                 <div style="font-size:9.5px; color:#64748b; margin-top:3px; line-height:1.3;">Sampling &amp; ISO 15189 Audit</div>
               </div>
+
+              <!-- AVA Tech Master Vendor Admin Card -->
+              <div onclick="quickFillDemoUser('admin@avahealth.sbs', 'tech')" style="background:linear-gradient(135deg, #0f172a, #1e293b); border:1px solid #38bdf8; border-radius:11px; padding:11px 13px; cursor:pointer; transition:all 0.2s ease; grid-column: span 2;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(56,189,248,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size:11.5px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:5px;">💻 AVA Tech SaaS Console (tech.avahealth.sbs)</div>
+                <div style="font-size:9.5px; color:#94a3b8; margin-top:3px; line-height:1.3;">Pengelola Multi-Tenant, Cabang Faskes &amp; Lisensi Modul</div>
+              </div>
             </div>
           </div>
 
@@ -174,7 +180,7 @@
           </div>
 
           <form id="login-form" onsubmit="handleLogin(event)">
-            <!-- 5 Role Segmented Tabs (Clean White & Gold Active Styling) -->
+            <!-- 6 Role Segmented Tabs (Clean White & Gold Active Styling) -->
             <div class="role-selector" style="margin-bottom: 22px;">
               <span class="role-label" style="font-size:10.5px; font-weight:800; color:#8f6f16; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:10px;">Pilih Peran Akses Login:</span>
               
@@ -195,9 +201,13 @@
                   <input type="radio" name="login-role" value="staff" onchange="updateLoginFormUI('staff')">
                   <span class="role-pill-span" data-role="staff" style="display:block; text-align:center; padding:9px 5px; font-size:11px; font-weight:700; border-radius:9px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; transition:all 0.2s;">🩺 Staff Nakes</span>
                 </label>
-                <label class="role-btn" style="cursor:pointer; grid-column: span 2;">
+                <label class="role-btn" style="cursor:pointer;">
                   <input type="radio" name="login-role" value="referral" onchange="updateLoginFormUI('referral')">
-                  <span class="role-pill-span" data-role="referral" style="display:block; text-align:center; padding:9px 5px; font-size:11px; font-weight:700; border-radius:9px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; transition:all 0.2s;">🔗 Dokter / Faskes Referral</span>
+                  <span class="role-pill-span" data-role="referral" style="display:block; text-align:center; padding:9px 5px; font-size:11px; font-weight:700; border-radius:9px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; transition:all 0.2s;">🔗 Dokter Referral</span>
+                </label>
+                <label class="role-btn" style="cursor:pointer;">
+                  <input type="radio" name="login-role" value="tech" onchange="updateLoginFormUI('tech')">
+                  <span class="role-pill-span" data-role="tech" style="display:block; text-align:center; padding:9px 5px; font-size:11px; font-weight:700; border-radius:9px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; transition:all 0.2s;">💻 AVA Tech SaaS</span>
                 </label>
               </div>
             </div>
@@ -260,6 +270,7 @@
                 <option value="corporate" style="color:#0f172a; background:#ffffff;">🏢 Mode Corporate B2B</option>
                 <option value="staff" style="color:#0f172a; background:#ffffff;">🩺 Mode Staff Nakes</option>
                 <option value="referral" style="color:#0f172a; background:#ffffff;">🔗 Mode Faskes Referral</option>
+                <option value="tech" style="color:#0f172a; background:#ffffff;">💻 Mode AVA Tech SaaS</option>
               </select>
             </div>
           </div>
@@ -2430,6 +2441,255 @@
           </div>
 
           <button class="btn btn-teal" onclick="alert('Kalibrasi & Check Pre-Departure Valid! Armada Siap Berangkat.')" style="width:100%; padding:12px; font-size:13px; font-weight:800;">✅ Konfirmasi Armada Cold-Chain Siap En-Route</button>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: AVA TECH MASTER SAAS OPERATIONS CONSOLE (tech.avahealth.sbs) ──────── -->
+      <div id="tech-saas-master-console-view" class="view-panel">
+        <!-- Hero Dark Header Card -->
+        <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border:1px solid #334155; border-radius:16px; padding:24px; color:white; margin-bottom:20px; box-shadow:0 10px 25px rgba(15,23,42,0.15);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+            <div>
+              <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.3); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:800; color:#38bdf8; margin-bottom:8px;">
+                <span>💻</span> AVA TECH &bull; MASTER SAAS VENDOR OPERATIONS CENTER (tech.avahealth.sbs)
+              </div>
+              <h2 style="font-size:24px; font-weight:900; color:#ffffff; margin:0 0 6px 0; letter-spacing:-0.5px;">Master Console Pengelola Sistem &amp; Lisensi Modul</h2>
+              <p style="font-size:12.5px; color:#94a3b8; margin:0; max-width:720px; line-height:1.5;">
+                Pusat kendali vendor perangkat lunak AVA Tech: Pengawasan cabang/site faskes, pengaturan lisensi modul per pesanan, pemantauan log telemetri, penanganan bug &amp; SLA ticket, serta pemeliharaan cadangan data otomatis.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <span class="badge" style="background:#065f46; color:#34d399; border:1px solid #059669; font-weight:800; padding:8px 14px; border-radius:20px; font-size:11.5px;">🟢 SYSTEM STATUS: ALL 12 SITES ONLINE</span>
+              <button class="btn btn-teal" onclick="alert('Inisiator backup darurat dipicu untuk seluruh 12 site cabang!')" style="padding:8px 14px; font-size:12px; font-weight:700; background:#0284c7; border-color:#0284c7; color:white;">💾 Run System-Wide Backup</button>
+            </div>
+          </div>
+
+          <!-- 4 Key SaaS KPI Metrics -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:20px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.1);">
+            <div style="background:rgba(255,255,255,0.05); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+              <span style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">TOTAL SITE CABANG KLIEN</span>
+              <h3 style="font-size:20px; font-weight:900; color:#38bdf8; margin:4px 0 0 0;">12 Faskes / Site</h3>
+              <span style="font-size:10px; color:#34d399;">11 Active &bull; 1 Maintenance</span>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+              <span style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">RECURRING REVENUE (MRR)</span>
+              <h3 style="font-size:20px; font-weight:900; color:#fbbf24; margin:4px 0 0 0;">Rp 185,5 Juta</h3>
+              <span style="font-size:10px; color:#fbbf24;">100% Kontrak Terverifikasi</span>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+              <span style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">LATENSI TELEMETRI &amp; ERROR RATE</span>
+              <h3 style="font-size:20px; font-weight:900; color:#34d399; margin:4px 0 0 0;">42 ms / 0.02%</h3>
+              <span style="font-size:10px; color:#34d399;">SLA Target 99.9% Met</span>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+              <span style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">BUG &amp; SLA TICKET STATUS</span>
+              <h3 style="font-size:20px; font-weight:900; color:#f87171; margin:4px 0 0 0;">0 P1 &bull; 1 P2 Bug</h3>
+              <span style="font-size:10px; color:#94a3b8;">100% SLA Resolution Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Domain Interactive Tabbed Console Bar -->
+        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:20px; border-bottom:2px solid #e2e8f0;">
+          <button class="btn tech-tab-btn active" onclick="switchTechTab('domain-site')" style="padding:10px 16px; font-size:12px; font-weight:800; border-radius:10px 10px 0 0; background:#0f172a; color:#38bdf8; border:none; cursor:pointer;">🏢 1. Site Branch &amp; Cabang</button>
+          <button class="btn tech-tab-btn" onclick="switchTechTab('domain-modules')" style="padding:10px 16px; font-size:12px; font-weight:700; border-radius:10px 10px 0 0; background:#f1f5f9; color:#475569; border:none; cursor:pointer;">📦 2. Modul &amp; Lisensi Pemesanan</button>
+          <button class="btn tech-tab-btn" onclick="switchTechTab('domain-telemetry')" style="padding:10px 16px; font-size:12px; font-weight:700; border-radius:10px 10px 0 0; background:#f1f5f9; color:#475569; border:none; cursor:pointer;">📊 3. Log Activity &amp; Telemetri</button>
+          <button class="btn tech-tab-btn" onclick="switchTechTab('domain-bugs')" style="padding:10px 16px; font-size:12px; font-weight:700; border-radius:10px 10px 0 0; background:#f1f5f9; color:#475569; border:none; cursor:pointer;">🐞 4. Bug &amp; Problem Tracker</button>
+          <button class="btn tech-tab-btn" onclick="switchTechTab('domain-backup')" style="padding:10px 16px; font-size:12px; font-weight:700; border-radius:10px 10px 0 0; background:#f1f5f9; color:#475569; border:none; cursor:pointer;">💾 5. Backup &amp; Maintenance</button>
+          <button class="btn tech-tab-btn" onclick="switchTechTab('domain-security')" style="padding:10px 16px; font-size:12px; font-weight:700; border-radius:10px 10px 0 0; background:#f1f5f9; color:#475569; border:none; cursor:pointer;">🔑 6. Security &amp; AI Gateway</button>
+        </div>
+
+        <!-- TAB CONTENT 1: SITE BRANCH & CABANG -->
+        <div id="tech-tab-domain-site" class="tech-tab-content active">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin:0;">🏢 Daftar Site Branch &amp; Cabang Faskes Terdaftar</h4>
+              <button class="btn btn-teal" onclick="alert('Modal Tambah Site Branch Baru Aktif!')" style="padding:8px 14px; font-size:12px; font-weight:700;">+ Registrasi Cabang / Site Baru</button>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                <thead>
+                  <tr style="text-align:left; color:#64748b; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+                    <th style="padding:10px 14px;">Nama Cabang / Site</th>
+                    <th>Kode Tenant / Subdomain</th>
+                    <th>Versi Build</th>
+                    <th>Status Server</th>
+                    <th>Pengguna Aktif</th>
+                    <th>Paket Lisensi</th>
+                    <th style="text-align:right; padding-right:14px;">Aksi Kendali</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 14px;"><strong>Klinik Utama AVA Jakarta Pusat</strong><div style="font-size:10.5px; color:#64748b;">JL. H.R. Rasuna Said No. 12</div></td>
+                    <td><code>jkt-pusat.avahealth.sbs</code></td>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">v3.4.2-patch1</span></td>
+                    <td><span class="badge" style="background:#dcfce7; color:#166534; font-weight:700;">🟢 ONLINE (14ms)</span></td>
+                    <td>42 Staf Aktif</td>
+                    <td>Enterprise RS</td>
+                    <td style="text-align:right; padding-right:14px;"><button class="btn btn-teal" style="padding:4px 10px; font-size:11px;" onclick="alert('Kelola konfigurasi Site Jakarta Pusat')">Kelola</button></td>
+                  </tr>
+
+                  <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 14px;"><strong>Lab Rujukan AVA Surabaya Main Branch</strong><div style="font-size:10.5px; color:#64748b;">JL. Pemuda No. 88, Surabaya</div></td>
+                    <td><code>surabaya.avahealth.sbs</code></td>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">v3.4.2-patch1</span></td>
+                    <td><span class="badge" style="background:#dcfce7; color:#166534; font-weight:700;">🟢 ONLINE (18ms)</span></td>
+                    <td>28 Staf Aktif</td>
+                    <td>Starter LIS</td>
+                    <td style="text-align:right; padding-right:14px;"><button class="btn btn-teal" style="padding:4px 10px; font-size:11px;" onclick="alert('Kelola konfigurasi Site Surabaya')">Kelola</button></td>
+                  </tr>
+
+                  <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 14px;"><strong>Queen Sanctuary Spa &amp; Wellness Bali</strong><div style="font-size:10.5px; color:#64748b;">JL. Sunset Road No. 45, Seminyak</div></td>
+                    <td><code>bali-spa.avahealth.sbs</code></td>
+                    <td><span class="badge" style="background:#fef3c7; color:#b45309;">v3.4.1 (Update Ready)</span></td>
+                    <td><span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">🟡 DEGRADED (+140ms)</span></td>
+                    <td>15 Staf Aktif</td>
+                    <td>Custom VIP Spa</td>
+                    <td style="text-align:right; padding-right:14px;"><button class="btn btn-teal" style="padding:4px 10px; font-size:11px; background:#f59e0b; border-color:#f59e0b; color:white;" onclick="alert('Patch Hotfix dikirim ke Site Bali!')">Push Hotfix</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: MODUL & LISENSI PEMESANAN -->
+        <div id="tech-tab-domain-modules" class="tech-tab-content" style="display:none;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-bottom:14px;">📦 Matrix Toggling Modul Sistem Sesuai Pemesanan Klien</h4>
+            <p style="font-size:12px; color:#64748b; margin-bottom:18px;">Aktifkan atau nonaktifkan modul secara instan per cabang tanpa perlu membongkar kode aplikasi.</p>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+              <div style="padding:16px; border:1px solid #cbd5e1; border-radius:12px; background:#f8fafc;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <strong style="font-size:13px; color:#0f172a;">🏥 Modul HIS Rawat Jalan &amp; Rawat Inap</strong>
+                  <input type="checkbox" checked onchange="alert('Status Modul HIS Diperbarui!')" style="width:18px; height:18px; cursor:pointer;">
+                </div>
+                <span style="font-size:11px; color:#64748b; display:block;">Rekam Medis EMR, Registrasi Admission, Antrean Kiosk, Billing Kasir.</span>
+              </div>
+
+              <div style="padding:16px; border:1px solid #cbd5e1; border-radius:12px; background:#f8fafc;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <strong style="font-size:13px; color:#0f172a;">🧪 Modul LIS Lab (530+ Parameter &amp; ISO 15189)</strong>
+                  <input type="checkbox" checked onchange="alert('Status Modul LIS Diperbarui!')" style="width:18px; height:18px; cursor:pointer;">
+                </div>
+                <span style="font-size:11px; color:#64748b; display:block;">Katalog LOINC/UCUM, Chain-of-Custody Flebotomi, Cold-Chain Telemetry.</span>
+              </div>
+
+              <div style="padding:16px; border:1px solid #cbd5e1; border-radius:12px; background:#f8fafc;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <strong style="font-size:13px; color:#0f172a;">🌿 Modul Wellness &amp; 7 Lifestyle Suite</strong>
+                  <input type="checkbox" checked onchange="alert('Status Modul Wellness Diperbarui!')" style="width:18px; height:18px; cursor:pointer;">
+                </div>
+                <span style="font-size:11px; color:#64748b; display:block;">Run Challenge + Wearables Sync, NutriCo Planner, HRV Stress, Bio-Age.</span>
+              </div>
+
+              <div style="padding:16px; border:1px solid #cbd5e1; border-radius:12px; background:#f8fafc;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <strong style="font-size:13px; color:#0f172a;">🏢 Modul Corporate MCU &amp; Burnout Index</strong>
+                  <input type="checkbox" checked onchange="alert('Status Modul Corporate Diperbarui!')" style="width:18px; height:18px; cursor:pointer;">
+                </div>
+                <span style="font-size:11px; color:#64748b; display:block;">Dasbor MCU Karyawan Massal, Approval Maker/Approver, Epidemiologi.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 3: LOG ACTIVITY & TELEMETRY -->
+        <div id="tech-tab-domain-telemetry" class="tech-tab-content" style="display:none;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-bottom:14px;">📊 Live Audit Activity Stream &amp; Telemetri API</h4>
+            
+            <div style="background:#0f172a; color:#38bdf8; font-family:monospace; padding:16px; border-radius:10px; font-size:11.5px; height:240px; overflow-y:auto; line-height:1.7;">
+              <div>[17:45:02 WIB] INFO  - Site Jakarta: Dr. Sinta created E-Rujukan (Ref #REF-99201)</div>
+              <div>[17:44:18 WIB] INFO  - Site Surabaya: Flebotomis Budi validated ISO 15189 Cold-Chain Temp (4.2°C)</div>
+              <div>[17:43:55 WIB] INFO  - Site Bali: Wearable Sync API Processed (+1,000 steps for User Ace)</div>
+              <div>[17:42:10 WIB] WARN  - Site Bali: Latency spike detected (+140ms on Supabase connection)</div>
+              <div>[17:40:00 WIB] INFO  - System: Automated Daily Snapshot Backup Completed (SHA-256 Valid)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 4: BUG & PROBLEM TRACKER -->
+        <div id="tech-tab-domain-bugs" class="tech-tab-content" style="display:none;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin:0;">🐞 Bug, Problem &amp; Incident SLA Ticketing</h4>
+              <button class="btn btn-teal" onclick="alert('Form Laporkan Bug/Incident Baru Aktif!')" style="padding:6px 12px; font-size:11px; background:#ef4444; border-color:#ef4444; color:white;">+ Laporkan Bug / Outage Baru</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="padding:12px 16px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <span class="badge" style="background:#ef4444; color:white; font-size:10px; font-weight:800;">P2 MAJOR BUG</span>
+                  <strong style="font-size:12.5px; color:#991b1b; display:block; margin-top:2px;">Printer POS ESC/POS Disconnect at Site Bali</strong>
+                  <span style="font-size:11px; color:#7f1d1d;">Dilaporkan: 2 Jam lalu &bull; Assigned to: Dev Hardware Team</span>
+                </div>
+                <button class="btn btn-teal" onclick="alert('Tiket Bug P2 Diselesaikan!')" style="padding:6px 12px; font-size:11px; font-weight:700;">✅ Mark Resolved</button>
+              </div>
+
+              <div style="padding:12px 16px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <span class="badge" style="background:#f59e0b; color:white; font-size:10px; font-weight:800;">P3 MINOR UI</span>
+                  <strong style="font-size:12.5px; color:#92400e; display:block; margin-top:2px;">Header Kuitansi Kasir Tergeser 2 Pixel</strong>
+                  <span style="font-size:11px; color:#78350f;">Dilaporkan: 1 Hari lalu &bull; Assigned to: Frontend UI Team</span>
+                </div>
+                <button class="btn btn-teal" onclick="alert('Tiket Bug P3 Diselesaikan!')" style="padding:6px 12px; font-size:11px; font-weight:700;">✅ Mark Resolved</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 5: BACKUP & MAINTENANCE -->
+        <div id="tech-tab-domain-backup" class="tech-tab-content" style="display:none;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-bottom:14px;">💾 Automated Backup &amp; Scheduled Maintenance Engine</h4>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div style="padding:16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px;">
+                <strong style="font-size:13px; color:#166534; display:block; margin-bottom:4px;">🟢 Automated Daily Snapshot Status</strong>
+                <p style="font-size:11.5px; color:#14532d; margin:0 0 10px 0;">Terakhir dieksekusi: Hari ini 04:00 WIB (Ukuran: 4.2 GB, Checksum Valid SHA-256).</p>
+                <button class="btn btn-teal" onclick="alert('Inisiasi Pemulihan Data PITR (Point-In-Time Restore) Sukses!')" style="padding:6px 12px; font-size:11px; font-weight:700;">🔄 Point-In-Time Restore (PITR)</button>
+              </div>
+
+              <div style="padding:16px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:12px;">
+                <strong style="font-size:13px; color:#0369a1; display:block; margin-bottom:4px;">⏰ Maintenance Window Update Schedule</strong>
+                <p style="font-size:11.5px; color:#0c4a6e; margin:0 0 10px 0;">Jadwal Update Selanjutnya: Minggu 02:00 WIB (Pemberitahuan otomatis dikirim ke 12 site).</p>
+                <button class="btn btn-teal" onclick="alert('Broadcast Pengumuman Maintenance Dikirim!')" style="padding:6px 12px; font-size:11px; font-weight:700; background:#0284c7; border-color:#0284c7; color:white;">📢 Broadcast Advance Notice</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 6: SECURITY & AI GATEWAY -->
+        <div id="tech-tab-domain-security" class="tech-tab-content" style="display:none;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-bottom:14px;">🔑 Security Credentials &amp; AI Gateway Key Pool</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="padding:14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:12.5px; color:#0f172a; display:block;">🌐 SATUSEHAT Kemenkes OAuth Credentials</strong>
+                  <span style="font-size:11px; color:#64748b;">Client ID: <code>ava_satusehat_prod_88192</code> &bull; Status: Active</span>
+                </div>
+                <span class="badge" style="background:#dcfce7; color:#166534; font-weight:800;">VERIFIED ACTIVE</span>
+              </div>
+
+              <div style="padding:14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:12.5px; color:#0f172a; display:block;">🤖 AI Gateway LLM Key Pool (Gemini / Claude / OpenAI)</strong>
+                  <span style="font-size:11px; color:#64748b;">12 Kunci Aktif Terpasang dalam Key Pool Rotation</span>
+                </div>
+                <button class="btn btn-teal" onclick="alert('Kunci API Rotasi Baru Berhasil Ditambahkan ke Pool!')" style="padding:6px 12px; font-size:11px; font-weight:700;">+ Rotasi Key Pool</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

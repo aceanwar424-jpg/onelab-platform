@@ -77,14 +77,19 @@ const SUPPORTIVE_TYPES = {
 };
 
 let suppAll = [];
+let suppFormDefaultType = 'EKG 12 Lead';
 
-async function renderSupportive() {
+async function renderSupportive(params = {}) {
   if (typeof injectProShell==='function') injectProShell();
+  const focusedType = SUPPORTIVE_TYPES[params.type] ? params.type : '';
+  suppFormDefaultType = focusedType || 'EKG 12 Lead';
+  suppActiveType = focusedType;
+  const focusedCfg = focusedType ? SUPPORTIVE_TYPES[focusedType] : null;
   document.getElementById('main-content').innerHTML = `
     <div class="pro-shell">
     <div class="pro-header">
-      <div><h1>${svgIcon('heart',18)} Supportive Examination</h1>
-        <span class="pro-sub">EKG 12 Lead · EKG Treadmill · Audiometri · Spirometri</span></div>
+      <div><h1>${focusedCfg ? `${focusedCfg.icon} ${focusedType}` : `${svgIcon('heart',18)} Pemeriksaan Penunjang`}</h1>
+        <span class="pro-sub">${focusedCfg ? `Daftar dan input ${focusedType}. Gunakan dashboard penunjang untuk melihat seluruh jenis pemeriksaan.` : 'EKG 12 Lead · EKG Treadmill · Audiometri · Spirometri'}</span></div>
       <button class="btn btn-teal btn-sm" onclick="openSupportiveForm()">${svgIcon('plus',14)} Input Pemeriksaan</button>
     </div>
 
@@ -229,7 +234,7 @@ async function openSupportiveForm(id=null) {
   } catch(e){}
 
   const user=getUserName?getUserName():'User';
-  const currentType = r.product_name || 'EKG 12 Lead';
+  const currentType = r.product_name || suppFormDefaultType || 'EKG 12 Lead';
 
   openModal(`
     <div class="modal-header">

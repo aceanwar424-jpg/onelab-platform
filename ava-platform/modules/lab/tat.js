@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// MODULE: Turnaround Time (TAT) & Management Dashboard (Sysmex HCLAB Pro Max)
-// Sesuai Spesifikasi Sysmex HCLAB (Hal. 8):
+// MODULE: Turnaround Time (TAT) & Management Dashboard (AVA Lab)
+// Sesuai Spesifikasi AVA Lab (Hal. 8):
 // - 8 Circular Progress KPI Gauges (NEW, PENDING, QUEUE, UNMATCHED, LATE, UNAPPROVED, PANIC, TAT ALERT)
 // - Median & P90 SLA Monitoring (ISO 15189:2022)
 // - Bottleneck Analyzer & Slowest Specimen Tracking
@@ -27,7 +27,7 @@ async function renderLabTat() {
         <div>
           <div style="display:flex; align-items:center; gap:8px;">
             <h1 style="font-size:20px; font-weight:800; margin:0; color:var(--text, #0f172a);">
-              ⏱️ Management Dashboard &amp; Monitoring TAT (Sysmex HCLAB)
+              ⏱️ Management Dashboard &amp; Monitoring TAT (AVA Lab)
             </h1>
             <span style="font-size:10px; font-weight:800; background:#0284c7; color:#fff; padding:2px 8px; border-radius:999px;">
               ISO 15189 SLA
@@ -110,10 +110,10 @@ function tatGambar() {
   const lambat = tahap.reduce((a, b) => (Number(b.median) || 0) > (Number(a.median) || 0) ? b : a, tahap[0] || {});
 
   el.innerHTML = `
-    <!-- 8 CIRCULAR KPI GAUGES (SYSMEX HCLAB PAGE 8) -->
+    <!-- 8 CIRCULAR KPI GAUGES (AVA LAB PAGE 8) -->
     <div style="background:var(--bg2, #f8fafc); border:1px solid var(--border, #cbd5e1); border-radius:10px; padding:14px; margin-bottom:16px;">
       <div style="font-size:11.5px; font-weight:800; color:var(--text, #0f172a); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:12px;">
-        📊 Real-Time Workstation Status (Sysmex Multi-Gauge)
+        📊 Real-Time Workstation Status (Ringkasan Operasional)
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">

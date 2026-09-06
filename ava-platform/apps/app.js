@@ -448,6 +448,21 @@ function renderSidebarMenu() {
       renderCategoryAccordion('r-rujukan', 'Manajemen Rujukan (E-Rujukan)', '🏥', subRefRujukan, true),
       renderCategoryAccordion('r-wallet', 'Wallet &amp; Komisi Mitra', '💰', subRefWallet, true)
     ].join('');
+
+  } else if (currentRole === 'tech') {
+    const subTechMaster = `
+      <a class="sidebar-link active" onclick="showView('tech-saas-master-console-view', 'AVA Tech Master Console')">${I.dashboard}<span>💻 Master Dashboard &amp; Telemetri</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-site'); showView('tech-saas-master-console-view', 'Monitoring Site Branch')">${I.home}<span>🏢 Monitoring Site Branch (Per Cabang)</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-modules'); showView('tech-saas-master-console-view', 'Set Modul &amp; Lisensi')">${I.package}<span>📦 Set Modul &amp; Lisensi Pemesanan</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-telemetry'); showView('tech-saas-master-console-view', 'Log Activity &amp; Telemetri')">${I.medrec}<span>📊 Log Activity &amp; Live Telemetry</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-bugs'); showView('tech-saas-master-console-view', 'Bug &amp; SLA Tracker')">${I.result}<span>🐞 Bug, Incident &amp; SLA Ticket</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-backup'); showView('tech-saas-master-console-view', 'Backup &amp; Maintenance')">${I.device}<span>💾 Backup &amp; Maintenance Engine</span></a>
+      <a class="sidebar-link" onclick="switchTechTab('domain-security'); showView('tech-saas-master-console-view', 'Security &amp; AI Gateway')">${I.deposit}<span>🔑 Security, API Keys &amp; AI Gateway</span></a>
+    `;
+
+    navContainer.innerHTML = [
+      renderCategoryAccordion('t-master', 'AVA Tech Vendor Operations Center', '💻', subTechMaster, true)
+    ].join('');
   }
 }
 
@@ -3909,6 +3924,11 @@ async function applyRoleUIState(role) {
     await loadDataFromSupabase();
     showView('staff-homecare-view', 'Tugas Home Care Nakes');
   }
+  else if (role === 'tech') {
+    if (avatarEl) { avatarEl.textContent = '💻'; avatarEl.style.background = 'linear-gradient(135deg, #0f172a, #1e293b)'; }
+    if (welcomeEl) welcomeEl.textContent = isSuperAdmin ? `${adminRealName} (AVA Tech Admin)` : (currentUsername || 'AVA Tech SaaS Master Admin');
+    showView('tech-saas-master-console-view', 'AVA Tech Master Operations Console');
+  }
   else {
     // Default: Patient
     if (avatarEl) { avatarEl.textContent = 'P'; avatarEl.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)'; }
@@ -4322,6 +4342,7 @@ function updateLoginFormUI(role) {
     else if (role === 'corporate') userLabel.textContent = 'Corporate User ID / NIP';
     else if (role === 'staff') userLabel.textContent = 'ID Nakes / NIP Staff';
     else if (role === 'referral') userLabel.textContent = 'Kode Dokter / ID Faskes Referral';
+    else if (role === 'tech') userLabel.textContent = 'Email Admin SaaS / Vendor Operator ID';
   }
 
   if (userInput && (!userInput.value || userInput.value === 'admin@avahealth.sbs' || userInput.value.includes('@'))) {
@@ -4330,6 +4351,19 @@ function updateLoginFormUI(role) {
     else if (role === 'corporate') userInput.placeholder = 'Contoh: corp@avahealth.sbs';
     else if (role === 'staff') userInput.placeholder = 'Contoh: nakes@avahealth.sbs';
     else if (role === 'referral') userInput.placeholder = 'Contoh: referral@avahealth.sbs';
+    else if (role === 'tech') userInput.placeholder = 'Contoh: admin@avahealth.sbs';
+  }
+
+  const titleEl = document.getElementById('login-form-title');
+  const subTitleEl = document.getElementById('login-form-subtitle');
+  if (titleEl && subTitleEl) {
+    if (role === 'tech') {
+      titleEl.textContent = 'Masuk Console AVA Tech';
+      subTitleEl.textContent = 'Pusat Kendali Vendor SaaS Multi-Tenant & Lisensi Modul';
+    } else {
+      titleEl.textContent = 'Masuk Portal Layanan';
+      subTitleEl.textContent = 'Pilih tipe hak akses dan masukkan kredensial Anda';
+    }
   }
 
   if (corpGroup) {
@@ -4439,6 +4473,35 @@ function startGuidedBreathingSession() {
   alert("🫁 Sesi Box Breathing (4-7-8 Technique) Dimulai:\n\n1. Tarik napas lewat hidung (4 detik)\n2. Tahan napas (7 detik)\n3. Hembuskan perlahan lewat mulut (8 detik)\n\nUlangi 4 siklus untuk menurunkan kadar kortisol.");
 }
 
+function switchTechTab(tabId) {
+  document.querySelectorAll('.tech-tab-content').forEach(el => {
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+
+  document.querySelectorAll('.tech-tab-btn').forEach(btn => {
+    btn.style.background = '#f1f5f9';
+    btn.style.color = '#475569';
+    btn.style.fontWeight = '700';
+    btn.classList.remove('active');
+  });
+
+  const targetTab = document.getElementById(`tech-tab-${tabId}`);
+  if (targetTab) {
+    targetTab.style.display = 'block';
+    targetTab.classList.add('active');
+  }
+
+  const activeBtn = document.querySelector(`.tech-tab-btn[onclick*="${tabId}"]`);
+  if (activeBtn) {
+    activeBtn.style.background = '#0f172a';
+    activeBtn.style.color = '#38bdf8';
+    activeBtn.style.fontWeight = '800';
+    activeBtn.classList.add('active');
+  }
+}
+
+window.switchTechTab = switchTechTab;
 window.syncWearableDevice = syncWearableDevice;
 window.simulateWearableAddSteps = simulateWearableAddSteps;
 window.addWaterIntake = addWaterIntake;

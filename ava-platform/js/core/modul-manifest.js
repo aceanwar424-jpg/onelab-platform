@@ -1246,6 +1246,38 @@ window.MODUL_HALAMAN = {
   "modules/system/timeline.js",
   "modules/system/config/master_registry.js"
  ],
+ "ekg-treadmill": [
+  "modules/system/config/config_family.js",
+  "modules/system/config/config_home.js",
+  "modules/system/config/config_labreport.js",
+  "modules/system/config/config_package.js",
+  "modules/system/config/config_product.js",
+  "modules/system/db_studio.js",
+  "modules/system/lisensi.js",
+  "modules/system/ops_kendali.js",
+  "modules/system/portal_akses.js",
+  "modules/system/settings.js",
+  "modules/system/supportive.js",
+  "modules/system/surat.js",
+  "modules/system/timeline.js",
+  "modules/system/config/master_registry.js"
+ ],
+ "audiometry": [
+  "modules/system/config/config_family.js",
+  "modules/system/config/config_home.js",
+  "modules/system/config/config_labreport.js",
+  "modules/system/config/config_package.js",
+  "modules/system/config/config_product.js",
+  "modules/system/db_studio.js",
+  "modules/system/lisensi.js",
+  "modules/system/ops_kendali.js",
+  "modules/system/portal_akses.js",
+  "modules/system/settings.js",
+  "modules/system/supportive.js",
+  "modules/system/surat.js",
+  "modules/system/timeline.js",
+  "modules/system/config/master_registry.js"
+ ],
  "spirometry": [
   "modules/system/config/config_family.js",
   "modules/system/config/config_home.js",

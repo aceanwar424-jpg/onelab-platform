@@ -135,7 +135,7 @@ async function renderLisHelpDesk() {
                 ISO 15189:2022 SOP
               </span>
               <span style="color:#94a3b8; font-size:12px;">&bull;</span>
-              <span style="color:#38bdf8; font-size:12px; font-weight:700;">Sysmex HCLAB Architecture</span>
+              <span style="color:#38bdf8; font-size:12px; font-weight:700;">Alur Layanan AVA Lab</span>
             </div>
             <h1 style="font-size:22px; font-weight:800; margin:0; color:#fff;">
               💡 Pusat Bantuan, SOP &amp; Panduan Alur Kerja LIS

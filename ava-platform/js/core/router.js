@@ -355,7 +355,9 @@ async function navigate(page, params={}) {
     case 'corporate':   safeRun('renderConfigCorporate');        break;
     case 'radiology':   safeRun('renderRIS');                    break;
     case 'supportive':  safeRun('renderSupportive');             break;
-    case 'spirometry':  safeRun('renderSupportive');             break;
+    case 'ekg-treadmill': safeRun('renderSupportive', { type: 'EKG 12 Lead' }); break;
+    case 'audiometry':  safeRun('renderSupportive', { type: 'Audiometri' }); break;
+    case 'spirometry':  safeRun('renderSupportive', { type: 'Spirometri' }); break;
     case 'medrecord':   safeRun('renderMedRecord');              break;
     case 'inpatient':   safeRun('renderInpatient');              break;
     // Dulu menunjuk renderFarmasi di farmasi_eprescription.js — 367 baris
