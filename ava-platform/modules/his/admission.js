@@ -61,6 +61,99 @@ function getAdmissionMode(mode) {
   return ADM_REGISTRATION_MODES[mode] ? mode : 'outpatient';
 }
 
+// Metadata mode tetap disimpan bersama baris layanan yang sudah ada. Dengan
+// begitu konteks operasional tidak hilang saat formulir dibuka kembali, tanpa
+// menambah kolom atau mengubah kontrak tabel admissions.
+function parseAdmissionServices(value) {
+  try { return Array.isArray(value) ? value : JSON.parse(value || '[]'); }
+  catch (e) { return []; }
+}
+
+function getStoredAdmissionContext(services, fallbackMode) {
+  const row = (services || []).find(item => item && item.admission_context);
+  return { mode: fallbackMode, ...(row?.admission_context || {}) };
+}
+
+function admissionModeContextMarkup(mode, context = {}, facilityOpts = '') {
+  const v = (key, fallback = '') => String(context[key] ?? fallback).replace(/"/g, '&quot;');
+  const title = {
+    outpatient: 'Konteks Kunjungan Poli', service: 'Konteks Layanan Langsung',
+    'medical-kit': 'Kendali Medical Kit', package: 'Paket & Add-on',
+    subscription: 'Hak Langganan', 'package-usage': 'Penebusan Hak Paket',
+  }[mode] || 'Konteks Layanan';
+  const intro = {
+    outpatient: 'Unit dan dokter diperlukan sebelum layanan diteruskan ke antrean poli.',
+    service: 'Tentukan jalur layanan agar tindakan langsung tidak tercampur dengan kunjungan poli.',
+    'medical-kit': 'Tanggal layanan, identitas kit/perangkat, dan status kesiapan dicatat sebelum registrasi.',
+    package: 'Pilih paket terlebih dahulu; layanan tambahan dicatat sebagai add-on terpisah.',
+    subscription: 'Tentukan periode berlaku dan saldo hak awal untuk pembelian paket berulang.',
+    'package-usage': 'Pilih referensi hak paket aktif dan jumlah pemakaian yang akan ditebus.',
+  }[mode] || '';
+  let fields = '';
+  if (mode === 'outpatient') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Unit / Fasilitas *</span><select id="af-facility"><option value="">Pilih unit layanan</option>${facilityOpts}</select></label>
+      <label class="form-group"><span>Dokter / Praktisi *</span><input id="af-doctor" value="${v('doctor')}" placeholder="Nama dokter atau praktisi"></label>
+      <label class="form-group"><span>Jam kunjungan</span><input id="af-visit-time" type="time" value="${v('visitTime')}"></label>
+    </div>`;
+  } else if (mode === 'service') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Jalur layanan *</span><select id="af-service-flow"><option value="Tindakan langsung" ${v('serviceFlow','Tindakan langsung') === 'Tindakan langsung' ? 'selected' : ''}>Tindakan langsung</option><option value="Penunjang" ${v('serviceFlow') === 'Penunjang' ? 'selected' : ''}>Penunjang</option><option value="Konsultasi" ${v('serviceFlow') === 'Konsultasi' ? 'selected' : ''}>Konsultasi</option></select></label>
+      <label class="form-group"><span>Waktu layanan</span><input id="af-service-time" type="time" value="${v('serviceTime')}"></label>
+      <label class="form-group"><span>Catatan operasional</span><input id="af-service-note" value="${v('serviceNote')}" placeholder="Opsional"></label>
+    </div>`;
+  } else if (mode === 'medical-kit') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Tanggal layanan *</span><input id="af-kit-date" type="date" value="${v('serviceDate', new Date().toISOString().slice(0,10))}"></label>
+      <label class="form-group"><span>Kode kit / perangkat *</span><input id="af-kit-code" value="${v('kitCode')}" placeholder="Kode kit atau perangkat"></label>
+      <label class="form-group"><span>Status kesiapan *</span><select id="af-kit-status"><option value="Siap" ${v('kitStatus','Siap') === 'Siap' ? 'selected' : ''}>Siap</option><option value="Menunggu" ${v('kitStatus') === 'Menunggu' ? 'selected' : ''}>Menunggu</option><option value="Perlu verifikasi" ${v('kitStatus') === 'Perlu verifikasi' ? 'selected' : ''}>Perlu verifikasi</option></select></label>
+    </div>`;
+  } else if (mode === 'package') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Kategori paket</span><input id="af-package-category" value="${v('packageCategory')}" placeholder="Contoh: MCU, Preventif"></label>
+      <label class="form-group"><span>Catatan add-on</span><input id="af-addon-note" value="${v('addonNote')}" placeholder="Opsional"></label>
+    </div>`;
+  } else if (mode === 'subscription') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Mulai berlaku *</span><input id="af-subscription-start" type="date" value="${v('subscriptionStart', new Date().toISOString().slice(0,10))}"></label>
+      <label class="form-group"><span>Berlaku sampai *</span><input id="af-subscription-end" type="date" value="${v('subscriptionEnd')}"></label>
+      <label class="form-group"><span>Saldo hak awal *</span><input id="af-entitlement-qty" type="number" min="1" step="1" value="${v('entitlementQty','1')}"></label>
+    </div>`;
+  } else if (mode === 'package-usage') {
+    fields = `<div class="admission-mode-fields">
+      <label class="form-group"><span>Referensi hak paket *</span><input id="af-entitlement-ref" value="${v('entitlementRef')}" placeholder="Nomor langganan / hak paket"></label>
+      <label class="form-group"><span>Tanggal pemakaian *</span><input id="af-usage-date" type="date" value="${v('usageDate', new Date().toISOString().slice(0,10))}"></label>
+      <label class="form-group"><span>Jumlah pemakaian *</span><input id="af-usage-qty" type="number" min="1" step="1" value="${v('usageQty','1')}"></label>
+    </div>`;
+  }
+  return `<section class="admission-mode-context"><div><strong>${title}</strong><small>${intro}</small></div>${fields}</section>`;
+}
+
+function collectAdmissionModeContext(mode) {
+  const val = id => document.getElementById(id)?.value?.trim?.() ?? document.getElementById(id)?.value ?? '';
+  const base = { mode };
+  if (mode === 'outpatient') return { ...base, facilityId: Number(val('af-facility')) || null, doctor: val('af-doctor'), visitTime: val('af-visit-time') };
+  if (mode === 'service') return { ...base, serviceFlow: val('af-service-flow'), serviceTime: val('af-service-time'), serviceNote: val('af-service-note') };
+  if (mode === 'medical-kit') return { ...base, serviceDate: val('af-kit-date'), kitCode: val('af-kit-code'), kitStatus: val('af-kit-status') };
+  if (mode === 'package') return { ...base, packageCategory: val('af-package-category'), addonNote: val('af-addon-note') };
+  if (mode === 'subscription') return { ...base, subscriptionStart: val('af-subscription-start'), subscriptionEnd: val('af-subscription-end'), entitlementQty: Number(val('af-entitlement-qty')) || 0 };
+  if (mode === 'package-usage') return { ...base, entitlementRef: val('af-entitlement-ref'), usageDate: val('af-usage-date'), usageQty: Number(val('af-usage-qty')) || 0 };
+  return base;
+}
+
+function validateAdmissionMode(mode, context) {
+  const hasService = (admFormState.serviceLines || []).some(line => line?.product_id || String(line?.name || '').trim());
+  const hasKitLine = (admFormState.serviceLines || []).some(line => line?.requires_kit);
+  const hasPackage = !!admFormState.packageId;
+  if (mode === 'outpatient' && (!context.facilityId || !context.doctor)) return { tab: 'services', message: 'Pilih unit/fasilitas dan dokter/praktisi untuk kunjungan poli.' };
+  if (mode === 'medical-kit' && (!context.serviceDate || !context.kitCode || !context.kitStatus || context.kitStatus === 'Menunggu' || !hasKitLine)) return { tab: 'services', message: 'Medical kit harus memiliki layanan bertanda kit, tanggal layanan, kode kit/perangkat, dan status Siap atau Perlu verifikasi.' };
+  if (mode === 'package' && !hasPackage) return { tab: 'services', message: 'Pilih paket layanan sebelum menyimpan registrasi paket.' };
+  if (mode === 'subscription' && (!hasPackage || !context.subscriptionStart || !context.subscriptionEnd || context.entitlementQty < 1 || context.subscriptionEnd < context.subscriptionStart)) return { tab: 'services', message: 'Langganan memerlukan paket, periode berlaku yang benar, dan saldo hak awal minimal satu.' };
+  if (mode === 'package-usage' && (!hasPackage || !context.entitlementRef || !context.usageDate || context.usageQty < 1)) return { tab: 'services', message: 'Pemakaian paket memerlukan paket, referensi hak aktif, tanggal, dan jumlah pemakaian.' };
+  if (!hasService) return { tab: 'services', message: 'Tambahkan minimal satu layanan atau paket sebelum menyimpan.' };
+  return null;
+}
+
 // ── Ikon SVG line profesional (Feather-style) ─────────────────────
 const SVG_ICONS = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/>',
@@ -486,10 +579,12 @@ let admMasterPackages = [];
 
 function renderServiceLines() {
   const el = document.getElementById('af-services-table'); if (!el) return;
+  const isMedicalKit = admFormState.mode === 'medical-kit';
   el.innerHTML = `
-    <table style="width:100%;font-size:11.5px;border-collapse:collapse">
+    <div class="admission-service-table-wrap"><table class="admission-service-table">
       <thead><tr style="background:var(--bg)">
         <th style="padding:4px;text-align:left;min-width:180px">Name</th><th style="padding:4px;min-width:80px">Priority</th>
+        ${isMedicalKit ? '<th style="padding:4px;min-width:58px">Kit</th>' : ''}
         <th style="padding:4px;min-width:90px">Unit Price</th><th style="padding:4px;min-width:60px">Disc %</th>
         <th style="padding:4px;min-width:90px">Disc (Rp)</th><th style="padding:4px;min-width:100px">Sub Total</th>
         <th style="padding:4px;width:36px"></th>
@@ -543,6 +638,7 @@ function renderServiceLines() {
                 ${['-', 'Normal', 'Urgent', 'Cito'].map(p => `<option ${row.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </td>
+            ${isMedicalKit ? `<td style="padding:3px;text-align:center"><label class="admission-kit-check"><input type="checkbox" ${row.requires_kit ? 'checked' : ''} onchange="updateServiceLine(${i},'requires_kit',this.checked)"> Ya</label></td>` : ''}
             <td style="padding:3px"><input type="number" value="${row.unit_price || 0}" oninput="updateServiceLine(${i},'unit_price',this.value)" style="font-size:11px;padding:3px;width:100%"></td>
             <td style="padding:3px"><input type="number" value="${row.discount_pct || 0}" oninput="updateServiceLine(${i},'discount_pct',this.value)" style="font-size:11px;padding:3px;width:100%"></td>
             <td style="padding:3px"><input type="number" value="${row.discount_idr || 0}" oninput="updateServiceLine(${i},'discount_idr',this.value)" style="font-size:11px;padding:3px;width:100%"></td>
@@ -551,7 +647,7 @@ function renderServiceLines() {
           </tr>`;
   }).join('')}
       </tbody>
-    </table>
+    </table></div>
     <div style="display:flex;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost btn-sm" onclick="addServiceLine()">+ Add</button>
     </div>`;
@@ -781,22 +877,28 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
   let a = {};
   if (id) { const d = await sbGet('admissions', `select=*&id=eq.${id}`); a = d[0] || {}; }
 
-  // Load packages, corporates, families, projects, master products in parallel
-  let pkgs = [], corps = [], fams = [], projs = [];
+  // Muat master yang menjadi pilihan operator. Kegagalan salah satu master
+  // tidak boleh menutup formulir; validasi akan menjelaskan pilihan yang
+  // belum dapat dipenuhi.
+  let pkgs = [], corps = [], fams = [], projs = [], facilities = [];
   try {
-    [pkgs, corps, fams, projs, admMasterProducts] = await Promise.all([
+    [pkgs, corps, fams, projs, admMasterProducts, facilities] = await Promise.all([
       sbGet('packages', 'select=id,nama_paket,harga_normal,harga_korporat,kode_paket&is_active=eq.true&order=nama_paket').catch(() => []),
       sbGet('corporates', 'select=id,corporate_name,discount_type,discount_value&status=eq.Aktif&order=corporate_name').catch(() => []),
       sbGet('families', 'select=id,family_code,family_name,discount_type,discount_value,status&status=eq.Aktif&order=family_name').catch(() => []),
       sbGet('projects', 'select=id,project_name,project_code&status=eq.Active&order=created_at.desc&limit=50').catch(() => []),
       sbGet('products', 'select=id,kode_internal,nama_tes,hpp,harga_normal,kategori,is_panel,sampel_type&is_active=eq.true&order=kategori,nama_tes').catch(() => []),
+      sbGet('health_facilities', 'select=id,facility_name,facility_type&order=facility_name').catch(() => []),
     ]);
   } catch (e) { }
   admMasterPackages = pkgs || [];
+  const storedServices = parseAdmissionServices(a.services);
+  const storedContext = getStoredAdmissionContext(storedServices, mode);
 
   // Load existing patient IDs and service lines if editing
   admFormState = {
     patientIds: [], serviceLines: [], admissionId: id, activeTab: 'patient', mode,
+    modeContext: storedContext,
     // Diskon berjenjang
     scheme: a.discount_scheme || 'umum',       // umum | family | corporate
     schemeRefId: a.scheme_ref_id || a.corporate_id || a.family_id || null,
@@ -815,10 +917,10 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
       admFormState.patientIds = (existingIds || []).map(r => ({ id_type: r.id_type, id_number: r.id_number, issuer_country: r.issuer_country, is_primary: r.is_primary }));
     } catch (e) { }
     try {
-      const svcIds = a.services ? JSON.parse(a.services) : [];
-      admFormState.serviceLines = (svcIds || []).map(s => ({
+      admFormState.serviceLines = (storedServices || []).map(s => ({
         product_id: s.product_id, name: s.name, priority: s.priority || '-',
         unit_price: s.unit_price || 0, discount_pct: s.discount_pct || 0, discount_idr: s.discount_idr || 0,
+        pkg_name: s.pkg_name || '', is_panel: !!s.is_panel, requires_kit: !!s.requires_kit,
       }));
     } catch (e) { }
   }
@@ -834,6 +936,7 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
       ${a.family_id == fm.id ? 'selected' : ''}>${fm.family_code ? '[' + fm.family_code + '] ' : ''}${fm.family_name} (${fm.discount_type === 'fixed' ? formatCurrency(fm.discount_value || 0) : (fm.discount_value || 0) + '%'})</option>`).join('');
   const projOpts = '<option value="">-- Tidak terkait project --</option>' +
     (projs || []).map(p => `<option value="${p.id}" ${a.project_id == p.id ? 'selected' : ''}>${p.project_code} — ${p.project_name}</option>`).join('');
+  const facilityOpts = (facilities || []).map(f => `<option value="${f.id}" ${Number(storedContext.facilityId || a.facility_id) === Number(f.id) ? 'selected' : ''}>${f.facility_name || 'Fasilitas ' + f.id}${f.facility_type ? ' · ' + f.facility_type : ''}</option>`).join('');
 
   const today = new Date().toISOString().split('T')[0];
   const visitNum = id ? a.visit_number : `VISIT-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Date.now().toString().slice(-3)}`;
@@ -1030,10 +1133,13 @@ async function openAdmissionForm(id = null, requestedMode = window.activeAdmissi
 
     <!-- ═══ TAB: SERVICES ═══ -->
     <div id="af-tab-content-services" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-        <button type="button" class="btn btn-ghost btn-sm" onclick="addServiceLine()">+ Satuan / Panel</button>
-        <button type="button" class="btn btn-teal btn-sm" onclick="openPackagePicker()">+ Paket</button>
-        <span style="font-size:11px;color:var(--gray)">🧬 Panel &amp; 🗂️ Paket otomatis terurai menjadi tes komponen dengan harga per-tes.</span>
+      ${admissionModeContextMarkup(mode, storedContext, facilityOpts)}
+      <div class="admission-service-toolbar">
+        <div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="addServiceLine()">+ Layanan</button>
+          <button type="button" class="btn btn-teal btn-sm" onclick="openPackagePicker()">${mode === 'package' || mode === 'subscription' || mode === 'package-usage' ? '+ Pilih Paket' : '+ Paket'}</button>
+        </div>
+        <span>Panel dan paket terurai menjadi komponen agar harga serta antrean dapat ditelusuri.</span>
       </div>
       <div id="af-services-table"></div>
     </div>
@@ -1347,6 +1453,16 @@ async function saveAdmission(id) {
   const name = document.getElementById('af-name').value.trim();
   if (!name) { toast('Nama pasien wajib diisi', 'err'); return; }
 
+  const mode = getAdmissionMode(admFormState.mode);
+  const modeContext = collectAdmissionModeContext(mode);
+  const modeProblem = validateAdmissionMode(mode, modeContext);
+  if (modeProblem) {
+    switchAdmTab(modeProblem.tab);
+    toast(modeProblem.message, 'warn', 5000);
+    return;
+  }
+  admFormState.modeContext = modeContext;
+
   const pkgId = admFormState.packageId || null;
   const pkgName = admFormState.packageName || null;
   const user = getUserName ? getUserName() : 'User';
@@ -1356,6 +1472,8 @@ async function saveAdmission(id) {
   const servicesJson = JSON.stringify(admFormState.serviceLines.map(r => ({
     product_id: r.product_id, name: r.name, priority: r.priority,
     unit_price: r.unit_price, discount_pct: r.discount_pct, discount_idr: r.discount_idr,
+    pkg_name: r.pkg_name || null, is_panel: !!r.is_panel, requires_kit: !!r.requires_kit,
+    admission_context: modeContext,
   })));
 
   const primaryId = admFormState.patientIds.find(r => r.is_primary) || admFormState.patientIds[0];
@@ -1375,7 +1493,10 @@ async function saveAdmission(id) {
     mr_number: document.getElementById('af-mr')?.value || null,
     visit_type: document.getElementById('af-type').value,
     visit_date: document.getElementById('af-date').value,
+    visit_time: modeContext.visitTime || modeContext.serviceTime || null,
     project_id: parseInt(document.getElementById('af-project')?.value) || null,
+    facility_id: modeContext.facilityId || null,
+    doctor_referral: modeContext.doctor || null,
     patient_name: name,
     patient_salutation: document.getElementById('af-salutation')?.value.trim() || null,
     patient_gender: document.getElementById('af-gender').value,

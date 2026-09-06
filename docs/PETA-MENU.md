@@ -171,68 +171,68 @@ Keterangan status: 🟢 ada · 🟡 sebagian · ⚪ struktur saja, belum dibuat
 
 ---
 
-### Laboratorium LIS
+### Laboratorium
 
 `lis`
 
-**Pra-Analitik & Sampling**
+**Pendaftaran & Sampel**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟢 | Penerimaan & Barcode | `lab` | Check-in spesimen dan cetak barcode tabung CLSI |
-| 🟢 | Order Pemeriksaan | `lis-admission` | Pendaftaran order spesimen & auto-split tabung |
-| 🟢 | Flebotomi & Sampling | `lis-phlebotomy` | Verifikasi tabung, lokasi flebotomi & timestamp sampling |
-| 🟢 | Kriteria Kelayakan Spesimen | `lis-kelayakan` | Verifikasi penerimaan/penolakan spesimen (hemolisis/lipemik/clot) |
+| 🟢 | Permintaan Pemeriksaan | `lis-admission` | Pendaftaran order spesimen & auto-split tabung |
+| 🟢 | Pengambilan Sampel | `lis-phlebotomy` | Verifikasi tabung, lokasi flebotomi & timestamp sampling |
+| 🟢 | Penerimaan Sampel | `lab` | Check-in spesimen dan cetak barcode tabung CLSI |
+| 🟢 | Kelayakan Sampel | `lis-kelayakan` | Verifikasi penerimaan/penolakan spesimen (hemolisis/lipemik/clot) |
 
-**Analitik & Interfacing**
+**Pemeriksaan**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟢 | Worklist Analyzer | `worklist` | Daftar antrean kerja batch analyzer per instrumen |
-| 🟢 | Entry Hasil & Delta Check | `lab-result` | Input hasil, kalkulator pengenceran & deteksi delta check |
-| 🟢 | Interfacing Alat (:9999) | `lis-analyzer` | Konfigurasi protokol ASTM E1381/E1394 & channel mapping |
+| 🟢 | Antrean Pemeriksaan | `worklist` | Daftar antrean kerja batch analyzer per instrumen |
+| 🟢 | Input & Tinjau Hasil | `lab-result` | Input hasil, kalkulator pengenceran & deteksi delta check |
+| 🟢 | Rujukan Laboratorium | `referral` | Outsource spesimen ke lab rujukan & rekonsiliasi |
+
+**Validasi & Hasil**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Pelaporan Nilai Kritis | `lis-critical-value` | Pencatatan eskalasi nilai kritis SLA < 15 menit & TBaK |
+| 🟢 | Tinjauan Dokter Sp.PK | `lab-validation` | Expert clinical impression & otorisasi medis Sp.PK |
+| 🟢 | Validasi & Rilis Hasil | `lab-approval` | Tanda tangan kriptografis QR & rilis hasil resmi |
+| 🟢 | Waktu Layanan (TAT) | `lab-tat` | Turnaround time pra-analitik, analitik, dan pasca-analitik |
+
+**Mutu Laboratorium**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Kendali Mutu Harian (QC) | `lab-qc` | Plot Levey-Jennings, evaluasi 6 multi-rules Westgard & Six Sigma |
 | 🟢 | Verifikasi Lot Reagen | `lis-lot-verification` | Evaluasi bias lot-to-lot & uji paralel kontrol |
-
-**Pasca-Analitik & Otorisasi**
-
-| | Menu | Halaman | Keterangan |
-|---|---|---|---|
-| 🟢 | Otorisasi Dokter Sp.PK | `lab-validation` | Expert clinical impression & otorisasi medis Sp.PK |
-| 🟢 | Logbook Nilai Kritis | `lis-critical-value` | Pencatatan eskalasi nilai kritis SLA < 15 menit & TBaK |
-| 🟢 | Validasi & TTE Digital | `lab-approval` | Tanda tangan kriptografis QR & rilis hasil resmi |
-| 🟢 | Monitoring TAT | `lab-tat` | Turnaround time pra-analitik, analitik, dan pasca-analitik |
-
-**Quality Control (QC)**
-
-| | Menu | Halaman | Keterangan |
-|---|---|---|---|
-| 🟢 | QC Harian & Westgard | `lab-qc` | Plot Levey-Jennings, evaluasi 6 multi-rules Westgard & Six Sigma |
 | 🟢 | Uji Profisiensi (PME) | `lis-pme` | Kalkulasi Z-Score uji profisiensi eksternal ISO 15189 |
 
-**Bio-Bank & Arsip**
+**Riwayat & Arsip**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟢 | Rak Penyimpanan Spesimen | `lis-sample-archive` | Manajemen slot freezer -20°C & retrieval add-on test |
-| 🟢 | Riwayat Hasil Kumulatif | `lab-report` | Tren analit longitudinal & riwayat kumulatif pasien |
+| 🟢 | Riwayat & Tren Hasil | `lab-report` | Tren analit longitudinal & riwayat kumulatif pasien |
+| 🟢 | Penyimpanan Sampel | `lis-sample-archive` | Manajemen slot freezer -20°C & retrieval add-on test |
 
-**Master Data & Konfigurasi**
-
-| | Menu | Halaman | Keterangan |
-|---|---|---|---|
-| 🟢 | Reference Range Matrix | `refrange` | Nilai rujukan multi-tier per usia, gender, dan metode |
-| 🟢 | Katalog Tes & LOINC/UCUM | `product` | Master analit & pemetaan standar LOINC OBX-3 / UCUM OBX-6 |
-| 🟢 | Panel & Paket Pemeriksaan | `package` | Konfigurasi profil panel organ, hemostasis, dan MCU |
-| 🟢 | Inventori Reagen & BHP | `inventory` | Logistik reagen, lot number, expired date & suhu simpan |
-| 🟢 | Rujukan Laboratorium | `referral` | Outsource spesimen ke lab rujukan & rekonsiliasi |
-| 🟢 | Ekspor Standar LOINC | `catalog-export` | Generator dataset LIS-ready dalam format CSV/TSV |
-| 🟢 | Konfigurasi LIS & Gateway | `lis-settings` | Profil instansi, DPJP Sp.PK, critical limits & installer service :9999 |
-
-**Pusat Bantuan & Panduan SOP**
+**Katalog & Persediaan**
 
 | | Menu | Halaman | Keterangan |
 |---|---|---|---|
-| 🟢 | Help Desk & Panduan Alur LIS | `lis-helpdesk` | Panduan interaktif end-to-end, SOP tiap menu & troubleshooting laboratorium |
+| 🟢 | Katalog Pemeriksaan | `product` | Master analit & pemetaan standar LOINC OBX-3 / UCUM OBX-6 |
+| 🟢 | Panel & Paket | `package` | Konfigurasi profil panel organ, hemostasis, dan MCU |
+| 🟢 | Nilai Rujukan | `refrange` | Nilai rujukan multi-tier per usia, gender, dan metode |
+| 🟢 | Stok Reagen & Bahan | `inventory` | Logistik reagen, lot number, expired date & suhu simpan |
+| 🟢 | Ekspor Katalog | `catalog-export` | Generator dataset LIS-ready dalam format CSV/TSV |
+
+**Pengaturan & Bantuan**
+
+| | Menu | Halaman | Keterangan |
+|---|---|---|---|
+| 🟢 | Koneksi Alat | `lis-analyzer` | Konfigurasi protokol ASTM E1381/E1394 & channel mapping |
+| 🟢 | Pengaturan Laboratorium | `lis-settings` | Profil instansi, DPJP Sp.PK, critical limits & installer service :9999 |
+| 🟢 | Panduan & Bantuan | `lis-helpdesk` | Panduan interaktif end-to-end, SOP tiap menu & troubleshooting laboratorium |
 
 ---
 

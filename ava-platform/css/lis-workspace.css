@@ -1,0 +1,32 @@
+/* OWNED_BY: ava. Presentation only; clinical status colors remain unchanged. */
+body.lis-workspace-page .sidebar-rail {
+  background: linear-gradient(165deg, #102a43 0%, #0a1e32 100%);
+  border-right: 1px solid rgba(148,163,184,.18);
+}
+body.lis-workspace-page .sidebar-main-btn { min-height: 48px; }
+body.lis-workspace-page .sidebar-main-label { font-size: 12px; line-height: 1.45; white-space: normal; }
+body.lis-workspace-page .sidebar-main-btn.active-group {
+  background: rgba(45,212,191,.13); color: #b9f5ec;
+  box-shadow: inset 3px 0 #5eead4;
+}
+body.lis-workspace-page .topbar { border-bottom: 1px solid var(--border); box-shadow: 0 3px 16px rgba(15,23,42,.04); }
+body.lis-workspace-page .topbar-title { font-size: 16px; letter-spacing: -.025em; }
+body.lis-workspace-page .navigation-context.direct-menu { width: min(480px, calc(100vw - var(--rail-w))); }
+body.lis-workspace-page .navigation-context.direct-menu .navigation-context-body { grid-template-columns: minmax(0, 1fr); }
+body.lis-workspace-page .navigation-context.direct-menu .navigation-context-services { display: none; }
+body.lis-workspace-page .navigation-context-head { background: linear-gradient(120deg,#102a43,#164e57); border-bottom-color: #5eead4; }
+body.lis-workspace-page .navigation-context-modules { background: var(--surface, var(--white)); padding: 20px; }
+body.lis-workspace-page .navigation-module-list { gap: 8px; }
+body.lis-workspace-page .navigation-module-item { padding: 14px; min-height: 72px; border-color: var(--border); border-radius: 12px; }
+body.lis-workspace-page .navigation-module-item-copy strong { white-space: normal; font-size: 14px; line-height: 1.4; }
+body.lis-workspace-page .navigation-module-item-copy small { font-size: 12px; line-height: 1.5; display: block; }
+body.lis-workspace-page .navigation-module-item:hover,
+body.lis-workspace-page .navigation-module-item.active { background: var(--bg2); border-color: var(--teal); }
+body.lis-workspace-page .navigation-context-module-head > span { color: var(--text3); background: var(--bg2); font-size: 11px; }
+body.lis-workspace-page .navigation-context-module-head h3 { font-size: 17px; }
+body.lis-workspace-page .navigation-module-item:focus-visible,
+body.lis-workspace-page .sidebar-main-btn:focus-visible { outline: 2px solid var(--teal2); outline-offset: 3px; }
+@media (max-width: 767px) {
+  body.lis-workspace-page .navigation-context.direct-menu { width: 100vw; }
+  body.lis-workspace-page .navigation-context-modules { padding: 16px; }
+}

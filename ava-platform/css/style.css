@@ -2676,6 +2676,23 @@ body.admission-workspace-page .main-content {
 .admission-form-content .form-row { gap: 10px; }
 .admission-form-content > #af-tab-content-patient > div:first-child { padding: 9px 10px !important; margin-bottom: 10px !important; }
 .admission-form-content > #af-tab-content-patient > div[style*="display:flex"] { gap: 12px !important; }
+.admission-mode-context { display: grid; gap: 9px; margin: 0 0 10px; padding: 10px; background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--teal); border-radius: 8px; }
+.admission-mode-context > div:first-child { display: grid; gap: 2px; }
+.admission-mode-context strong { color: var(--navy); font-size: 11.5px; }
+.admission-mode-context small { color: var(--text3); font-size: 10px; line-height: 1.35; }
+.admission-mode-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.admission-mode-fields .form-group { min-width: 0; margin: 0; }
+.admission-mode-fields .form-group > span { display: block; margin-bottom: 4px; color: var(--text2); font-size: 10.5px; font-weight: 700; }
+.admission-mode-fields input,
+.admission-mode-fields select { width: 100%; min-height: 33px; padding: 7px 9px !important; }
+.admission-service-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 8px; }
+.admission-service-toolbar > div { display: flex; flex: 0 0 auto; gap: 6px; }
+.admission-service-toolbar span { max-width: 440px; color: var(--text3); font-size: 10px; line-height: 1.35; text-align: right; }
+.admission-service-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+.admission-service-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 11px; }
+.admission-service-table th { color: var(--text3); background: var(--bg2); font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.admission-kit-check { display: inline-flex; align-items: center; gap: 4px; margin: 0 !important; color: var(--text2); font-size: 10px !important; font-weight: 700; white-space: nowrap; }
+.admission-kit-check input { width: 14px; height: 14px; padding: 0 !important; }
 .admission-form-footer { display: flex; justify-content: flex-end; gap: 8px; margin: 16px -16px -14px; padding: 11px 16px; background: var(--bg2); border-top: 1px solid var(--border); }
 .admission-report-workspace { max-width: 1100px; min-height: calc(100vh - 28px); margin: 0 auto; color: var(--text); }
 .admission-report-surface { padding: 16px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
@@ -2693,6 +2710,7 @@ body.admission-workspace-page .main-content {
   .admission-form-workspace-head { flex-wrap: wrap; }
   .admission-form-heading { order: 3; flex-basis: 100%; }
   .admission-form-layout { grid-template-columns: 148px minmax(0, 1fr); gap: 10px; }
+  .admission-mode-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admission-report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 768px) {
@@ -2711,6 +2729,9 @@ body.admission-workspace-page .main-content {
   .admission-form-tabs button { flex: 0 0 auto; min-height: 42px; padding: 7px 9px; border-radius: 0; border-bottom: 2px solid transparent; }
   .admission-form-tabs button.active { background: transparent; border-color: transparent transparent var(--teal); box-shadow: none; }
   .admission-tab-icon { width: 25px; height: 25px; }
+  .admission-mode-fields { grid-template-columns: 1fr; }
+  .admission-service-toolbar { align-items: flex-start; flex-direction: column; }
+  .admission-service-toolbar span { max-width: none; text-align: left; }
   .admission-form-footer { margin-right: -12px; margin-bottom: -12px; margin-left: -12px; padding-right: 12px; padding-left: 12px; }
 }
 @media (max-width: 460px) {

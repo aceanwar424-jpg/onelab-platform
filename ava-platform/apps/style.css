@@ -301,7 +301,7 @@ th {
   border-radius: 4px;
 }
 
-/* Phase Panels */
+/* Phase & View Panels */
 .phase-panel {
   display: none;
   flex-direction: column;
@@ -309,6 +309,30 @@ th {
 
 .phase-panel.active {
   display: flex;
+}
+
+.view-panels-wrapper {
+  width: 100%;
+  position: relative;
+  min-height: calc(100vh - 70px);
+}
+
+.view-panel {
+  display: none !important;
+  padding: 24px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.view-panel.active {
+  display: block !important;
+  animation: fadeInView 0.25s ease-in-out;
+}
+
+@keyframes fadeInView {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Buttons */

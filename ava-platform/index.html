@@ -9,8 +9,9 @@
      query pertama. Hanya petunjuk browser — tidak mengubah perilaku apa pun. -->
 <link rel="preconnect" href="https://rmyqzyfvlmjxtatpctks.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://rmyqzyfvlmjxtatpctks.supabase.co">
-<link rel="stylesheet" href="css/style.css?v=20260905-his-shell">
+<link rel="stylesheet" href="css/style.css?v=20260906-admission-flow">
 <link rel="stylesheet" href="css/dashboard.css?v=20260719s">
+<link rel="stylesheet" href="css/lis-workspace.css?v=20260906">
 <!-- Hanya URL dan anon key per-deployment; bukan secret server. -->
 <script src="/api/runtime-config.js" onerror="void 0"></script>
 <script defer src="js/core/rbacService.js"></script>
@@ -378,13 +379,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   // umum tetap melewati router/RBAC; hanya target pintasannya yang berubah.
   function sesuaikanChromeRuangKerja(ruang) {
     const opsi = {
-      lis:      { halaman: 'lis-settings', label: 'Pengaturan & LIS Connector', tag: 'ISO 15189:2022' },
+      lis:      { halaman: 'lis-settings', label: 'Pengaturan Laboratorium', tag: 'AVA LAB / LIS' },
       his:      { halaman: 'settings',     label: 'Pengaturan Sistem HIS',     tag: 'HIS / RME' },
       tech:     { halaman: 'settings',     label: 'Pengaturan Platform',       tag: 'AVA TECH' },
       wellness: { halaman: 'settings',     label: 'Pengaturan Wellness',       tag: 'WELLNESS' },
       ops:      { halaman: 'settings',     label: 'Pengaturan Holding',        tag: 'AVA GLOBAL' }
     }[ruang] || { halaman: 'settings', label: 'Pengaturan Sistem', tag: 'AVA ENGINE' };
 
+    document.body.classList.toggle('lis-workspace-page', ruang === 'lis');
+    const contextLabel = document.querySelector('.navigation-context-heading p');
+    if (contextLabel) contextLabel.textContent = ruang === 'lis' ? 'RUANG KERJA LABORATORIUM' : 'NAVIGASI ' + ruang.toUpperCase();
+    if (ruang === 'lis') document.title = 'AVA Lab — Laboratorium';
     const tombol = document.getElementById('workspace-settings-btn');
     const label = document.getElementById('workspace-settings-label');
     const tag = document.getElementById('sidebar-brand-tag');
@@ -948,6 +953,10 @@ function gambarRail(ruang) {
   const currentPage = window.currentPage || '';
 
   const GROUP_ICONS = {
+    'Pendaftaran & Sampel': '🩸', 'Pemeriksaan': '🔬',
+    'Validasi & Hasil': '✅', 'Mutu Laboratorium': '📊',
+    'Riwayat & Arsip': '🗂️', 'Katalog & Persediaan': '🧪',
+    'Pengaturan & Bantuan': '⚙️',
     'Alur Pasien': '🏥', 'Pelayanan Klinis': '🩺',
     'Fasilitas & Antrean': '🎟️', 'Master Klinis': '🗂️',
     'Administrasi & Kepatuhan': '⚖️', 'Operasional Klinik': '📊',
@@ -1230,6 +1239,9 @@ function renderNavigationContext(groupId, preferredServiceIndex) {
     ? Math.max(0, Math.min(preferredServiceIndex, group.services.length - 1))
     : activeNavigationServiceIndex(group);
   const service = group.services[serviceIndex] || { name: 'Menu', items: [] };
+  // LIS has a single direct list per workflow; omit the redundant "Menu" column.
+  document.getElementById('navigation-context')?.classList.toggle('direct-menu',
+    document.body.classList.contains('lis-workspace-page') && group.services.length === 1);
   window.activeNavigationContext = { groupId, serviceIndex };
 
   document.getElementById('navigation-context-icon').textContent = group.icon;

@@ -75,6 +75,13 @@
 - [x] Label tahap yang tidak diperlukan dihapus dan form responsif dipertahankan.
 - [x] Menu, renderer, keamanan, dan preview lintas kelompok diverifikasi.
 
+## Penyelesaian End-to-End Admission — 6 September 2026
+
+- [ ] Petakan kontrak dan field per jenis registrasi.
+- [ ] Bedakan konteks, validasi, dan ringkasan tiap alur Admission.
+- [ ] Rapikan daftar, form, pemilih layanan, pembayaran, kasir, laporan, dan handoff antrean.
+- [ ] Uji renderer serta transisi tanpa menyimpan transaksi.
+
 ## Web publik AVA Health — 2026-09-05
 - [x] Audit sumber portal, pemetaan domain, dan perubahan pengguna.
 - [ ] Rombak portal menjadi profil perusahaan dengan detail brand dan katalog publik.
@@ -132,3 +139,8 @@
 - [x] Ringkasan serta tautan di Tentang AVA; struktur multipage tetap terjaga.
 - [x] Validasi 32 halaman, link, ID/H1, rebuild deterministik, kalkulator dan HTTP.
 - [ ] Foto founder: akan diberikan pengguna.
+
+## Audit LIS — 2026-09-06
+- [x] Audit menu sumber dan halaman masuk produksi.
+- [ ] Rapikan kelompok, label, judul navigasi dan tema LIS.
+- [ ] Verifikasi rute, generator, sintaks dan catat keterbatasan audit.

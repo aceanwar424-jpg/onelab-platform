@@ -191,7 +191,9 @@ async function navigate(page, params={}) {
   if (typeof syncFlyoutToPage === 'function') syncFlyoutToPage(resolvedPage);
 
   const titleEl = document.getElementById('topbar-title');
-  if (titleEl) titleEl.textContent = PAGE_TITLES[resolvedPage] || resolvedPage;
+  const lisTitle = document.body.classList.contains('lis-workspace-page')
+    ? window.modulePickerItems?.find(item => item.page === resolvedPage)?.label : null;
+  if (titleEl) titleEl.textContent = lisTitle || PAGE_TITLES[resolvedPage] || resolvedPage;
 
   if (window.innerWidth < 768) {
     if (typeof window.setSidebarOpen === 'function') window.setSidebarOpen(false);

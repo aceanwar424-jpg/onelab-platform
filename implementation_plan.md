@@ -203,6 +203,31 @@ Membuat ruang `his.avahealth.sbs` dapat dipakai secara konsisten untuk alur HIS 
   pengujian. Perubahan skema atau integrasi tetap memerlukan checkpoint
   pemilik database.
 
+## Penyelesaian End-to-End Admission — 6 September 2026
+
+### Urutan implementasi
+
+1. [ ] Petakan ulang enam alur Admission ke data dan kontrak yang sudah ada:
+   OPD, layanan langsung, medical kit, paket, langganan, dan pemakaian paket.
+2. [ ] Buat tiap alur memiliki konteks layanan, field wajib, validasi pra-simpan,
+   serta ringkasan transaksi yang berbeda tanpa menambah kolom basis data.
+3. [ ] Rapikan workspace daftar, form, pemilih layanan/paket, pembayaran,
+   kasir, laporan, dan handoff antrean dengan komponen kompak responsif.
+4. [ ] Tambahkan pemeriksaan konsistensi mode pada UI dan payload, serta jalur
+   aman bila data master atau layanan pendukung belum tersedia.
+5. [ ] Uji tiap mode hingga renderer/validasi/transisi dapat dicapai tanpa
+   menyimpan transaksi; jalankan audit menu, sintaks, dan keamanan.
+
+### Implikasi IP & Kepatuhan
+
+- Tidak ada perubahan skema `admissions`, tabel master, nomor antrean, atau
+  integrasi eksternal. Penyimpanan tetap memakai kontrak yang sudah ada.
+- Uji dilakukan pada layar kosong atau data sintetis lokal; tidak membuat,
+  mengubah, menghapus, mengekspor, atau mencetak data pasien produksi.
+- Aturan klinis, diskon, penjamin, dan penebusan hak paket yang membutuhkan
+  keputusan bisnis/DB tetap diberi validasi UI. Perubahan aturan otoritatif
+  atau migrasi tabel memerlukan checkpoint pemilik database.
+
 ## Perombakan web publik AVA Health — 2026-09-05
 Rencana: (1) audit portal dan routing (≤1 jam), (2) bangun profil publik responsif, detail brand, katalog, sejarah, sertifikasi, kontak (≤1 jam), (3) validasi tautan/aset/routing dan preview (≤1 jam).
 Arah visual: editorial kesehatan, putih dan navy, aksen emerald, tipografi besar, enam brand sebagai portofolio bisnis. Pertahankan stack statis dan deployment Vercel yang ada.
@@ -228,3 +253,8 @@ OWNED_BY: ava. Sumber: instruksi terbaru pemilik, AVA HEALTH SOLUTION THE FUTURE
 Rencana: perluas narasi dari dokumen korporat dan discovery (≤1 jam), buat halaman sejarah serta founder dengan ruang foto (≤1 jam), verifikasi halaman dan tautan (≤1 jam).
 ### Implikasi IP & Kepatuhan
 OWNED_BY: ava. Founder/Owner/CEO: Ace Anwar sesuai dokumen induk dan instruksi pemilik. Gunakan pengalaman operasional lab, informatika dan mutu yang tersedia. Tidak mengarang pendidikan, tanggal berdiri, pengalaman pasien, pencapaian, kutipan pribadi atau timeline bertanggal. Sejarah ditulis sebagai latar dan perkembangan gagasan; rencana ekspansi dipisahkan dari status saat ini. Ruang foto disengaja sesuai permintaan, tanpa foto orang pengganti atau URL gambar rusak. Konten publik tidak memuat formula/proyeksi internal.
+
+## Audit dan perapihan LIS — 2026-09-06
+Rencana: audit navigasi dan akses produksi (≤1 jam), rapikan label/pengelompokan serta tema khusus LIS (≤1 jam), periksa rute, generator, dan sintaks (≤1 jam).
+### Implikasi IP & Kepatuhan
+OWNED_BY: ava. Perubahan presentasi aplikasi sendiri, tanpa pemindahan aset ke produk generik. Tidak mengubah ID menu, RBAC, skema, nilai rujukan, aturan QC, validasi klinis atau integrasi produksi. Akses produksi berhenti pada halaman login; pengujian kode lokal tanpa data pasien. Istilah klinis penting dipertahankan; rincian teknis tetap ada dalam deskripsi dan konfigurasi.
