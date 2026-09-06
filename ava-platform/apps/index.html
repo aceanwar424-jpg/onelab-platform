@@ -2433,6 +2433,669 @@
         </div>
       </div>
 
+      <!-- ──────── VIEW: AVA WELLNESS HUB MAIN ──────── -->
+      <div id="ava-wellness-hub-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🌿 AVA Wellness &amp; Bio-Hacking Suite</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Optimasi Gaya Hidup, Kinerja Fisik &amp; Bio-Age Berdasarkan Biomarker Biologis Anda</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span id="wearable-hub-status-badge" class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700; padding:6px 12px; border-radius:20px; font-size:11px;">⌚ Apple Watch &amp; Garmin Active</span>
+            <button class="btn btn-teal" onclick="syncWearableDevice('all')" style="padding:8px 14px; font-size:12px; font-weight:700;">🔄 Sync Perangkat Real-Time</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+          <!-- Modul 1: Step & Run Challenge -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #10b981; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#059669; letter-spacing:0.5px;">MODUL 1 &bull; LIFESTYLE FIT</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">🏃 Step &amp; Run Club Challenge</h4>
+                </div>
+                <span style="background:#ecfdf5; color:#047857; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">84.5% Goal</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Tantangan langkah harian &amp; lari terintegrasi wearable dengan sistem reward AVA Coins.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                  <span style="color:#64748b; font-weight:600;">Langkah Hari Ini</span>
+                  <strong style="color:#0f172a;" id="hub-step-count">8.450 / 10.000 steps</strong>
+                </div>
+                <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                  <div id="hub-step-bar" style="width:84.5%; height:100%; background:linear-gradient(90deg, #10b981, #059669); border-radius:4px;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#64748b; margin-top:6px;">
+                  <span id="hub-cal-burned">🔥 412 kcal</span>
+                  <span id="hub-distance">📍 6.2 km</span>
+                  <span>🪙 +150 AVA Coins</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-run-challenge-view', 'Step &amp; Run Challenge')" style="width:100%; padding:10px; font-size:12px; font-weight:700;">Buka Step Challenge &gt;</button>
+          </div>
+
+          <!-- Modul 2: NutriCo Calorie & Diet Planner -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #f59e0b; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#d97706; letter-spacing:0.5px;">MODUL 2 &bull; DIET PRESISI</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">🥗 NutriCo Calorie &amp; Diet Planner</h4>
+                </div>
+                <span style="background:#fffbeb; color:#b45309; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">Sesuai Lab HbA1c</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Pengaturan energi &amp; makronutrisi harian berdasarkan profil biomarker laboratorium darah.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                  <span style="color:#64748b; font-weight:600;">Budget Kalori Harian</span>
+                  <strong style="color:#0f172a;">1.420 / 2.100 kcal</strong>
+                </div>
+                <div style="display:flex; gap:4px; margin-bottom:6px;">
+                  <div style="flex:1; background:#e0e7ff; padding:6px; border-radius:6px; text-align:center;">
+                    <span style="font-size:9px; color:#4338ca; display:block; font-weight:700;">PROTEIN</span>
+                    <strong style="font-size:11px; color:#1e1b4b;">120g / 150g</strong>
+                  </div>
+                  <div style="flex:1; background:#fef3c7; padding:6px; border-radius:6px; text-align:center;">
+                    <span style="font-size:9px; color:#b45309; display:block; font-weight:700;">KARBO</span>
+                    <strong style="font-size:11px; color:#78350f;">160g / 210g</strong>
+                  </div>
+                  <div style="flex:1; background:#fee2e2; padding:6px; border-radius:6px; text-align:center;">
+                    <span style="font-size:9px; color:#b91c1c; display:block; font-weight:700;">LEMAK</span>
+                    <strong style="font-size:11px; color:#7f1d1d;">42g / 60g</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-nutrico-view', 'NutriCo Calorie Planner')" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:#f59e0b; border-color:#f59e0b; color:white;">Buka NutriCo Planner &gt;</button>
+          </div>
+
+          <!-- Modul 3: Sleep & Circadian Optimizer -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #6366f1; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#4f46e5; letter-spacing:0.5px;">MODUL 3 &bull; CIRCADIAN RHYTHM</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">🌙 Sleep &amp; Circadian Optimizer</h4>
+                </div>
+                <span style="background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">Skor 88 (Optimal)</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Optimasi fase tidur lelap (Deep/REM) dan kalibrasi jam biologis melatonin tubuh.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                  <span style="color:#64748b;">Durasi Tidur Semalam</span>
+                  <strong style="color:#4f46e5;">7 Jam 42 Menit</strong>
+                </div>
+                <div style="font-size:10.5px; color:#64748b;">
+                  <span>Deep Sleep: 2j 15m (29%) &bull; Melatonin Window: 22:15 WIB</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-sleep-optimizer-view', 'Sleep Optimizer')" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:#6366f1; border-color:#6366f1; color:white;">Atur Ritme Tidur &gt;</button>
+          </div>
+
+          <!-- Modul 4: Mindfulness & HRV Stress Biofeedback -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #8b5cf6; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#7c3aed; letter-spacing:0.5px;">MODUL 4 &bull; AUTONOMIC BALANCE</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">🧘 Mindfulness &amp; HRV Stress</h4>
+                </div>
+                <span style="background:#f3e8ff; color:#6b21a8; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">HRV: 24 ms (Rileks)</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Monitoring ketahanan sistem saraf via Heart Rate Variability &amp; guided biofeedback breathing.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                  <span style="color:#64748b;">Level Stres Otonom</span>
+                  <strong style="color:#7c3aed;">18% (Stres Rendah)</strong>
+                </div>
+                <div style="font-size:10.5px; color:#64748b;">
+                  <span>Rekomendasi: 5 Menit Box Breathing (4-7-8 Technique)</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-hrv-stress-view', 'HRV Stress Biofeedback')" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:#8b5cf6; border-color:#8b5cf6; color:white;">Mulai Biofeedback &gt;</button>
+          </div>
+
+          <!-- Modul 5: Smart Hydration Tracker -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #06b6d4; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#0891b2; letter-spacing:0.5px;">MODUL 5 &bull; CELLULAR HYDRATION</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">💧 Smart Hydration Tracker</h4>
+                </div>
+                <span style="background:#cffafe; color:#155e75; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">70% Target</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Monitoring asupan cairan &amp; elektrolit seluler berdasarkan suhu lingkungan &amp; latihan.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                  <span style="color:#64748b; font-weight:600;">Asupan Air Hari Ini</span>
+                  <strong style="color:#0f172a;">2.100 / 3.000 ml</strong>
+                </div>
+                <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                  <div style="width:70%; height:100%; background:linear-gradient(90deg, #06b6d4, #0891b2); border-radius:4px;"></div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-hydration-view', 'Smart Hydration Tracker')" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:#06b6d4; border-color:#06b6d4; color:white;">Log Asupan Air &gt;</button>
+          </div>
+
+          <!-- Modul 6: Hormonal & Metabolic Syncing -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #ec4899; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#db2777; letter-spacing:0.5px;">MODUL 6 &bull; HORMONAL OPTIMIZATION</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">⚖️ Hormonal &amp; Metabolic Syncing</h4>
+                </div>
+                <span style="background:#fce7f3; color:#9d174d; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">Fase Folikular (Hari 8)</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Sinkronisasi jenis latihan &amp; nutrisi mikro sesuai fase fluktuasi hormon tubuh.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                  <span style="color:#64748b;">Status Energi &amp; Estrogen</span>
+                  <strong style="color:#db2777;">Peak Energy Phase</strong>
+                </div>
+                <div style="font-size:10.5px; color:#64748b;">
+                  <span>Latihan Disarankan: Heavy Lifting, High Intensity Cardio</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-hormonal-sync-view', 'Hormonal Syncing')" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:#ec4899; border-color:#ec4899; color:white;">Lihat Panduan Fase &gt;</button>
+          </div>
+
+          <!-- Modul 7: Bio-Age 90-Day Quest -->
+          <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-left:4px solid #14b8a6; border-radius:14px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                  <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:#0d9488; letter-spacing:0.5px;">MODUL 7 &bull; LONGEVITY PROTOCOL</span>
+                  <h4 style="font-size:15px; font-weight:800; color:#0f2963; margin-top:2px;">🚀 Bio-Age 90-Day Quest</h4>
+                </div>
+                <span style="background:#ccfbf1; color:#115e59; font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px;">Hari Ke-34 / 90</span>
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin-bottom:14px;">Program 90 hari bio-hacking terpadu untuk menurunkan usia biologis sel &amp; organ.</p>
+              <div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                  <span style="color:#64748b;">Pembalikan Usia Biologis</span>
+                  <strong style="color:#0d9488;">-2.4 Tahun Muda</strong>
+                </div>
+                <div style="font-size:10.5px; color:#64748b;">
+                  <span>Misi Hari Ini: 3 / 4 Selesai &bull; Biomarker Target: HbA1c &amp; Lipid</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-teal" onclick="showView('wellness-bioage-quest-view', 'Bio-Age 90-Day Quest')" style="width:100%; padding:10px; font-size:12px; font-weight:700;">Lanjutkan Quest 90 Hari &gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 1 - STEP & RUN CLUB CHALLENGE ──────── -->
+      <div id="wellness-run-challenge-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🏃 Step &amp; Run Club Challenge (Wearable Sync)</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Tantangan langkah harian, lari maraton komunitas &amp; reward AVA Coins.</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <!-- Devices Connection Bar -->
+        <div class="glass-card" style="padding:16px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; margin-bottom:20px;">
+          <div style="font-size:12px; font-weight:800; color:#0f2963; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+            <span>⌚ Status Koneksi Perangkat Wearable &amp; App Kesehatan</span>
+            <span style="font-size:11px; color:#059669; font-weight:700;">Live Sync 17:30 WIB</span>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn" onclick="syncWearableDevice('Apple Health')" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#0f172a; padding:8px 12px; font-size:11.5px; font-weight:700; border-radius:8px; display:flex; align-items:center; gap:6px;">
+              <span>🍎 Apple Health</span> <span class="badge" style="background:#dcfce7; color:#166534; font-size:9.5px; padding:2px 6px;">CONNECTED</span>
+            </button>
+            <button class="btn" onclick="syncWearableDevice('Google Fit')" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#0f172a; padding:8px 12px; font-size:11.5px; font-weight:700; border-radius:8px; display:flex; align-items:center; gap:6px;">
+              <span>🏃 Google Fit</span> <span class="badge" style="background:#dcfce7; color:#166534; font-size:9.5px; padding:2px 6px;">CONNECTED</span>
+            </button>
+            <button class="btn" onclick="syncWearableDevice('Garmin Connect')" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#0f172a; padding:8px 12px; font-size:11.5px; font-weight:700; border-radius:8px; display:flex; align-items:center; gap:6px;">
+              <span>📡 Garmin Connect</span> <span class="badge" style="background:#e0f2fe; color:#0369a1; font-size:9.5px; padding:2px 6px;">SYNC NOW</span>
+            </button>
+            <button class="btn" onclick="syncWearableDevice('Fitbit')" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#0f172a; padding:8px 12px; font-size:11.5px; font-weight:700; border-radius:8px; display:flex; align-items:center; gap:6px;">
+              <span>⌚ Fitbit / Galaxy Watch</span> <span class="badge" style="background:#e2e8f0; color:#475569; font-size:9.5px; padding:2px 6px;">PAIR</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; align-items:start;">
+          <!-- Progress Today Dial -->
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px; text-align:center;">
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Pencapaian Langkah Hari Ini</span>
+            <h2 style="font-size:38px; font-weight:900; color:#10b981; margin:10px 0 4px 0;" id="run-view-steps">8.450</h2>
+            <p style="font-size:13px; color:#475569; font-weight:600; margin-bottom:16px;">Target Harian: 10.000 steps (Sisa 1.550 steps lagi!)</p>
+            
+            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:6px; overflow:hidden; margin-bottom:20px;">
+              <div id="run-view-bar" style="width:84.5%; height:100%; background:linear-gradient(90deg, #10b981, #059669); border-radius:6px;"></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; background:#f8fafc; padding:14px; border-radius:10px;">
+              <div>
+                <span style="font-size:10px; color:#64748b; font-weight:700; display:block;">JARAK</span>
+                <strong style="font-size:14px; color:#0f172a;" id="run-view-dist">6.2 km</strong>
+              </div>
+              <div>
+                <span style="font-size:10px; color:#64748b; font-weight:700; display:block;">KALORI</span>
+                <strong style="font-size:14px; color:#d97706;" id="run-view-cal">412 kcal</strong>
+              </div>
+              <div>
+                <span style="font-size:10px; color:#64748b; font-weight:700; display:block;">DURASI</span>
+                <strong style="font-size:14px; color:#4f46e5;">54 Menit</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-teal" onclick="simulateWearableAddSteps()" style="margin-top:16px; width:100%; padding:10px; font-size:12px; font-weight:800;">➕ Simulasi Tambah 1.000 Langkah (Simulasi Sensor)</button>
+          </div>
+
+          <!-- Active Challenges & Leaderboard -->
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+              <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">🏆 Challenge Aktif Minggu Ini</h4>
+              
+              <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <strong style="font-size:12.5px; color:#166534;">AVA 10K Weekend Sprint</strong>
+                  <span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:10px;">+200 AVA Coins</span>
+                </div>
+                <p style="font-size:11px; color:#365314; margin:0 0 8px 0;">Selesaikan 10.000 langkah dalam 24 jam untuk klaim voucher diskon lab 20%.</p>
+                <div style="font-size:11px; font-weight:700; color:#166534;">Progress: 8.450 / 10.000 (84.5%)</div>
+              </div>
+
+              <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <strong style="font-size:12.5px; color:#92400e;">Weekly 50K Marathon Club</strong>
+                  <span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700; font-size:10px;">+500 AVA Coins</span>
+                </div>
+                <p style="font-size:11px; color:#78350f; margin:0 0 8px 0;">Tantangan 50.000 langkah dalam seminggu bersama komunitas AVA.</p>
+                <div style="font-size:11px; font-weight:700; color:#92400e;">Progress: 34.200 / 50.000 (68.4%)</div>
+              </div>
+            </div>
+
+            <!-- Community Leaderboard -->
+            <div class="glass-card" style="padding:20px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+              <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">🥇 Leaderboard Komunitas AVA Hari Ini</h4>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fef9c3; border-radius:8px; border:1px solid #fde047;">
+                  <span style="font-size:12px; font-weight:800; color:#854d0e;">🥇 1. dr. Sinta Rahmawati</span>
+                  <strong style="font-size:12px; color:#854d0e;">12.450 steps</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f1f5f9; border-radius:8px; border:1px solid #cbd5e1;">
+                  <span style="font-size:12px; font-weight:800; color:#0f172a;">🥈 2. Ace Darojatun (Anda)</span>
+                  <strong style="font-size:12px; color:#059669;" id="leaderboard-user-steps">8.450 steps</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:8px;">
+                  <span style="font-size:12px; font-weight:600; color:#475569;">🥉 3. Maya Putri, S.Farm</span>
+                  <strong style="font-size:12px; color:#475569;">7.920 steps</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 2 - NUTRICO CALORIE & DIET PLANNER ──────── -->
+      <div id="wellness-nutrico-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🥗 NutriCo Calorie &amp; Diet Planner (Lab-Driven)</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Perencanaan Nutrisi &amp; Diet Berdasarkan Profil Lab Biomarker Darah</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <!-- Left: Calorie Budget & Macros -->
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <span style="font-size:11px; font-weight:800; color:#d97706; text-transform:uppercase; letter-spacing:0.5px;">Ringkasan Kalori Harian</span>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin:12px 0 8px 0;">
+              <h2 style="font-size:32px; font-weight:900; color:#0f2963; margin:0;">1.420 <span style="font-size:14px; font-weight:600; color:#64748b;">/ 2.100 kcal</span></h2>
+              <span style="font-size:13px; font-weight:700; color:#059669;">Sisa: 680 kcal</span>
+            </div>
+            <div style="width:100%; height:10px; background:#e2e8f0; border-radius:5px; overflow:hidden; margin-bottom:20px;">
+              <div style="width:67.6%; height:100%; background:linear-gradient(90deg, #f59e0b, #d97706); border-radius:5px;"></div>
+            </div>
+
+            <!-- Lab Recommendation Box -->
+            <div style="background:#fffbeb; border:1px solid #fcd34d; border-radius:12px; padding:14px; margin-bottom:20px;">
+              <div style="font-size:11.5px; font-weight:800; color:#92400e; margin-bottom:4px;">💡 Rekomendasi Diet Berdasarkan Lab Terakhir (HbA1c 5.4%)</div>
+              <p style="font-size:11px; color:#78350f; margin:0; line-height:1.5;">
+                Biomarker darah Anda berada dalam rentang normal. Tingkatkan konsumsi asupan serat larut (Oat, Biji Chia) dan pertahankan rasio protein 1.8g/kg BB untuk menjaga ketahanan massa otot.
+              </p>
+            </div>
+
+            <h4 style="font-size:13px; font-weight:800; color:#0f2963; margin-bottom:10px;">Distribusi Makronutrisi Hari Ini</h4>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                  <span style="color:#4338ca; font-weight:700;">Protein (120g / 150g)</span>
+                  <strong style="color:#1e1b4b;">80% Target</strong>
+                </div>
+                <div style="width:100%; height:6px; background:#e0e7ff; border-radius:3px; overflow:hidden;">
+                  <div style="width:80%; height:100%; background:#4338ca;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                  <span style="color:#b45309; font-weight:700;">Karbohidrat (160g / 210g)</span>
+                  <strong style="color:#78350f;">76% Target</strong>
+                </div>
+                <div style="width:100%; height:6px; background:#fef3c7; border-radius:3px; overflow:hidden;">
+                  <div style="width:76%; height:100%; background:#d97706;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                  <span style="color:#b91c1c; font-weight:700;">Lemak Sehat (42g / 60g)</span>
+                  <strong style="color:#7f1d1d;">70% Target</strong>
+                </div>
+                <div style="width:100%; height:6px; background:#fee2e2; border-radius:3px; overflow:hidden;">
+                  <div style="width:70%; height:100%; background:#dc2626;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Meal Log & AI Scanner -->
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin:0;">🍽️ Catatan Makanan Hari Ini</h4>
+              <button class="btn btn-teal" onclick="alert('Fitur AI Meal Scanner Camera Aktif! Foto piring Anda untuk hitung kalori otomatis.')" style="padding:6px 12px; font-size:11px; font-weight:700; background:#f59e0b; border-color:#f59e0b; color:white;">📸 AI Scan Makanan</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="padding:10px 14px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:12px; color:#0f172a; display:block;">🥞 Sarapan: Avocado Toast &amp; Telur Rebus</strong>
+                  <span style="font-size:10.5px; color:#64748b;">Protein 24g &bull; Karbo 35g &bull; Lemak 14g</span>
+                </div>
+                <span style="font-size:12px; font-weight:800; color:#d97706;">450 kcal</span>
+              </div>
+
+              <div style="padding:10px 14px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:12px; color:#0f172a; display:block;">🥗 Makan Siang: Salmon Bowl &amp; Quinoa</strong>
+                  <span style="font-size:10.5px; color:#64748b;">Protein 48g &bull; Karbo 65g &bull; Lemak 18g</span>
+                </div>
+                <span style="font-size:12px; font-weight:800; color:#d97706;">680 kcal</span>
+              </div>
+
+              <div style="padding:10px 14px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:12px; color:#0f172a; display:block;">🥜 Camilan: Greek Yogurt &amp; Kacang Almond</strong>
+                  <span style="font-size:10.5px; color:#64748b;">Protein 18g &bull; Karbo 15g &bull; Lemak 10g</span>
+                </div>
+                <span style="font-size:12px; font-weight:800; color:#d97706;">290 kcal</span>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; padding-top:14px; border-top:1px dashed #cbd5e1; display:flex; gap:8px;">
+              <input type="text" placeholder="Tambah nama makanan manual..." style="flex:1; padding:8px 12px; font-size:12px; border:1px solid #cbd5e1; border-radius:8px;">
+              <button class="btn btn-teal" onclick="alert('Makanan berhasil dicatat ke NutriCo Planner!')" style="padding:8px 14px; font-size:12px; font-weight:700;">+ Catat</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 3 - SLEEP & CIRCADIAN OPTIMIZER ──────── -->
+      <div id="wellness-sleep-optimizer-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🌙 Sleep &amp; Circadian Optimizer</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Optimasi Fase Tidur Lelap &amp; Jendela Waktu Jam Biologis Melatonin</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px; text-align:center;">
+            <span style="font-size:11px; font-weight:800; color:#4f46e5; text-transform:uppercase; letter-spacing:0.5px;">Skor Kualitas Tidur Semalam</span>
+            <h1 style="font-size:52px; font-weight:900; color:#4f46e5; margin:10px 0 0 0;">88 <span style="font-size:16px; color:#64748b;">/ 100</span></h1>
+            <span class="badge" style="background:#e0e7ff; color:#3730a3; font-weight:800; padding:4px 12px; border-radius:20px; font-size:11px;">OPTIMAL RECOVERY</span>
+            
+            <div style="margin:20px 0; background:#f8fafc; padding:16px; border-radius:12px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                <span style="color:#64748b;">Total Durasi Tidur:</span>
+                <strong style="color:#0f172a;">7 Jam 42 Menit</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                <span style="color:#64748b;">Deep Sleep (Pemulihan Sel):</span>
+                <strong style="color:#059669;">2 Jam 15 Menit (29%)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                <span style="color:#64748b;">REM Sleep (Fungsi Memori):</span>
+                <strong style="color:#4f46e5;">1 Jam 45 Menit (23%)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:#64748b;">Efisiensi Tidur:</span>
+                <strong style="color:#0f172a;">93%</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-teal" onclick="alert('Perangkat Wearable Sleep Tracker Telah Terhubung!')" style="width:100%; padding:10px; font-size:12px; font-weight:800; background:#6366f1; border-color:#6366f1; color:white;">🔄 Re-sync Sleep Sensor Data</button>
+          </div>
+
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:14px;">⏰ Panduan Jam Biologis Sirkadian Hari Ini</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="padding:12px; background:#fef9c3; border-radius:10px; border:1px solid #fde047;">
+                <strong style="font-size:12px; color:#854d0e; display:block;">☀️ 07:00 - 07:30 WIB &bull; Morning Sun Exposure</strong>
+                <span style="font-size:11px; color:#713f12;">Paparan sinar matahari pagi untuk mengunci ritme kortisol &amp; sintesis vitamin D.</span>
+              </div>
+
+              <div style="padding:12px; background:#f0fdf4; border-radius:10px; border:1px solid #bbf7d0;">
+                <strong style="font-size:12px; color:#166534; display:block;">☕ 14:00 WIB &bull; Cut-Off Kafein</strong>
+                <span style="font-size:11px; color:#14532d;">Stop konsumsi kopi agar tidak memblokir reseptor adenosine malam hari.</span>
+              </div>
+
+              <div style="padding:12px; background:#e0e7ff; border-radius:10px; border:1px solid #c7d2fe;">
+                <strong style="font-size:12px; color:#3730a3; display:block;">🌌 22:15 WIB &bull; Melatonin Natural Window</strong>
+                <span style="font-size:11px; color:#1e1b4b;">Matikan layar gadget &amp; aktifkan mode pencahayaan redup untuk memicu tidur lelap.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 4 - MINDFULNESS & HRV STRESS BIOFEEDBACK ──────── -->
+      <div id="wellness-hrv-stress-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🧘 Mindfulness &amp; HRV Stress Biofeedback</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Monitoring Ketahanan Saraf Otonom via Heart Rate Variability &amp; Guided Breathwork</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px; text-align:center;">
+            <span style="font-size:11px; font-weight:800; color:#7c3aed; text-transform:uppercase; letter-spacing:0.5px;">Indikator Ketahanan Stres Saraf (HRV)</span>
+            <h2 style="font-size:42px; font-weight:900; color:#7c3aed; margin:10px 0 4px 0;">24 <span style="font-size:18px; color:#64748b;">ms</span></h2>
+            <span class="badge" style="background:#f3e8ff; color:#6b21a8; font-weight:800; padding:4px 12px; border-radius:20px; font-size:11px; margin-bottom:16px;">SISTEM SARAF RILES &amp; SIAP AMBIL BEBAN</span>
+            
+            <div style="background:#f8fafc; padding:16px; border-radius:12px; text-align:left; margin:16px 0;">
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                <span style="color:#64748b;">Level Stres Otonom:</span>
+                <strong style="color:#059669;">18% (Rendah)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:#64748b;">Resting Heart Rate (RHR):</span>
+                <strong style="color:#0f172a;">58 bpm</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-teal" onclick="startGuidedBreathingSession()" style="width:100%; padding:12px; font-size:13px; font-weight:800; background:#8b5cf6; border-color:#8b5cf6; color:white;">🫁 Mulai 5-Min Guided Box Breathing (4-7-8)</button>
+          </div>
+
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">📈 Tren HRV &amp; Biofeedback Insight</h4>
+            <p style="font-size:11.5px; color:#475569; line-height:1.5; margin-bottom:16px;">
+              Variabilitas Detak Jantung (HRV) Anda berada pada nilai puncak 24 ms pagi ini. Hal ini menunjukkan dominasi sistem saraf parasimpatik (pemulihan &amp; pencernaan), yang ideal untuk mengambil keputusan penting dan latihan fisik intensitas tinggi.
+            </p>
+
+            <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px; padding:14px;">
+              <strong style="font-size:12px; color:#5b21b6; display:block; margin-bottom:4px;">🎯 Target Biofeedback Mingguan</strong>
+              <span style="font-size:11px; color:#4c1d95;">Selesaikan 3 sesi breathwork minggu ini untuk mengunci +50 AVA Loyalty Points.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 5 - SMART HYDRATION TRACKER ──────── -->
+      <div id="wellness-hydration-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">💧 Smart Hydration Tracker</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Monitoring Asupan Cairan Seluler &amp; Elektrolit Presisi</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px; text-align:center;">
+            <span style="font-size:11px; font-weight:800; color:#0891b2; text-transform:uppercase; letter-spacing:0.5px;">Pencapaian Hidrasi Hari Ini</span>
+            <h2 style="font-size:42px; font-weight:900; color:#0891b2; margin:10px 0 4px 0;" id="water-log-val">2.100 <span style="font-size:16px; color:#64748b;">/ 3.000 ml</span></h2>
+            <p style="font-size:12px; color:#475569; font-weight:600; margin-bottom:16px;">(70% Terpenuhi &bull; Sisa 900 ml lagi)</p>
+
+            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:6px; overflow:hidden; margin-bottom:20px;">
+              <div id="water-log-bar" style="width:70%; height:100%; background:linear-gradient(90deg, #06b6d4, #0891b2); border-radius:6px;"></div>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+              <button class="btn btn-teal" onclick="addWaterIntake(250)" style="padding:10px 16px; font-size:12px; font-weight:700; background:#06b6d4; border-color:#06b6d4; color:white;">+ 250 ml Air Putih</button>
+              <button class="btn btn-teal" onclick="addWaterIntake(350)" style="padding:10px 16px; font-size:12px; font-weight:700; background:#0284c7; border-color:#0284c7; color:white;">+ 350 ml Elektrolit</button>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">🌡️ Faktor Cuaca &amp; Latihan Real-Time</h4>
+            
+            <div style="background:#cffafe; border:1px solid #a5f3fc; border-radius:10px; padding:14px; margin-bottom:14px;">
+              <strong style="font-size:12px; color:#155e75; display:block; margin-bottom:4px;">☀️ Suhu Sekitar: 31°C (Cukup Panas)</strong>
+              <span style="font-size:11px; color:#164e63;">Target hidrasi Anda disesuaikan +400 ml otomatis untuk mencegah dehidrasi seluler saat beraktivitas outdoor.</span>
+            </div>
+
+            <div style="background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0;">
+              <span style="font-size:11px; font-weight:700; color:#64748b; display:block; margin-bottom:4px;">🔔 Reminder Refill Selanjutnya</span>
+              <strong style="font-size:13px; color:#0f172a;">Pukul 15:30 WIB (250 ml Air Putih)</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 6 - HORMONAL & METABOLIC SYNCING ──────── -->
+      <div id="wellness-hormonal-sync-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">⚖️ Hormonal &amp; Metabolic Syncing</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Sinkronisasi Latihan &amp; Nutrisi Berdasarkan Fluktuasi Hormon Tubuh</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <span style="font-size:11px; font-weight:800; color:#db2777; text-transform:uppercase; letter-spacing:0.5px;">Status Siklus &amp; Metabolik Aktif</span>
+            <h2 style="font-size:24px; font-weight:900; color:#9d174d; margin:8px 0 4px 0;">Fase Folikular (Hari ke-8 dari 28)</h2>
+            <span class="badge" style="background:#fce7f3; color:#9d174d; font-weight:800; padding:4px 12px; border-radius:20px; font-size:11px; margin-bottom:16px;">ESTROGEN RISING &bull; PEAK ENERGY</span>
+            
+            <div style="background:#f8fafc; padding:16px; border-radius:12px; margin-top:16px;">
+              <h4 style="font-size:13px; font-weight:800; color:#0f2963; margin-bottom:8px;">💪 Rekomendasi Jenis Olahraga Hari Ini</h4>
+              <p style="font-size:11.5px; color:#475569; margin:0; line-height:1.5;">
+                Pada fase ini, sensitivitas insulin dan kekuatan otot berada pada tingkat tertinggi. Sangat disarankan untuk melakukan latihan angkat beban (*Heavy Resistance Training*) atau *HIIT Cardio*.
+              </p>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">🥗 Nutrisi Mikro Spesifik Fase</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="padding:10px 12px; background:#fdf2f8; border-radius:8px; border:1px solid #fbcfe8;">
+                <strong style="font-size:12px; color:#9d174d; display:block;">🥑 Lemak Sehat &amp; Omega-3</strong>
+                <span style="font-size:10.5px; color:#831843;">Alpukat, Ikan Salmon &amp; Biji Bunga Matahari untuk menopang produksi hormon netral.</span>
+              </div>
+              <div style="padding:10px 12px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;">
+                <strong style="font-size:12px; color:#0f172a; display:block;">🥦 Makanan Fermentasi &amp; Fitonutrisi</strong>
+                <span style="font-size:10.5px; color:#64748b;">Brokoli &amp; Tempeh organik untuk membantu metabolisme estrogen berlebih di hati.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── VIEW: MODUL 7 - BIO-AGE 90-DAY QUEST ──────── -->
+      <div id="wellness-bioage-quest-view" class="view-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <div class="section-title" style="margin-bottom:4px; color:#0f2963;">🚀 Bio-Age 90-Day Quest (Longevity Reversal)</div>
+            <p style="color:#64748b; font-size:12px; margin:0;">Program 90 Hari Rejuvenasi Usia Seluler &amp; Penurunan Usia Biologis Organ</p>
+          </div>
+          <button class="btn btn-teal" onclick="showView('ava-wellness-hub-view', 'Wellness Hub')" style="padding:8px 14px; font-size:12px; background:#e2e8f0; color:#334155; border-color:#cbd5e1;">&larr; Kembali ke Wellness Hub</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px; text-align:center;">
+            <span style="font-size:11px; font-weight:800; color:#0d9488; text-transform:uppercase; letter-spacing:0.5px;">Progress Program 90 Hari</span>
+            <h2 style="font-size:36px; font-weight:900; color:#0d9488; margin:8px 0 2px 0;">Hari Ke-34 <span style="font-size:16px; color:#64748b;">/ 90</span></h2>
+            <span class="badge" style="background:#ccfbf1; color:#115e59; font-weight:800; padding:4px 12px; border-radius:20px; font-size:11px;">USIA BIOLOGIS: -2.4 TAHUN LEBIH MUDA</span>
+            
+            <div style="margin:20px 0; background:#f8fafc; padding:16px; border-radius:12px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                <span style="color:#64748b;">Usia Kronologis (KTP):</span>
+                <strong style="color:#0f172a;">34.0 Tahun</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                <span style="color:#64748b;">Usia Biologis (AVA Index):</span>
+                <strong style="color:#0d9488;">31.6 Tahun</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:#64748b;">Delta Perbaikan Organ:</span>
+                <strong style="color:#059669;">+12.8% VO2 Max &amp; HbA1c Optimal</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-teal" onclick="alert('Selamat! Misi Bio-Age Quest Hari Ini Selesai.')" style="width:100%; padding:12px; font-size:13px; font-weight:800;">✅ Klaim Daily Quest Rewards (+100 Coins)</button>
+          </div>
+
+          <div class="glass-card" style="padding:24px; background:#ffffff; border:1px solid var(--border); border-radius:14px;">
+            <h4 style="font-size:14px; font-weight:800; color:#0f2963; margin-bottom:12px;">📋 Checklist Misi Bio-Hacking Hari Ini</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0; font-size:12px; color:#166534; font-weight:700;">
+                <span><input type="checkbox" checked style="margin-right:8px;"> 10.000 Langkah Wearable Sync</span>
+                <span>✅ SELESAI</span>
+              </label>
+
+              <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0; font-size:12px; color:#166534; font-weight:700;">
+                <span><input type="checkbox" checked style="margin-right:8px;"> Cold Shower 2-Min Rejuvenation</span>
+                <span>✅ SELESAI</span>
+              </label>
+
+              <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0; font-size:12px; color:#166534; font-weight:700;">
+                <span><input type="checkbox" checked style="margin-right:8px;"> Intermittent Fasting 16/8 Window</span>
+                <span>✅ SELESAI</span>
+              </label>
+
+              <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#fffbeb; border-radius:8px; border:1px solid #fde68a; font-size:12px; color:#92400e; font-weight:700;">
+                <span><input type="checkbox" style="margin-right:8px;"> 10-Min Evening HRV Box Breathing</span>
+                <span>PENDING</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </main>
   </div>
 

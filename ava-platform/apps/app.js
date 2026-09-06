@@ -338,69 +338,55 @@ function renderSidebarMenu() {
     care:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
   };
 
-    if (currentRole === 'patient') {
-    const subLayanan = `
-      <a class="sidebar-link active" onclick="showView('patient-view', 'Dashboard Utama')">${I.dashboard}<span>Dashboard Utama</span></a>
-      <a class="sidebar-link" onclick="showView('ava-biotwin-view', 'AVA Bio-Twin Index')">${I.result}<span>🧬 AVA Bio-Twin Index</span></a>
-      <a class="sidebar-link" onclick="showView('book-test-view', 'Pesan Lab &amp; MCU')">${I.lab}<span>Pesan Test Lab</span></a>
-      <a class="sidebar-link" onclick="showView('book-homecare-view', 'Book Home Visit')">${I.home}<span>Book Homecare Nakes</span></a>
-      <a class="sidebar-link" onclick="showView('buy-package-view', 'Beli Paket MCU')">${I.package}<span>Beli Paket MCU</span></a>
-      <a class="sidebar-link" onclick="showView('ava-consult-view', 'Telekonsultasi Dokter')">${I.consult}<span>Telekonsultasi Dokter</span></a>
-      <a class="sidebar-link" onclick="showView('ava-marketplace-view', 'Sewa &amp; Beli Alkes')">${I.market}<span>Toko AVA &amp; Alkes</span></a>
-    `;
+    if (currentRole === 'patient' || currentRole === 'member') {
+      const subLayanan = `
+        <a class="sidebar-link active" onclick="showView('patient-view', 'Dashboard Utama')">${I.dashboard}<span>Dashboard Utama</span></a>
+        <a class="sidebar-link" onclick="showView('book-test-view', 'Pesan Lab &amp; MCU')">${I.lab}<span>Pesan Test Lab</span></a>
+        <a class="sidebar-link" onclick="showView('book-homecare-view', 'Book Home Visit')">${I.home}<span>Book Homecare Nakes</span></a>
+        <a class="sidebar-link" onclick="showView('buy-package-view', 'Beli Paket MCU')">${I.package}<span>Beli Paket MCU</span></a>
+        <a class="sidebar-link" onclick="showView('ava-consult-view', 'Telekonsultasi Dokter')">${I.consult}<span>Telekonsultasi Dokter</span></a>
+        <a class="sidebar-link" onclick="showView('ava-marketplace-view', 'Sewa &amp; Beli Alkes')">${I.market}<span>Toko AVA &amp; Alkes</span></a>
+      `;
 
-    const subRekamMedis = `
-      <a class="sidebar-link" onclick="showView('ava-biointerpreter-view', 'AI Bio-Interpreter Lab')">${I.medrec}<span>🤖 AI Bio-Interpreter Lab</span></a>
-      <a class="sidebar-link" onclick="showView('medrec-view', 'Rekam Medis Digital (EHR)')">${I.medrec}<span>Rekam Medis (EHR LOINC)</span></a>
-      <a class="sidebar-link" onclick="showView('ava-devices-view', 'Perangkat &amp; Wearables')">${I.device}<span>Biosensor &amp; Wearable Pulse</span></a>
-      <a class="sidebar-link" onclick="switchTimelinePhase('fase2'); showView('patient-view', 'CRISPR Bio-Age Reversal')">${I.result}<span>CRISPR Bio-Age Reversal</span></a>
-    `;
+      const subRekamMedis = `
+        <a class="sidebar-link" onclick="showView('ava-biointerpreter-view', 'AI Bio-Interpreter Lab')">${I.medrec}<span>🤖 AI Bio-Interpreter Lab</span></a>
+        <a class="sidebar-link" onclick="showView('medrec-view', 'Rekam Medis Digital (EHR)')">${I.medrec}<span>Rekam Medis (EHR LOINC)</span></a>
+        <a class="sidebar-link" onclick="showView('ava-biotwin-view', 'AVA Bio-Twin Index')">${I.result}<span>🧬 AVA Bio-Twin Index</span></a>
+        <a class="sidebar-link" onclick="showView('ava-devices-view', 'Perangkat &amp; Wearables')">${I.device}<span>Biosensor &amp; Wearable Pulse</span></a>
+        <a class="sidebar-link" onclick="switchTimelinePhase('fase2'); showView('patient-view', 'CRISPR Bio-Age Reversal')">${I.result}<span>CRISPR Bio-Age Reversal</span></a>
+      `;
 
-    const subTracking = `
-      <a class="sidebar-link" onclick="showView('ava-homecare-tracking-view', 'Lacak Cold-Chain Flebotomi')">${I.home}<span>🚚 Lacak Live Cold-Chain</span></a>
-      <a class="sidebar-link" onclick="showView('orders-tracking-view', 'Lacak Pesanan D2C')">${I.package}<span>Lacak Pesanan D2C Refill</span></a>
-      <a class="sidebar-link" onclick="showView('homecare-results-view', 'Lacak Kunjungan Nakes')">${I.home}<span>Lacak Kunjungan Home Care</span></a>
-    `;
+      const subWellness = `
+        <a class="sidebar-link" onclick="showView('ava-wellness-hub-view', 'Wellness &amp; Bio-Hacking Hub')">${I.dashboard}<span>🌟 Wellness &amp; Bio-Hacking Hub</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-run-challenge-view', 'Step &amp; Run Challenge')">${I.dashboard}<span>🏃 1. Step &amp; Run Club Challenge</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-nutrico-view', 'NutriCo Calorie Planner')">${I.package}<span>🥗 2. NutriCo Calorie &amp; Diet</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-sleep-optimizer-view', 'Sleep &amp; Circadian Optimizer')">${I.result}<span>🌙 3. Sleep &amp; Circadian Optimizer</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-hrv-stress-view', 'HRV Stress Biofeedback')">${I.device}<span>🧘 4. HRV Stress Biofeedback</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-hydration-view', 'Smart Hydration Tracker')">${I.deposit}<span>💧 5. Smart Hydration Tracker</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-hormonal-sync-view', 'Hormonal &amp; Metabolic Syncing')">${I.result}<span>⚖️ 6. Hormonal &amp; Metabolic Sync</span></a>
+        <a class="sidebar-link" onclick="showView('wellness-bioage-quest-view', 'Bio-Age 90-Day Quest')">${I.approve}<span>🚀 7. Bio-Age 90-Day Quest</span></a>
+      `;
 
-    const subSanctuary = `
-      <a class="sidebar-link" onclick="showView('member-sanctuary-view', 'Queen Sanctuary Spa')">${I.book}<span>Queen Sanctuary &amp; VIP Spa</span></a>
-    `;
+      const subTracking = `
+        <a class="sidebar-link" onclick="showView('ava-homecare-tracking-view', 'Lacak Cold-Chain Flebotomi')">${I.home}<span>🚚 Lacak Live Cold-Chain</span></a>
+        <a class="sidebar-link" onclick="showView('orders-tracking-view', 'Lacak Pesanan D2C')">${I.package}<span>Lacak Pesanan D2C Refill</span></a>
+        <a class="sidebar-link" onclick="showView('homecare-results-view', 'Lacak Kunjungan Nakes')">${I.home}<span>Lacak Kunjungan Home Care</span></a>
+      `;
 
-    const subAkun = `
-      <a class="sidebar-link" onclick="showView('ava-caregiver-view', 'Caregiver &amp; Pendampingan Keluarga')">${I.care}<span>Caregiver &amp; Keluarga</span></a>
-      <a class="sidebar-link" onclick="showView('nearme-view', 'Cabang Terdekat')">${I.mapPin}<span>Cabang &amp; Faskes Terdekat</span></a>
-      <a class="sidebar-link" onclick="showView('profile-view', 'Profil Saya')">${I.profile}<span>Profil &amp; Card Member</span></a>
-    `;
+      const subSanctuaryAkun = `
+        <a class="sidebar-link" onclick="showView('member-sanctuary-view', 'Queen Sanctuary Spa')">${I.book}<span>👑 Queen Sanctuary &amp; VIP Spa</span></a>
+        <a class="sidebar-link" onclick="showView('ava-caregiver-view', 'Caregiver &amp; Pendampingan Keluarga')">${I.care}<span>👨‍👩‍👧 Caregiver &amp; Keluarga</span></a>
+        <a class="sidebar-link" onclick="showView('nearme-view', 'Cabang Terdekat')">${I.mapPin}<span>📍 Cabang &amp; Faskes Terdekat</span></a>
+        <a class="sidebar-link" onclick="showView('profile-view', 'Profil Saya')">${I.profile}<span>👤 Profil &amp; Card Member VIP</span></a>
+      `;
 
-    navContainer.innerHTML = [
-      renderCategoryAccordion('p-layanan', 'Portal Pasien (Layanan Utama)', '🩺', subLayanan, true),
-      renderCategoryAccordion('p-rekam', 'Hasil Lab &amp; Rekam Medis', '📊', subRekamMedis, true),
-      renderCategoryAccordion('p-tracking', 'Queen Care &amp; Nutri Refill', '📦', subTracking, false),
-      renderCategoryAccordion('p-sanctuary', 'Sanctuary Spa &amp; Wellness', '👑', subSanctuary, false),
-      renderCategoryAccordion('p-akun', 'Caregiver &amp; Akun Pasien', '👤', subAkun, false)
-    ].join('');
-
-  } else if (currentRole === 'member') {
-    const subPrivilege = `
-      <a class="sidebar-link active" onclick="showView('member-sanctuary-view', 'Queen Sanctuary')">${I.book}<span>VIP Sanctuary &amp; Spa</span></a>
-      <a class="sidebar-link" onclick="showView('ava-biotwin-view', 'AVA Bio-Twin Index')">${I.result}<span>🧬 AVA Bio-Twin Index</span></a>
-      <a class="sidebar-link" onclick="showView('orders-tracking-view', 'Auto-Refill Nutrisi')">${I.package}<span>Auto-Refill Suplemen</span></a>
-      <a class="sidebar-link" onclick="showView('ava-consult-view', 'Konsultasi Dokter VIP')">${I.consult}<span>Telekonsultasi VIP</span></a>
-      <a class="sidebar-link" onclick="showView('homecare-results-view', 'Lacak Home Care')">${I.home}<span>Lacak Home Care</span></a>
-    `;
-
-    const subEHR = `
-      <a class="sidebar-link" onclick="showView('patient-view', 'Status Kesehatan')">${I.dashboard}<span>Status Kesehatan</span></a>
-      <a class="sidebar-link" onclick="showView('ava-biointerpreter-view', 'AI Bio-Interpreter Lab')">${I.medrec}<span>🤖 AI Bio-Interpreter Lab</span></a>
-      <a class="sidebar-link" onclick="showView('medrec-view', 'Rekam Medis (EHR)')">${I.medrec}<span>Rekam Medis (EHR)</span></a>
-      <a class="sidebar-link" onclick="showView('ava-caregiver-view', 'Caregiver &amp; Keluarga')">${I.care}<span>Caregiver &amp; Keluarga</span></a>
-      <a class="sidebar-link" onclick="showView('profile-view', 'Profil Member')">${I.profile}<span>Profil Member VIP</span></a>
-    `;
-
-    navContainer.innerHTML = [
-      renderCategoryAccordion('m-privilege', 'VIP Sanctuary Privilege', '👑', subPrivilege, true),
-      renderCategoryAccordion('m-ehr', 'Rekam Medis &amp; Caregiver', '📊', subEHR, true)
-    ].join('');
+      navContainer.innerHTML = [
+        renderCategoryAccordion('p-layanan', 'Portal Pasien (Layanan Utama)', '🩺', subLayanan, true),
+        renderCategoryAccordion('p-rekam', 'Hasil Lab &amp; Rekam Medis (Klinis)', '📊', subRekamMedis, true),
+        renderCategoryAccordion('p-wellness', 'AVA Wellness &amp; Bio-Hacking (7 Modul)', '🌿', subWellness, true),
+        renderCategoryAccordion('p-tracking', 'Logistik, Tracking &amp; Cold-Chain', '🚚', subTracking, false),
+        renderCategoryAccordion('p-sanctuary', 'Queen Sanctuary VIP &amp; Akun', '👑', subSanctuaryAkun, false)
+      ].join('');
 
   } else if (currentRole === 'corporate') {
     const isSA = (currentUserEmail === 'admin@avahealth.sbs');
@@ -4393,6 +4379,70 @@ window.generateLaasApiKey = generateLaasApiKey;
 window.trackUnifiedOrder = trackUnifiedOrder;
 window.updateLoginFormUI = updateLoginFormUI;
 window.quickFillDemoUser = quickFillDemoUser;
+
+// ════════════════════════ MODUL WELLNESS & WEARABLES HELPER ENGINE ════════════════════════
+let currentStepsCount = 8450;
+let currentWaterIntake = 2100;
+
+function syncWearableDevice(provider) {
+  const stepsAdd = Math.floor(Math.random() * 850) + 150;
+  currentStepsCount += stepsAdd;
+  
+  // Update Hub DOM
+  const hubSteps = document.getElementById('hub-step-count');
+  const hubBar = document.getElementById('hub-step-bar');
+  const hubCal = document.getElementById('hub-cal-burned');
+  const hubDist = document.getElementById('hub-distance');
+  
+  // Update Run View DOM
+  const runSteps = document.getElementById('run-view-steps');
+  const runBar = document.getElementById('run-view-bar');
+  const runCal = document.getElementById('run-view-cal');
+  const runDist = document.getElementById('run-view-dist');
+  const leaderUser = document.getElementById('leaderboard-user-steps');
+
+  const distKm = (currentStepsCount * 0.00074).toFixed(1);
+  const calBurn = Math.floor(currentStepsCount * 0.048);
+  const pct = Math.min(100, (currentStepsCount / 10000) * 100).toFixed(1);
+
+  if (hubSteps) hubSteps.textContent = `${currentStepsCount.toLocaleString('id-ID')} / 10.000 steps`;
+  if (hubBar) hubBar.style.width = `${pct}%`;
+  if (hubCal) hubCal.textContent = `🔥 ${calBurn} kcal`;
+  if (hubDist) hubDist.textContent = `📍 ${distKm} km`;
+
+  if (runSteps) runSteps.textContent = currentStepsCount.toLocaleString('id-ID');
+  if (runBar) runBar.style.width = `${pct}%`;
+  if (runCal) runCal.textContent = `${calBurn} kcal`;
+  if (runDist) runDist.textContent = `${distKm} km`;
+  if (leaderUser) leaderUser.textContent = `${currentStepsCount.toLocaleString('id-ID')} steps`;
+
+  alert(`✅ Sync Berhasil dari [${provider}]!\n+${stepsAdd} Langkah baru ditambahkan dari sensor wearable. Total: ${currentStepsCount.toLocaleString('id-ID')} steps.`);
+}
+
+function simulateWearableAddSteps() {
+  syncWearableDevice('Simulasi Wearable Motion Sensor');
+}
+
+function addWaterIntake(amountMl) {
+  currentWaterIntake += amountMl;
+  const valEl = document.getElementById('water-log-val');
+  const barEl = document.getElementById('water-log-bar');
+  
+  const pct = Math.min(100, (currentWaterIntake / 3000) * 100).toFixed(0);
+  if (valEl) valEl.innerHTML = `${currentWaterIntake.toLocaleString('id-ID')} <span style="font-size:16px; color:#64748b;">/ 3.000 ml</span>`;
+  if (barEl) barEl.style.width = `${pct}%`;
+
+  alert(`💧 Asupan +${amountMl} ml air tercatat! Total hidrasi hari ini: ${currentWaterIntake.toLocaleString('id-ID')} ml (${pct}% target).`);
+}
+
+function startGuidedBreathingSession() {
+  alert("🫁 Sesi Box Breathing (4-7-8 Technique) Dimulai:\n\n1. Tarik napas lewat hidung (4 detik)\n2. Tahan napas (7 detik)\n3. Hembuskan perlahan lewat mulut (8 detik)\n\nUlangi 4 siklus untuk menurunkan kadar kortisol.");
+}
+
+window.syncWearableDevice = syncWearableDevice;
+window.simulateWearableAddSteps = simulateWearableAddSteps;
+window.addWaterIntake = addWaterIntake;
+window.startGuidedBreathingSession = startGuidedBreathingSession;
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
